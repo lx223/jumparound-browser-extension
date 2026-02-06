@@ -6,7 +6,8 @@ export async function getAllTabs(): Promise<TabInfo[]> {
   const tabs = await chrome.tabs.query({});
   const currentWindow = await chrome.windows.getCurrent();
 
-  // Get current tabs
+  const now = Date.now();
+  // Get current tabs; use chrome's lastAccessed when present
   const currentTabs: TabInfo[] = tabs.map((tab, index) => ({
     id: tab.id!,
     title: tab.title || '',
@@ -14,12 +15,13 @@ export async function getAllTabs(): Promise<TabInfo[]> {
     favIconUrl: tab.favIconUrl,
     windowId: tab.windowId,
     active: tab.active && tab.windowId === currentWindow.id,
-    lastAccessed: tab.active ? Date.now() : Date.now() - (index + 1) * 1000,
+    lastAccessed:
+      tab.lastAccessed ??
+      (tab.active ? now : now - (index + 1) * 1000),
     isHistoryTab: false,
   }));
 
   // Get history tabs from last 24 hours
-  const now = Date.now();
   const oneDayAgo = now - HISTORY_THRESHOLD_MS;
 
   let historyTabs: TabInfo[] = [];
@@ -52,14 +54,7 @@ export async function getAllTabs(): Promise<TabInfo[]> {
   // Combine and sort
   const allTabs = [...currentTabs, ...historyTabs];
 
-  return allTabs.sort((a, b) => {
-    // Active tabs from current window first
-    if (a.windowId === currentWindow.id && b.windowId !== currentWindow.id) return -1;
-    if (b.windowId === currentWindow.id && a.windowId !== currentWindow.id) return 1;
-
-    // Then by last accessed
-    return b.lastAccessed - a.lastAccessed;
-  });
+  return allTabs.sort((a, b) => b.lastAccessed - a.lastAccessed);
 }
 
 export async function switchToTab(tabId: number): Promise<void> {
