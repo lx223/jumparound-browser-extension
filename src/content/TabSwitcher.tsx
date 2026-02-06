@@ -75,7 +75,7 @@ const TabSwitcher: React.FC = () => {
   }, [currentTabId]);
 
   // Global Escape in iframe: focus is inside the iframe when switcher is open,
-  // so the content script’s window listener never sees keydown. Handle Escape here.
+  // so the content script's window listener never sees keydown. Handle Escape here.
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
