@@ -16,6 +16,7 @@ chrome.runtime.onMessage.addListener((message: Message) => {
 });
 
 function injectSwitcher() {
+  console.log(isInjected);
   if (isInjected) return;
 
   const container = document.createElement('div');
@@ -26,7 +27,7 @@ function injectSwitcher() {
 
   const iframe = document.createElement('iframe');
   iframe.style.cssText = 'border: none; width: 100%; height: 100%; background: transparent;';
-  iframe.src = chrome.runtime.getURL('src/popup/index.html');
+  iframe.src = chrome.runtime.getURL('src/content/index.html');
 
   shadowRoot.appendChild(iframe);
   document.body.appendChild(container);
@@ -36,6 +37,7 @@ function injectSwitcher() {
 
 function removeSwitcher() {
   const container = document.getElementById('jumparound-root');
+  console.log('removeSwitcher', container);
   if (container) {
     container.remove();
     isInjected = false;
@@ -44,6 +46,7 @@ function removeSwitcher() {
 }
 
 window.addEventListener('keydown', (e) => {
+  console.log('keydown', e.key)
   if (e.key === 'Escape' && isInjected) {
     removeSwitcher();
   }

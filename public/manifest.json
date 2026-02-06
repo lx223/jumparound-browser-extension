@@ -30,7 +30,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["src/popup/index.html", "assets/*"],
+      "resources": ["src/content/index.html", "assets/*"],
       "matches": ["<all_urls>"]
     }
   ],

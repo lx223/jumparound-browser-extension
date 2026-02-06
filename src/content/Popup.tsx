@@ -105,10 +105,12 @@ const Popup: React.FC = () => {
     [filteredTabs, selectedIndex, searchQuery, openNewTab, closeSwitcher]
   );
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      closeSwitcher();
-    }
+  const handleBackdropClick = () => {
+    closeSwitcher();
+  };
+
+  const handlePaperClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
   };
 
   return (
@@ -132,6 +134,7 @@ const Popup: React.FC = () => {
     >
       <Paper
         elevation={0}
+        onClick={handlePaperClick}
         sx={{
           width: '900px',
           maxWidth: '90vw',
