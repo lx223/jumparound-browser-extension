@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - JumpAround Browser Extension</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        h2 {
+            color: #2c2c2c;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 5px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        ul {
+            margin-bottom: 15px;
+            margin-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .last-updated {
+            color: #666;
+            font-style: italic;
+            margin-bottom: 30px;
+        }
+
+        .highlight {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-left: 4px solid #4caf50;
+            margin: 20px 0;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+            font-size: 0.9em;
+            text-align: center;
+        }
+
+        strong {
+            color: #1a1a1a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Privacy Policy</h1>
+        <p class="last-updated">Last Updated: February 6, 2026</p>
+
+        <div class="highlight">
+            <p><strong>Privacy Summary:</strong> JumpAround is a privacy-first browser extension. We do not collect, store, transmit, or share any of your personal data. All tab information is processed locally in your browser's memory and is never saved to disk or sent anywhere.</p>
+        </div>
+
+        <h2>1. Introduction</h2>
+        <p>
+            JumpAround ("we", "our", or "the extension") is a browser extension that provides quick tab switching functionality using keyboard shortcuts. This privacy policy explains how we handle your information.
+        </p>
+
+        <h2>2. Information We Do Not Collect</h2>
+        <p>JumpAround does not collect, store, or transmit any personal information. Specifically:</p>
+        <ul>
+            <li>We do not collect browsing history</li>
+            <li>We do not collect personal data</li>
+            <li>We do not track your usage</li>
+            <li>We do not use analytics or tracking services</li>
+            <li>We do not use cookies</li>
+            <li>We do not share data with third parties</li>
+            <li>We do not store any data on external servers</li>
+        </ul>
+
+        <h2>3. What the Extension Does</h2>
+        <p>JumpAround is a keyboard-driven tab switcher that helps you quickly navigate between browser tabs. Here's exactly what it does:</p>
+
+        <h3 style="font-size: 1.1em; margin-top: 15px; margin-bottom: 10px;">Tab Information Access</h3>
+        <p>When you activate the extension (via keyboard shortcut), it temporarily reads the following information from your open tabs:</p>
+        <ul>
+            <li>Tab title</li>
+            <li>Tab URL</li>
+            <li>Tab favicon (the small icon)</li>
+            <li>Window ID (to identify which browser window the tab is in)</li>
+            <li>Active status (whether the tab is currently active)</li>
+            <li>Last access time (tracked in memory only, to sort recently used tabs)</li>
+        </ul>
+        <p><strong>Important:</strong> This information is read from your browser's memory each time you open the tab switcher and is immediately discarded when you close it. None of this data is saved to disk, logged, or persisted in any way.</p>
+
+        <h3 style="font-size: 1.1em; margin-top: 15px; margin-bottom: 10px;">Tab Access Time Tracking</h3>
+        <p>The extension tracks when you access tabs (stored in browser memory only) to sort tabs by recency. This helps you find recently used tabs faster. This timestamp data:</p>
+        <ul>
+            <li>Is stored only in your browser's volatile memory (RAM)</li>
+            <li>Is cleared when you restart your browser</li>
+            <li>Is never written to disk or persisted anywhere</li>
+            <li>Is never transmitted outside your browser</li>
+        </ul>
+
+        <h3 style="font-size: 1.1em; margin-top: 15px; margin-bottom: 10px;">Tab Switching and Creation</h3>
+        <p>When you select a tab from the switcher, the extension switches to that tab. If you type a search query when no tabs match, the extension can optionally create a new tab with either:</p>
+        <ul>
+            <li>A direct URL (if you type a URL)</li>
+            <li>A Google search (if you type a search query)</li>
+        </ul>
+
+        <h3 style="font-size: 1.1em; margin-top: 15px; margin-bottom: 10px;">Required Browser Permissions</h3>
+        <ul>
+            <li><strong>"tabs" permission:</strong> Required to read tab information (title, URL, favicon, etc.) from all your open tabs and to switch between tabs across all windows</li>
+            <li><strong>"activeTab" permission:</strong> Required to inject the tab switcher interface into the currently active tab when you press the keyboard shortcut</li>
+        </ul>
+
+        <h2>4. Data Storage</h2>
+        <p>
+            <strong>The extension does NOT use any persistent data storage.</strong> It does not use:
+        </p>
+        <ul>
+            <li>chrome.storage (browser extension storage API)</li>
+            <li>localStorage or sessionStorage</li>
+            <li>IndexedDB</li>
+            <li>Cookies</li>
+            <li>Any file system storage</li>
+        </ul>
+        <p>
+            The only data kept in memory is the tab access timestamps (to sort tabs by recency), which is stored in volatile RAM and is automatically cleared when you restart your browser.
+        </p>
+        <p>
+            If future versions add user preferences or settings, this privacy policy will be updated to reflect that change, and any such data would remain entirely on your device.
+        </p>
+
+        <h2>5. Third-Party Services</h2>
+        <p>
+            JumpAround does not integrate with, communicate with, or transmit data to any third-party services or servers.
+        </p>
+
+        <h2>6. Updates to the Extension</h2>
+        <p>
+            The extension receives updates through your browser's extension store (Chrome Web Store, Firefox Add-ons, etc.). These updates are handled by the browser vendor and follow their standard update mechanisms.
+        </p>
+
+        <h2>7. Children's Privacy</h2>
+        <p>
+            Our extension does not collect any information from anyone, including children under the age of 13.
+        </p>
+
+        <h2>8. Changes to This Privacy Policy</h2>
+        <p>
+            We may update this privacy policy from time to time. Any changes will be reflected in the "Last Updated" date at the top of this document. The updated policy will be available with the extension distribution.
+        </p>
+
+        <h2>9. Your Rights and Data Control</h2>
+        <p>
+            Since we do not collect, store, or transmit any personal data:
+        </p>
+        <ul>
+            <li>There is no personal information to access, modify, or delete</li>
+            <li>No data is shared with or sold to third parties</li>
+            <li>You can uninstall the extension at any time through your browser's extension management interface</li>
+            <li>Uninstalling removes all extension code from your browser</li>
+            <li>The tab access timestamps stored in memory are automatically cleared when you restart your browser</li>
+        </ul>
+        <p>
+            You have complete control over the extension. Disabling or uninstalling it immediately stops all functionality.
+        </p>
+
+        <h2>10. Open Source and Transparency</h2>
+        <p>
+            JumpAround may be open source, allowing anyone to review the complete source code. You can verify:
+        </p>
+        <ul>
+            <li>Exactly what data the extension accesses</li>
+            <li>That no data is transmitted to external servers</li>
+            <li>That no analytics or tracking code is present</li>
+            <li>How tab information is processed and displayed</li>
+        </ul>
+        <p>
+            We encourage technical users to review the code to confirm our privacy claims.
+        </p>
+
+        <h2>11. Privacy Regulation Compliance</h2>
+        <p>
+            <strong>GDPR (General Data Protection Regulation):</strong> This extension does not process any personal data as defined by GDPR. Tab titles and URLs are processed locally in your browser's memory but are not collected, stored, or transmitted.
+        </p>
+        <p>
+            <strong>CCPA (California Consumer Privacy Act):</strong> This extension does not sell, share, or collect personal information as defined by CCPA.
+        </p>
+        <p>
+            <strong>COPPA (Children's Online Privacy Protection Act):</strong> This extension does not collect any information from users of any age, including children under 13.
+        </p>
+        <p>
+            Since no data is collected, there are no data retention periods, no data transfers, and no data processing agreements needed.
+        </p>
+
+        <h2>12. Contact Information</h2>
+        <p>
+            If you have questions about this privacy policy or the extension's privacy practices, please contact us through the extension's support channels or repository.
+        </p>
+
+        <div class="footer">
+            <p>JumpAround Browser Extension</p>
+            <p>This privacy policy is provided in good faith and represents our commitment to your privacy.</p>
+        </div>
+    </div>
+</body>
+</html>
