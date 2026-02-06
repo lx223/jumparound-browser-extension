@@ -45,8 +45,3 @@ function removeSwitcher() {
     shadowRoot = null;
   }
 }
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && isInjected) {
-    removeSwitcher();
-  }
-});
