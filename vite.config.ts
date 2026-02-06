@@ -1,7 +1,22 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
+import { readFileSync, writeFileSync } from 'fs';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
+
+/** Injects package.json version into dist/manifest.json after build. */
+function injectManifestVersion() {
+  return {
+    name: 'inject-manifest-version',
+    closeBundle() {
+      const pkg = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf-8'));
+      const manifestPath = resolve(__dirname, 'dist/manifest.json');
+      const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
+      manifest.version = pkg.version;
+      writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+    },
+  };
+}
 
 export default defineConfig({
   plugins: [
@@ -13,6 +28,7 @@ export default defineConfig({
         { src: 'public/icons', dest: '.' },
       ],
     }),
+    injectManifestVersion(),
   ],
   build: {
     outDir: 'dist',
