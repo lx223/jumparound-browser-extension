@@ -14,6 +14,9 @@
   "noResults": {
     "message": "未找到标签页"
   },
+  "noResultsPressEnterToSearch": {
+    "message": "无匹配标签页，按 Enter 在新标签页中通过 Google 搜索"
+  },
   "currentTab": {
     "message": "当前"
   },
