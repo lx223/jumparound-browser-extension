@@ -20,7 +20,7 @@ chrome.commands.onCommand.addListener(async (command) => {
     const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
     if (activeTab?.id) {
-      chrome.tabs.sendMessage(activeTab.id, { type: 'TOGGLE_SWITCHER' } as Message);
+      chrome.tabs.sendMessage(activeTab.id, { type: 'TOGGLE_SWITCHER', tabId: activeTab.id } as Message);
     }
   }
 });

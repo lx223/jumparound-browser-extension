@@ -1,6 +1,6 @@
 {
   "name": "jumparound",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Cross-browser tab switcher with keyboard shortcuts",
   "type": "module",
   "scripts": {
@@ -16,7 +16,6 @@
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^7.3.7",
     "@mui/material": "^7.3.7",
-    "fuse.js": "^7.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

@@ -1,3 +1,5 @@
+/** Content script: runs per-tab and injects the switcher UI into the active page. */
+
 import type { Message } from '../types';
 
 let isInjected = false;
@@ -8,14 +10,14 @@ chrome.runtime.onMessage.addListener((message: Message) => {
     if (isInjected) {
       removeSwitcher();
     } else {
-      injectSwitcher();
+      injectSwitcher(message.tabId);
     }
   } else if (message.type === 'CLOSE_SWITCHER') {
     removeSwitcher();
   }
 });
 
-function injectSwitcher() {
+function injectSwitcher(tabId?: number) {
   if (isInjected) return;
 
   const container = document.createElement('div');
@@ -26,7 +28,8 @@ function injectSwitcher() {
 
   const iframe = document.createElement('iframe');
   iframe.style.cssText = 'border: none; width: 100%; height: 100%; background: transparent;';
-  iframe.src = chrome.runtime.getURL('src/popup/index.html');
+  const baseUrl = chrome.runtime.getURL('src/content/index.html');
+  iframe.src = tabId != null ? `${baseUrl}?tabId=${tabId}` : baseUrl;
 
   shadowRoot.appendChild(iframe);
   document.body.appendChild(container);
@@ -42,9 +45,3 @@ function removeSwitcher() {
     shadowRoot = null;
   }
 }
-
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && isInjected) {
-    removeSwitcher();
-  }
-});

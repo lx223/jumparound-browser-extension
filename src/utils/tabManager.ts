@@ -11,7 +11,7 @@ export async function getAllTabs(): Promise<TabInfo[]> {
       url: tab.url || '',
       favIconUrl: tab.favIconUrl,
       windowId: tab.windowId,
-      active: tab.active,
+      active: tab.active && tab.windowId === currentWindow.id,
       lastAccessed: tab.active ? Date.now() : Date.now() - (index + 1) * 1000,
     }))
     .sort((a, b) => {

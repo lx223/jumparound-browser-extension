@@ -19,7 +19,7 @@ JumpAround is a browser extension that provides a quick tab switcher with keyboa
 - Maintains a map of tab access times
 - Handles `GET_TABS` and `SWITCH_TAB` messages from the popup
 
-### 2. Content Script (`src/content/index.ts`)
+### 2. Content Script (`src/content/script.ts`)
 
 **Responsibilities:**
 - Inject the popup overlay into the current page
