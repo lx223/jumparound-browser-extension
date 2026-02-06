@@ -147,7 +147,7 @@ const TabSwitcher: React.FC = () => {
         alignItems: 'flex-start',
         justifyContent: 'center',
         paddingTop: '15vh',
-        background: 'rgba(0, 0, 0, 0.75)',
+        background: 'rgba(0, 0, 0, 0.5)',
         animation: 'fadeIn 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
         willChange: 'opacity',
         '@keyframes fadeIn': {
@@ -301,7 +301,7 @@ const TabSwitcher: React.FC = () => {
                   >
                     <ListItemAvatar sx={{ minWidth: 40 }}>
                       <Avatar
-                        src={tab.favIconUrl}
+                        src={tab.favIconUrl?.startsWith('http') ? tab.favIconUrl : undefined}
                         variant="rounded"
                         sx={{
                           width: 24,
