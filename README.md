@@ -107,14 +107,6 @@ This will watch for file changes and rebuild automatically. Reload the extension
 - Bundle size is ~350KB due to MUI (could be optimized with plain CSS in future)
 - Tab access tracking is simplified (current window + tab index order)
 
-## Contributing
-
-This is a minimal implementation focused on core functionality. Contributions welcome for:
-- Better icon designs
-- Additional language translations
-- Performance optimizations
-- Bug fixes
-
 ## License
 
 MIT - See [LICENSE](./LICENSE) file for details
