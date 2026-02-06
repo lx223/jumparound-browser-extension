@@ -86,7 +86,8 @@ const Popup: React.FC = () => {
       if (e.key === 'Enter') {
         e.preventDefault();
         if (filteredTabs.length > 0) {
-          switchToTab(filteredTabs[selectedIndex].id);
+          closeSwitcher();
+          chrome.runtime.sendMessage({ type: 'SWITCH_TAB', tabId: filteredTabs[selectedIndex].id } as Message);
         } else if (searchQuery.trim()) {
           openNewTab(searchQuery);
         }
@@ -101,7 +102,7 @@ const Popup: React.FC = () => {
         closeSwitcher();
       }
     },
-    [filteredTabs, selectedIndex, searchQuery, switchToTab, openNewTab, closeSwitcher]
+    [filteredTabs, selectedIndex, searchQuery, openNewTab, closeSwitcher]
   );
 
   const handleBackdropClick = (e: React.MouseEvent) => {
