@@ -110,11 +110,6 @@ const Popup: React.FC = () => {
     }
   };
 
-  const truncateUrl = (url: string, maxLength = 50) => {
-    if (url.length <= maxLength) return url;
-    return url.substring(0, maxLength) + '...';
-  };
-
   return (
     <Box
       onClick={handleBackdropClick}
@@ -125,20 +120,45 @@ const Popup: React.FC = () => {
         alignItems: 'flex-start',
         justifyContent: 'center',
         paddingTop: '15vh',
-        background: 'rgba(0, 0, 0, 0.7)',
+        background: 'rgba(0, 0, 0, 0.75)',
+        animation: 'fadeIn 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+        willChange: 'opacity',
+        '@keyframes fadeIn': {
+          from: { opacity: 0 },
+          to: { opacity: 1 },
+        },
       }}
     >
       <Paper
-        elevation={8}
+        elevation={0}
         sx={{
-          width: '600px',
-          maxHeight: '500px',
+          width: '900px',
+          maxWidth: '90vw',
+          maxHeight: '70vh',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
+          background: 'rgba(30, 30, 35, 0.95)',
+          backdropFilter: 'blur(16px) saturate(180%)',
+          borderRadius: '16px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08)',
+          animation: 'slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          willChange: 'transform, opacity',
+          transform: 'translateZ(0)',
+          '@keyframes slideUp': {
+            from: {
+              opacity: 0,
+              transform: 'translateY(12px) translateZ(0)',
+            },
+            to: {
+              opacity: 1,
+              transform: 'translateY(0) translateZ(0)',
+            },
+          },
         }}
       >
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ p: 3, pb: 2 }}>
           <TextField
             fullWidth
             variant="outlined"
@@ -149,7 +169,36 @@ const Popup: React.FC = () => {
             inputRef={searchInputRef}
             autoFocus
             InputProps={{
-              startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+              startAdornment: <SearchIcon sx={{ mr: 1, color: 'rgba(255, 255, 255, 0.5)' }} />,
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                color: 'rgba(255, 255, 255, 0.95)',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+                willChange: 'background-color, box-shadow',
+                '& fieldset': {
+                  borderColor: 'rgba(255, 255, 255, 0.12)',
+                },
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                  '& fieldset': {
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                  },
+                },
+                '&.Mui-focused': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  boxShadow: '0 0 0 2px rgba(99, 179, 237, 0.4)',
+                  '& fieldset': {
+                    borderColor: 'rgba(99, 179, 237, 0.6)',
+                  },
+                },
+              },
+              '& .MuiOutlinedInput-input::placeholder': {
+                color: 'rgba(255, 255, 255, 0.4)',
+                opacity: 1,
+              },
             }}
           />
         </Box>
@@ -159,55 +208,126 @@ const Popup: React.FC = () => {
           sx={{
             flexGrow: 1,
             overflow: 'auto',
-            maxHeight: '400px',
-            py: 0,
+            maxHeight: 'calc(70vh - 120px)',
+            py: 1,
+            px: 1,
+            '&::-webkit-scrollbar': {
+              width: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              background: 'transparent',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              background: 'rgba(255, 255, 255, 0.15)',
+              borderRadius: '4px',
+              '&:hover': {
+                background: 'rgba(255, 255, 255, 0.25)',
+              },
+            },
           }}
         >
           {filteredTabs.length === 0 ? (
-            <Box sx={{ p: 4, textAlign: 'center' }}>
-              <Typography variant="body1" color="text.secondary">
+            <Box
+              sx={{
+                p: 4,
+                textAlign: 'center',
+                animation: 'fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{
+                  fontWeight: 500,
+                  color: 'rgba(255, 255, 255, 0.5)',
+                }}
+              >
                 {noResults}
               </Typography>
             </Box>
           ) : (
             filteredTabs.map((tab, index) => (
-              <ListItem key={tab.id} disablePadding>
+              <ListItem key={tab.id} disablePadding sx={{ px: 2, py: 0.5 }}>
                 <ListItemButton
                   selected={index === selectedIndex}
                   onClick={() => switchToTab(tab.id)}
                   sx={{
                     py: 1.5,
+                    px: 2,
+                    borderRadius: '10px',
+                    transition: 'all 0.12s cubic-bezier(0.4, 0, 0.2, 1)',
+                    willChange: 'transform, background-color',
+                    transform: 'translateX(0) translateZ(0)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                      transform: 'translateX(4px) translateZ(0)',
+                    },
                     '&.Mui-selected': {
-                      backgroundColor: 'primary.dark',
+                      backgroundColor: 'rgba(99, 179, 237, 0.2)',
                       '&:hover': {
-                        backgroundColor: 'primary.dark',
+                        backgroundColor: 'rgba(99, 179, 237, 0.25)',
                       },
                     },
                   }}
                 >
-                  <ListItemAvatar>
+                  <ListItemAvatar sx={{ minWidth: 40 }}>
                     <Avatar
                       src={tab.favIconUrl}
                       variant="rounded"
-                      sx={{ width: 24, height: 24 }}
+                      sx={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: '6px',
+                        bgcolor: 'rgba(255, 255, 255, 0.1)',
+                        color: 'rgba(255, 255, 255, 0.9)',
+                      }}
                     >
                       {tab.title[0]?.toUpperCase() || '?'}
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
                     primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="body1" noWrap sx={{ flexGrow: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            flexGrow: 1,
+                            wordBreak: 'break-word',
+                            lineHeight: 1.4,
+                            color: 'rgba(255, 255, 255, 0.95)',
+                            fontWeight: 500,
+                          }}
+                        >
                           {tab.title || tab.url}
                         </Typography>
                         {tab.active && (
-                          <Chip label={currentTabLabel} size="small" color="primary" />
+                          <Chip
+                            label={currentTabLabel}
+                            size="small"
+                            sx={{
+                              height: '20px',
+                              fontSize: '0.7rem',
+                              flexShrink: 0,
+                              backgroundColor: 'rgba(99, 179, 237, 0.3)',
+                              color: 'rgba(255, 255, 255, 0.95)',
+                              border: '1px solid rgba(99, 179, 237, 0.5)',
+                              fontWeight: 600,
+                            }}
+                          />
                         )}
                       </Box>
                     }
                     secondary={
-                      <Typography variant="body2" color="text.secondary" noWrap>
-                        {truncateUrl(tab.url)}
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          wordBreak: 'break-all',
+                          lineHeight: 1.3,
+                          mt: 0.5,
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          fontSize: '0.8rem',
+                        }}
+                      >
+                        {tab.url}
                       </Typography>
                     }
                   />
