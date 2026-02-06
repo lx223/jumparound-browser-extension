@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Safari Web Extension Converter output (Xcode project)
+JumpAround/
+*.xcodeproj
+*.xcworkspace
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+*.local
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.swo
+*~
+
+# TypeScript
+*.tsbuildinfo
+
+# Vite
+.vite/
+
+# Optional: test coverage
+coverage/

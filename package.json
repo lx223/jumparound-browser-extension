@@ -1,0 +1,33 @@
+{
+  "name": "jumparound",
+  "version": "1.0.0",
+  "description": "Cross-browser tab switcher with keyboard shortcuts",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch --mode development",
+    "build": "tsc && vite build",
+    "build:chrome": "npm run build",
+    "build:safari": "npm run build && npm run convert:safari",
+    "convert:safari": "xcrun safari-web-extension-converter dist --app-name JumpAround --bundle-identifier com.jumparound.extension",
+    "generate-icons": "node scripts/generate-icons.js"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.3",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.15.7",
+    "@mui/material": "^5.15.7",
+    "fuse.js": "^7.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.256",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "@vitejs/plugin-react": "^4.2.1",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.11",
+    "vite-plugin-static-copy": "^1.0.0"
+  }
+}
