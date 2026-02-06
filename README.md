@@ -5,7 +5,7 @@ A lightweight, cross-browser tab switcher extension with keyboard shortcuts and 
 ## Features
 
 - **Quick Switch**: Press `Cmd+K` (macOS) or `Ctrl+K` (Windows/Linux) to open the tab switcher
-- **Fuzzy Search**: Type to search through all your tabs by title or URL
+- **Smart Search**: Type to search through all your tabs by title or URL with word-boundary matching
 - **Keyboard Navigation**: Use arrow keys, Tab, or Enter to navigate and switch
 - **Multi-Window**: Works across all browser windows
 - **Recent First**: Tabs are ordered by last access time
@@ -79,7 +79,7 @@ This will watch for file changes and rebuild automatically. Reload the extension
 - **TypeScript** - Type safety
 - **React** - UI framework
 - **Material-UI** - Component library
-- **Fuse.js** - Fuzzy search
+- **Hybrid Search** - Custom word-boundary and fuzzy matching algorithm
 
 ## Project Structure
 

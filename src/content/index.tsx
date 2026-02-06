@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import TabSwitcher from './Popup';
+import TabSwitcher from './TabSwitcher';
 
 const theme = createTheme({
   palette: {

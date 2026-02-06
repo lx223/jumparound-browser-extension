@@ -8,15 +8,17 @@ interface SearchResult {
 enum MatchType {
   EXACT = 1000,
   PREFIX = 800,
-  WORD_BOUNDARY = 600,
-  CONTAINS = 400,
-  FUZZY = 200,
+  ALL_WORDS_IN_ORDER = 700,
+  ALL_WORDS_ANY_ORDER = 650,
+  PARTIAL_WORDS = 400, // Base score, scaled by match percentage
+  FUZZY = 150, // Base score, scaled by fuzzy score
   NO_MATCH = 0,
 }
 
 /**
- * Hybrid search that prioritizes exact/prefix matches, then falls back to fuzzy matching.
- * Also considers tab recency as a tie-breaker.
+ * Hybrid search optimized for tab switching with 30-100 tabs.
+ * Prioritizes word-boundary matches and strict fuzzy matching.
+ * Does NOT match in middle of words to reduce noise.
  */
 export function createTabSearcher(tabs: TabInfo[]) {
   return {
@@ -32,7 +34,7 @@ export function createTabSearcher(tabs: TabInfo[]) {
         const titleScore = scoreText(tab.title, queryLower, queryWords);
         const urlScore = scoreText(tab.url, queryLower, queryWords);
 
-        // Title is more important than URL
+        // Title is significantly more important than URL
         const matchScore = Math.max(titleScore * 2, urlScore);
 
         // Add recency bonus (more recent tabs get slight boost)
@@ -54,7 +56,9 @@ export function createTabSearcher(tabs: TabInfo[]) {
 
 /**
  * Score a text against query and query words.
- * Prioritizes: exact > prefix > word boundary > contains > fuzzy
+ * Prioritizes: exact > prefix > all words (in order) > all words (any order) > partial words > fuzzy
+ *
+ * IMPORTANT: Only matches at word boundaries, not in middle of words.
  */
 function scoreText(text: string, query: string, queryWords: string[]): number {
   const textLower = text.toLowerCase();
@@ -69,36 +73,21 @@ function scoreText(text: string, query: string, queryWords: string[]): number {
     return MatchType.PREFIX;
   }
 
-  // Multi-word query: check if all words match
+  // For multi-word queries, evaluate word-by-word
   if (queryWords.length > 1) {
-    const allWordsMatch = queryWords.every(word => {
-      // Check word boundaries or contains
-      const wordBoundaryRegex = new RegExp(`\\b${escapeRegex(word)}`, 'i');
-      return wordBoundaryRegex.test(text) || textLower.includes(word);
-    });
-
-    if (allWordsMatch) {
-      // Check if query words appear in order
-      const inOrder = isInOrder(textLower, queryWords);
-      return inOrder ? MatchType.WORD_BOUNDARY : MatchType.CONTAINS;
-    }
+    return scoreMultiWord(textLower, text, queryWords);
   }
 
-  // Single word or fallback: word boundary match
+  // Single word: check word boundary match
   const wordBoundaryRegex = new RegExp(`\\b${escapeRegex(query)}`, 'i');
   if (wordBoundaryRegex.test(text)) {
-    return MatchType.WORD_BOUNDARY;
+    return MatchType.ALL_WORDS_IN_ORDER; // Treat single word boundary match as high score
   }
 
-  // Contains match
-  if (textLower.includes(query)) {
-    return MatchType.CONTAINS;
-  }
-
-  // Fuzzy match (characters in sequence)
+  // Fuzzy match with strict 80% threshold
   const fuzzyScore = fuzzyMatch(textLower, query);
-  if (fuzzyScore > 0.6) {
-    // Require at least 60% character match
+  if (fuzzyScore >= 0.8) {
+    // Require at least 80% character match
     return MatchType.FUZZY * fuzzyScore;
   }
 
@@ -106,14 +95,65 @@ function scoreText(text: string, query: string, queryWords: string[]): number {
 }
 
 /**
- * Check if words appear in order in the text
+ * Score multi-word queries.
+ * Allows partial matches but scores based on percentage of words matched.
  */
-function isInOrder(text: string, words: string[]): boolean {
-  let lastIndex = -1;
-  for (const word of words) {
-    const index = text.indexOf(word, lastIndex + 1);
-    if (index === -1) return false;
-    lastIndex = index;
+function scoreMultiWord(textLower: string, text: string, queryWords: string[]): number {
+  const matchedWords: boolean[] = [];
+  const wordPositions: number[] = [];
+
+  // Check which words match at word boundaries
+  for (const word of queryWords) {
+    const wordBoundaryRegex = new RegExp(`\\b${escapeRegex(word)}`, 'i');
+    const match = wordBoundaryRegex.test(text);
+    matchedWords.push(match);
+
+    if (match) {
+      // Find position for order checking
+      const pos = textLower.indexOf(word);
+      wordPositions.push(pos);
+    } else {
+      wordPositions.push(-1);
+    }
+  }
+
+  const matchCount = matchedWords.filter(m => m).length;
+
+  // No words matched at boundaries
+  if (matchCount === 0) {
+    return MatchType.NO_MATCH;
+  }
+
+  // All words matched
+  if (matchCount === queryWords.length) {
+    // Check if words appear in order
+    const inOrder = isInOrder(wordPositions);
+    return inOrder ? MatchType.ALL_WORDS_IN_ORDER : MatchType.ALL_WORDS_ANY_ORDER;
+  }
+
+  // Partial word match: scale score by percentage of words matched
+  const matchPercentage = matchCount / queryWords.length;
+
+  // Only return results if at least 50% of words match
+  if (matchPercentage < 0.5) {
+    return MatchType.NO_MATCH;
+  }
+
+  // Scale between PARTIAL_WORDS base (400) and ALL_WORDS_ANY_ORDER (650)
+  return MatchType.PARTIAL_WORDS + (matchPercentage * 250);
+}
+
+/**
+ * Check if word positions appear in order (ignoring -1 for non-matches)
+ */
+function isInOrder(positions: number[]): boolean {
+  const validPositions = positions.filter(p => p !== -1);
+  if (validPositions.length <= 1) return true;
+
+  for (let i = 1; i < validPositions.length; i++) {
+    if (validPositions[i] < validPositions[i - 1]) {
+      return false;
+    }
   }
   return true;
 }
@@ -121,6 +161,8 @@ function isInOrder(text: string, words: string[]): boolean {
 /**
  * Fuzzy match: check if query characters appear in sequence in text
  * Returns a score between 0 and 1
+ *
+ * Stricter than before - requires 80% threshold instead of 60%
  */
 function fuzzyMatch(text: string, query: string): number {
   let textIndex = 0;

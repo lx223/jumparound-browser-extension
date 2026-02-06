@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import type { TabInfo, Message } from '../types';
-import { createTabSearcher, createSearchUrl } from '../utils/fuzzySearch';
+import { createTabSearcher, createSearchUrl } from '../utils/tabSearch';
 
 const TabSwitcher: React.FC = () => {
   const [tabs, setTabs] = useState<TabInfo[]>([]);
@@ -75,7 +75,7 @@ const TabSwitcher: React.FC = () => {
   }, [currentTabId]);
 
   // Global Escape in iframe: focus is inside the iframe when switcher is open,
-  // so the content script’s window listener never sees keydown. Handle Escape here.
+  // so the content script's window listener never sees keydown. Handle Escape here.
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
