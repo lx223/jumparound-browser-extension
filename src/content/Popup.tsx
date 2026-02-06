@@ -16,7 +16,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import type { TabInfo, Message } from '../types';
 import { createTabSearcher, createSearchUrl } from '../utils/fuzzySearch';
 
-const Popup: React.FC = () => {
+const TabSwitcher: React.FC = () => {
   const [tabs, setTabs] = useState<TabInfo[]>([]);
   const [filteredTabs, setFilteredTabs] = useState<TabInfo[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,6 +27,11 @@ const Popup: React.FC = () => {
   const searchPlaceholder = chrome.i18n?.getMessage('searchPlaceholder') || 'Search tabs...';
   const noResults = chrome.i18n?.getMessage('noResults') || 'No tabs found';
   const currentTabLabel = chrome.i18n?.getMessage('currentTab') || 'Current';
+
+  const currentTabId = React.useMemo(() => {
+    const tabId = new URLSearchParams(window.location.search).get('tabId');
+    return tabId ? Number(tabId) : null;
+  }, []);
 
   useEffect(() => {
     chrome.runtime.sendMessage({ type: 'GET_TABS' } as Message, (response) => {
@@ -60,13 +65,33 @@ const Popup: React.FC = () => {
   }, [selectedIndex, filteredTabs]);
 
   const closeSwitcher = useCallback(() => {
-    chrome.runtime.sendMessage({ type: 'CLOSE_SWITCHER' } as Message);
-  }, []);
+    if (currentTabId != null) {
+      chrome.tabs.sendMessage(currentTabId, { type: 'CLOSE_SWITCHER' } as Message);
+    } else {
+      chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+        if (tab?.id) chrome.tabs.sendMessage(tab.id, { type: 'CLOSE_SWITCHER' } as Message);
+      });
+    }
+  }, [currentTabId]);
+
+  // Global Escape in iframe: focus is inside the iframe when switcher is open,
+  // so the content script’s window listener never sees keydown. Handle Escape here.
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeSwitcher();
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [closeSwitcher]);
 
   const switchToTab = useCallback(
     (tabId: number) => {
+      closeSwitcher();
+
       chrome.runtime.sendMessage({ type: 'SWITCH_TAB', tabId } as Message, () => {
-        closeSwitcher();
       });
     },
     [closeSwitcher]
@@ -345,4 +370,4 @@ const Popup: React.FC = () => {
   );
 };
 
-export default Popup;
+export default TabSwitcher;

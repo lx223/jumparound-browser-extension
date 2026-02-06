@@ -1,3 +1,5 @@
+/** Content script: runs per-tab and injects the switcher UI into the active page. */
+
 import type { Message } from '../types';
 
 let isInjected = false;
@@ -8,15 +10,14 @@ chrome.runtime.onMessage.addListener((message: Message) => {
     if (isInjected) {
       removeSwitcher();
     } else {
-      injectSwitcher();
+      injectSwitcher(message.tabId);
     }
   } else if (message.type === 'CLOSE_SWITCHER') {
     removeSwitcher();
   }
 });
 
-function injectSwitcher() {
-  console.log(isInjected);
+function injectSwitcher(tabId?: number) {
   if (isInjected) return;
 
   const container = document.createElement('div');
@@ -27,7 +28,8 @@ function injectSwitcher() {
 
   const iframe = document.createElement('iframe');
   iframe.style.cssText = 'border: none; width: 100%; height: 100%; background: transparent;';
-  iframe.src = chrome.runtime.getURL('src/content/index.html');
+  const baseUrl = chrome.runtime.getURL('src/content/index.html');
+  iframe.src = tabId != null ? `${baseUrl}?tabId=${tabId}` : baseUrl;
 
   shadowRoot.appendChild(iframe);
   document.body.appendChild(container);
@@ -37,17 +39,9 @@ function injectSwitcher() {
 
 function removeSwitcher() {
   const container = document.getElementById('jumparound-root');
-  console.log('removeSwitcher', container);
   if (container) {
     container.remove();
     isInjected = false;
     shadowRoot = null;
   }
 }
-
-window.addEventListener('keydown', (e) => {
-  console.log('keydown', e.key)
-  if (e.key === 'Escape' && isInjected) {
-    removeSwitcher();
-  }
-});
