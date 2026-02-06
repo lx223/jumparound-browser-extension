@@ -16,5 +16,8 @@
   },
   "currentTab": {
     "message": "当前"
+  },
+  "historyTab": {
+    "message": "历史"
   }
 }

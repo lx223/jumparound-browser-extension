@@ -16,5 +16,8 @@
   },
   "currentTab": {
     "message": "Current"
+  },
+  "historyTab": {
+    "message": "History"
   }
 }
