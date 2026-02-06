@@ -28,6 +28,7 @@ const TabSwitcher: React.FC = () => {
 
   const searchPlaceholder = chrome.i18n?.getMessage('searchPlaceholder') || 'Search tabs...';
   const noResults = chrome.i18n?.getMessage('noResults') || 'No tabs found';
+  const noResultsPressEnterToSearch = chrome.i18n?.getMessage('noResultsPressEnterToSearch') || 'No matching tabs. Press Enter to search on Google in a new tab';
   const currentTabLabel = chrome.i18n?.getMessage('currentTab') || 'Current';
   const historyTabLabel = chrome.i18n?.getMessage('historyTab') || 'History';
 
@@ -268,7 +269,7 @@ const TabSwitcher: React.FC = () => {
                   color: 'rgba(255, 255, 255, 0.5)',
                 }}
               >
-                {noResults}
+                {searchQuery.trim() ? noResultsPressEnterToSearch : noResults}
               </Typography>
             </Box>
           ) : (

@@ -14,6 +14,9 @@
   "noResults": {
     "message": "No tabs found"
   },
+  "noResultsPressEnterToSearch": {
+    "message": "No matching tabs. Press Enter to search on Google in a new tab"
+  },
   "currentTab": {
     "message": "Current"
   },
