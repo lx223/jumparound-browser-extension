@@ -39,7 +39,6 @@ function injectSwitcher(tabId?: number) {
 
 function removeSwitcher() {
   const container = document.getElementById('jumparound-root');
-  console.log('removeSwitcher', container);
   if (container) {
     container.remove();
     isInjected = false;
