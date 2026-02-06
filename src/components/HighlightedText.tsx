@@ -30,10 +30,7 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({
           component="span"
           sx={{
             backgroundColor: 'rgba(255, 193, 7, 0.4)',
-            color: 'rgba(255, 255, 255, 1)',
-            fontWeight: 600,
-            padding: '0 1px',
-            borderRadius: '2px',
+            color,
           }}
         >
           {char}
