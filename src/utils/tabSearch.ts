@@ -5,20 +5,36 @@ interface SearchResult {
   score: number;
 }
 
-enum MatchType {
-  EXACT = 1000,
-  PREFIX = 800,
-  ALL_WORDS_IN_ORDER = 700,
-  ALL_WORDS_ANY_ORDER = 650,
-  PARTIAL_WORDS = 400, // Base score, scaled by match percentage
-  FUZZY = 150, // Base score, scaled by fuzzy score
-  NO_MATCH = 0,
+interface MatchResult {
+  score: number;
+  positions: number[];
 }
 
+// Scoring constants inspired by VS Code's fuzzy scorer
+const SCORE_BASE = 1; // Base score for each matched character
+const SCORE_CONSECUTIVE_BONUS = 5; // Bonus for consecutive matches
+const SCORE_WORD_START = 8; // Match at start of word
+const SCORE_CAMEL_CASE = 2; // Match at camelCase boundary
+const SCORE_SEPARATOR = 4; // Match after separator (/, -, _, .)
+const SCORE_CASE_MATCH = 1; // Exact case match bonus
+
+// Quality thresholds
+const MIN_SCORE_PER_CHAR = 2; // Minimum average score per query character
+const MAX_MATCH_SPAN_RATIO = 8; // Max ratio of match span to query length
+const GAP_PENALTY = 0.5; // Penalty per character gap
+const MAX_AVERAGE_GAP = 15; // If average gap > 15 chars, probably not a good match
+
+// Separators that indicate word boundaries
+const SEPARATORS = new Set(['/', '\\', '-', '_', '.', ' ', ':', ',', ';', '|', '(', ')', '[', ']', '{', '}']);
+
 /**
- * Hybrid search optimized for tab switching with 30-100 tabs.
- * Prioritizes word-boundary matches and strict fuzzy matching.
- * Does NOT match in middle of words to reduce noise.
+ * VS Code-inspired fuzzy search optimized for tab switching.
+ * Features:
+ * - Consecutive character bonus
+ * - Position-based scoring (word start, camelCase, separators)
+ * - Case sensitivity awareness
+ * - Sequential matching
+ * - Gap penalties and match quality checks
  */
 export function createTabSearcher(tabs: TabInfo[]) {
   return {
@@ -27,17 +43,18 @@ export function createTabSearcher(tabs: TabInfo[]) {
         return tabs.map(tab => ({ item: tab, score: 0 }));
       }
 
-      const queryLower = query.toLowerCase();
-      const queryWords = queryLower.split(/\s+/).filter(w => w.length > 0);
-
       const results = tabs.map(tab => {
-        const titleScore = scoreText(tab.title, queryLower, queryWords);
-        const urlScore = scoreText(tab.url, queryLower, queryWords);
+        // Score both title and URL, prioritize title
+        const titleMatch = fuzzyScore(tab.title, query);
+        const urlMatch = fuzzyScore(tab.url, query);
 
-        // Title is significantly more important than URL
-        const matchScore = Math.max(titleScore * 2, urlScore);
+        // Title is 2x more important than URL
+        const matchScore = Math.max(
+          titleMatch ? titleMatch.score * 2 : 0,
+          urlMatch ? urlMatch.score : 0
+        );
 
-        // Add recency bonus (more recent tabs get slight boost)
+        // Add recency bonus for recently accessed tabs
         const recencyBonus = calculateRecencyBonus(tab.lastAccessed);
 
         return {
@@ -48,136 +65,182 @@ export function createTabSearcher(tabs: TabInfo[]) {
 
       // Filter out non-matches and sort by score descending
       return results
-        .filter(r => r.score > MatchType.NO_MATCH)
+        .filter(r => r.score > 0)
         .sort((a, b) => b.score - a.score);
     },
   };
 }
 
 /**
- * Score a text against query and query words.
- * Prioritizes: exact > prefix > all words (in order) > all words (any order) > partial words > fuzzy
+ * VS Code-inspired fuzzy scoring algorithm with quality checks.
  *
- * IMPORTANT: Only matches at word boundaries, not in middle of words.
+ * Key improvements:
+ * - Gap penalties for scattered matches
+ * - Minimum score threshold
+ * - Match density checks
+ * - Rejects low-quality matches
  */
-function scoreText(text: string, query: string, queryWords: string[]): number {
-  const textLower = text.toLowerCase();
+function fuzzyScore(target: string, query: string): MatchResult | null {
+  if (!target || !query) return null;
 
-  // Exact match
-  if (textLower === query) {
-    return MatchType.EXACT;
+  const queryLower = query.toLowerCase();
+  const targetLower = target.toLowerCase();
+
+  // Quick exact match check
+  if (targetLower === queryLower) {
+    return {
+      score: SCORE_WORD_START * query.length + query.length * 100,
+      positions: Array.from({ length: query.length }, (_, i) => i),
+    };
   }
 
-  // Prefix match
-  if (textLower.startsWith(query)) {
-    return MatchType.PREFIX;
+  // Quick prefix check
+  if (targetLower.startsWith(queryLower)) {
+    return {
+      score: SCORE_WORD_START * query.length + query.length * 50,
+      positions: Array.from({ length: query.length }, (_, i) => i),
+    };
   }
 
-  // For multi-word queries, evaluate word-by-word
-  if (queryWords.length > 1) {
-    return scoreMultiWord(textLower, text, queryWords);
-  }
+  // Quick contains check for short queries (boost for substring matches)
+  if (query.length >= 3 && targetLower.includes(queryLower)) {
+    const index = targetLower.indexOf(queryLower);
+    let bonusScore = 0;
 
-  // Single word: check word boundary match
-  const wordBoundaryRegex = new RegExp(`\\b${escapeRegex(query)}`, 'i');
-  if (wordBoundaryRegex.test(text)) {
-    return MatchType.ALL_WORDS_IN_ORDER; // Treat single word boundary match as high score
-  }
-
-  // Fuzzy match with strict 80% threshold
-  const fuzzyScore = fuzzyMatch(textLower, query);
-  if (fuzzyScore >= 0.8) {
-    // Require at least 80% character match
-    return MatchType.FUZZY * fuzzyScore;
-  }
-
-  return MatchType.NO_MATCH;
-}
-
-/**
- * Score multi-word queries.
- * Allows partial matches but scores based on percentage of words matched.
- */
-function scoreMultiWord(textLower: string, text: string, queryWords: string[]): number {
-  const matchedWords: boolean[] = [];
-  const wordPositions: number[] = [];
-
-  // Check which words match at word boundaries
-  for (const word of queryWords) {
-    const wordBoundaryRegex = new RegExp(`\\b${escapeRegex(word)}`, 'i');
-    const match = wordBoundaryRegex.test(text);
-    matchedWords.push(match);
-
-    if (match) {
-      // Find position for order checking
-      const pos = textLower.indexOf(word);
-      wordPositions.push(pos);
-    } else {
-      wordPositions.push(-1);
+    // Bonus if it starts at a word boundary
+    if (index === 0 || SEPARATORS.has(target[index - 1])) {
+      bonusScore = SCORE_WORD_START * query.length;
     }
+
+    return {
+      score: query.length * 20 + bonusScore,
+      positions: Array.from({ length: query.length }, (_, i) => index + i),
+    };
   }
 
-  const matchCount = matchedWords.filter(m => m).length;
-
-  // No words matched at boundaries
-  if (matchCount === 0) {
-    return MatchType.NO_MATCH;
-  }
-
-  // All words matched
-  if (matchCount === queryWords.length) {
-    // Check if words appear in order
-    const inOrder = isInOrder(wordPositions);
-    return inOrder ? MatchType.ALL_WORDS_IN_ORDER : MatchType.ALL_WORDS_ANY_ORDER;
-  }
-
-  // Partial word match: scale score by percentage of words matched
-  const matchPercentage = matchCount / queryWords.length;
-
-  // Only return results if at least 50% of words match
-  if (matchPercentage < 0.5) {
-    return MatchType.NO_MATCH;
-  }
-
-  // Scale between PARTIAL_WORDS base (400) and ALL_WORDS_ANY_ORDER (650)
-  return MatchType.PARTIAL_WORDS + (matchPercentage * 250);
-}
-
-/**
- * Check if word positions appear in order (ignoring -1 for non-matches)
- */
-function isInOrder(positions: number[]): boolean {
-  const validPositions = positions.filter(p => p !== -1);
-  if (validPositions.length <= 1) return true;
-
-  for (let i = 1; i < validPositions.length; i++) {
-    if (validPositions[i] < validPositions[i - 1]) {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * Fuzzy match: check if query characters appear in sequence in text
- * Returns a score between 0 and 1
- *
- * Stricter than before - requires 80% threshold instead of 60%
- */
-function fuzzyMatch(text: string, query: string): number {
-  let textIndex = 0;
+  // Fuzzy matching with position tracking and gap penalties
+  let targetIndex = 0;
   let queryIndex = 0;
-  let matchCount = 0;
+  let score = 0;
+  let consecutiveCount = 0;
+  let lastMatchIndex = -1;
+  const positions: number[] = [];
+  let totalGap = 0;
 
-  while (textIndex < text.length && queryIndex < query.length) {
-    if (text[textIndex] === query[queryIndex]) {
-      matchCount++;
+  while (targetIndex < target.length && queryIndex < query.length) {
+    const targetChar = target[targetIndex];
+    const targetCharLower = targetLower[targetIndex];
+    const queryChar = query[queryIndex];
+    const queryCharLower = queryLower[queryIndex];
+
+    if (targetCharLower === queryCharLower) {
+      // Character matched!
+      positions.push(targetIndex);
+
+      // Calculate gap from last match
+      if (lastMatchIndex !== -1) {
+        const gap = targetIndex - lastMatchIndex - 1;
+        totalGap += gap;
+
+        // Apply gap penalty for large gaps
+        if (gap > 0) {
+          score -= gap * GAP_PENALTY;
+        }
+      }
+
+      // Base score
+      let charScore = SCORE_BASE;
+
+      // Consecutive bonus
+      if (lastMatchIndex === targetIndex - 1) {
+        consecutiveCount++;
+        charScore += SCORE_CONSECUTIVE_BONUS;
+      } else {
+        consecutiveCount = 0;
+      }
+
+      // Position-based bonuses
+      if (targetIndex === 0) {
+        // Start of string (very strong)
+        charScore += SCORE_WORD_START;
+      } else {
+        const prevChar = target[targetIndex - 1];
+
+        // After separator (strong)
+        if (SEPARATORS.has(prevChar)) {
+          charScore += SCORE_SEPARATOR;
+        }
+        // camelCase or PascalCase (moderate)
+        else if (
+          isLowerCase(prevChar) &&
+          isUpperCase(targetChar)
+        ) {
+          charScore += SCORE_CAMEL_CASE;
+        }
+        // After number (moderate)
+        else if (isDigit(prevChar) && !isDigit(targetChar)) {
+          charScore += SCORE_CAMEL_CASE;
+        }
+      }
+
+      // Case sensitivity bonus
+      if (targetChar === queryChar) {
+        charScore += SCORE_CASE_MATCH;
+      }
+
+      score += charScore;
+      lastMatchIndex = targetIndex;
       queryIndex++;
     }
-    textIndex++;
+
+    targetIndex++;
   }
 
-  return queryIndex === query.length ? matchCount / query.length : 0;
+  // If we didn't match all query characters, no match
+  if (queryIndex < query.length) {
+    return null;
+  }
+
+  // Quality checks - reject low-quality matches
+
+  // 1. Check minimum score threshold
+  const minScore = query.length * MIN_SCORE_PER_CHAR;
+  if (score < minScore) {
+    return null;
+  }
+
+  // 2. Check match density - span should be reasonable relative to query length
+  const matchSpan = positions[positions.length - 1] - positions[0] + 1;
+  const spanRatio = matchSpan / query.length;
+  if (spanRatio > MAX_MATCH_SPAN_RATIO) {
+    // Match is too spread out
+    return null;
+  }
+
+  // 3. Check average gap size
+  const averageGap = positions.length > 1 ? totalGap / (positions.length - 1) : 0;
+  if (averageGap > MAX_AVERAGE_GAP) {
+    // Characters are too scattered
+    return null;
+  }
+
+  // Bonus for matching more characters consecutively
+  if (positions.length > 1) {
+    let maxConsecutive = 1;
+    let currentConsecutive = 1;
+    for (let i = 1; i < positions.length; i++) {
+      if (positions[i] === positions[i - 1] + 1) {
+        currentConsecutive++;
+        maxConsecutive = Math.max(maxConsecutive, currentConsecutive);
+      } else {
+        currentConsecutive = 1;
+      }
+    }
+    // Give bonus for long consecutive sequences
+    score += maxConsecutive * 3;
+  }
+
+  return { score, positions };
 }
 
 /**
@@ -196,13 +259,20 @@ function calculateRecencyBonus(lastAccessed: number): number {
   return 5;
 }
 
-/**
- * Escape special regex characters
- */
-function escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+// Helper functions for character classification
+function isUpperCase(char: string): boolean {
+  return char >= 'A' && char <= 'Z';
 }
 
+function isLowerCase(char: string): boolean {
+  return char >= 'a' && char <= 'z';
+}
+
+function isDigit(char: string): boolean {
+  return char >= '0' && char <= '9';
+}
+
+// URL detection and creation helpers
 export function isUrl(text: string): boolean {
   try {
     new URL(text.startsWith('http') ? text : `http://${text}`);
