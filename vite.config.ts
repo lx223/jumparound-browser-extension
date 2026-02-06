@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
@@ -53,5 +54,13 @@ export default defineConfig({
       },
     },
     sourcemap: process.env.NODE_ENV === 'development',
+  },
+  test: {
+    globals: true,
+    environment: 'happy-dom',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+    },
   },
 });

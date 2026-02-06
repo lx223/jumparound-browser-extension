@@ -1,84 +1,129 @@
-import type { TabInfo } from '../types';
-
-interface SearchResult {
-  item: TabInfo;
-  score: number;
-}
+import type { TabInfo, SearchResult } from '../types';
 
 interface MatchResult {
   score: number;
   positions: number[];
 }
 
-// Scoring constants inspired by VS Code's fuzzy scorer
-const SCORE_BASE = 1; // Base score for each matched character
-const SCORE_CONSECUTIVE_BONUS = 5; // Bonus for consecutive matches
-const SCORE_WORD_START = 8; // Match at start of word
-const SCORE_CAMEL_CASE = 2; // Match at camelCase boundary
-const SCORE_SEPARATOR = 4; // Match after separator (/, -, _, .)
-const SCORE_CASE_MATCH = 1; // Exact case match bonus
+// Scoring constants
+const SCORE_BASE = 1;
+const SCORE_CONSECUTIVE_BONUS = 5;
+const SCORE_WORD_START = 8;
+const SCORE_CAMEL_CASE = 2;
+const SCORE_SEPARATOR = 4;
+const SCORE_CASE_MATCH = 1;
 
 // Quality thresholds
-const MIN_SCORE_PER_CHAR = 2; // Minimum average score per query character
-const MAX_MATCH_SPAN_RATIO = 8; // Max ratio of match span to query length
-const GAP_PENALTY = 0.5; // Penalty per character gap
-const MAX_AVERAGE_GAP = 15; // If average gap > 15 chars, probably not a good match
+const MIN_SCORE_PER_CHAR = 2;
+const MAX_MATCH_SPAN_RATIO = 8;
+const GAP_PENALTY = 0.5;
+const MAX_AVERAGE_GAP = 15;
+
+// History threshold: 24 hours in milliseconds
+const HISTORY_THRESHOLD_MS = 24 * 60 * 60 * 1000;
 
 // Separators that indicate word boundaries
 const SEPARATORS = new Set(['/', '\\', '-', '_', '.', ' ', ':', ',', ';', '|', '(', ')', '[', ']', '{', '}']);
 
 /**
- * VS Code-inspired fuzzy search optimized for tab switching.
- * Features:
- * - Consecutive character bonus
- * - Position-based scoring (word start, camelCase, separators)
- * - Case sensitivity awareness
- * - Sequential matching
- * - Gap penalties and match quality checks
+ * Two-tier fuzzy search system:
+ * Tier 1 (Active tabs):
+ *   1. Search by URL
+ *   2. If no matches, search by title
+ *
+ * Tier 2 (History tabs - last 24 hours):
+ *   3. If still no matches, search history by URL
+ *   4. If still no matches, search history by title
  */
 export function createTabSearcher(tabs: TabInfo[]) {
   return {
     search: (query: string): SearchResult[] => {
       if (!query.trim()) {
-        return tabs.map(tab => ({ item: tab, score: 0 }));
+        return tabs
+          .filter(tab => !tab.isHistoryTab)
+          .map(tab => ({
+            item: tab,
+            score: 0,
+            matchedField: 'url' as const,
+            searchTier: 'tabs-url' as const,
+          }));
       }
 
-      const results = tabs.map(tab => {
-        // Score both title and URL, prioritize title
-        const titleMatch = fuzzyScore(tab.title, query);
-        const urlMatch = fuzzyScore(tab.url, query);
+      // Separate active tabs from history tabs
+      const activeTabs = tabs.filter(tab => !tab.isHistoryTab);
+      const historyTabs = tabs.filter(tab => tab.isHistoryTab);
 
-        // Title is 2x more important than URL
-        const matchScore = Math.max(
-          titleMatch ? titleMatch.score * 2 : 0,
-          urlMatch ? urlMatch.score : 0
-        );
+      // Tier 1.1: Search active tabs by URL
+      let results = searchByField(activeTabs, query, 'url', 'tabs-url');
+      if (results.length > 0) {
+        return results;
+      }
 
-        // Add recency bonus for recently accessed tabs
-        const recencyBonus = calculateRecencyBonus(tab.lastAccessed);
+      // Tier 1.2: Search active tabs by title
+      results = searchByField(activeTabs, query, 'title', 'tabs-title');
+      if (results.length > 0) {
+        return results;
+      }
 
-        return {
-          item: tab,
-          score: matchScore + recencyBonus,
-        };
-      });
+      // Tier 2.1: Search history tabs by URL
+      results = searchByField(historyTabs, query, 'url', 'history-url');
+      if (results.length > 0) {
+        return results;
+      }
 
-      // Filter out non-matches and sort by score descending
-      return results
-        .filter(r => r.score > 0)
-        .sort((a, b) => b.score - a.score);
+      // Tier 2.2: Search history tabs by title
+      results = searchByField(historyTabs, query, 'title', 'history-title');
+      return results;
     },
   };
 }
 
 /**
- * VS Code-inspired fuzzy scoring algorithm with quality checks.
- *
- * Key improvements:
- * - Gap penalties for scattered matches
- * - Minimum score threshold
- * - Match density checks
- * - Rejects low-quality matches
+ * Search tabs by a specific field (url or title)
+ */
+function searchByField(
+  tabs: TabInfo[],
+  query: string,
+  field: 'url' | 'title',
+  tier: SearchResult['searchTier']
+): SearchResult[] {
+  const results: SearchResult[] = [];
+
+  for (const tab of tabs) {
+    const target = field === 'url' ? tab.url : tab.title;
+    const match = fuzzyScore(target, query);
+
+    if (match) {
+      const result: SearchResult = {
+        item: tab,
+        score: match.score,
+        matchedField: field,
+        searchTier: tier,
+      };
+
+      // Add highlight information
+      if (field === 'url') {
+        result.urlHighlight = {
+          text: tab.url,
+          positions: match.positions,
+        };
+      } else {
+        result.titleHighlight = {
+          text: tab.title,
+          positions: match.positions,
+        };
+      }
+
+      results.push(result);
+    }
+  }
+
+  // Sort by score descending
+  return results.sort((a, b) => b.score - a.score);
+}
+
+/**
+ * Fuzzy scoring algorithm with quality checks and position tracking.
  */
 function fuzzyScore(target: string, query: string): MatchResult | null {
   if (!target || !query) return null;
@@ -134,24 +179,19 @@ function fuzzyScore(target: string, query: string): MatchResult | null {
     const queryCharLower = queryLower[queryIndex];
 
     if (targetCharLower === queryCharLower) {
-      // Character matched!
       positions.push(targetIndex);
 
-      // Calculate gap from last match
       if (lastMatchIndex !== -1) {
         const gap = targetIndex - lastMatchIndex - 1;
         totalGap += gap;
 
-        // Apply gap penalty for large gaps
         if (gap > 0) {
           score -= gap * GAP_PENALTY;
         }
       }
 
-      // Base score
       let charScore = SCORE_BASE;
 
-      // Consecutive bonus
       if (lastMatchIndex === targetIndex - 1) {
         consecutiveCount++;
         charScore += SCORE_CONSECUTIVE_BONUS;
@@ -159,31 +199,23 @@ function fuzzyScore(target: string, query: string): MatchResult | null {
         consecutiveCount = 0;
       }
 
-      // Position-based bonuses
       if (targetIndex === 0) {
-        // Start of string (very strong)
         charScore += SCORE_WORD_START;
       } else {
         const prevChar = target[targetIndex - 1];
 
-        // After separator (strong)
         if (SEPARATORS.has(prevChar)) {
           charScore += SCORE_SEPARATOR;
-        }
-        // camelCase or PascalCase (moderate)
-        else if (
+        } else if (
           isLowerCase(prevChar) &&
           isUpperCase(targetChar)
         ) {
           charScore += SCORE_CAMEL_CASE;
-        }
-        // After number (moderate)
-        else if (isDigit(prevChar) && !isDigit(targetChar)) {
+        } else if (isDigit(prevChar) && !isDigit(targetChar)) {
           charScore += SCORE_CAMEL_CASE;
         }
       }
 
-      // Case sensitivity bonus
       if (targetChar === queryChar) {
         charScore += SCORE_CASE_MATCH;
       }
@@ -196,31 +228,24 @@ function fuzzyScore(target: string, query: string): MatchResult | null {
     targetIndex++;
   }
 
-  // If we didn't match all query characters, no match
   if (queryIndex < query.length) {
     return null;
   }
 
-  // Quality checks - reject low-quality matches
-
-  // 1. Check minimum score threshold
+  // Quality checks
   const minScore = query.length * MIN_SCORE_PER_CHAR;
   if (score < minScore) {
     return null;
   }
 
-  // 2. Check match density - span should be reasonable relative to query length
   const matchSpan = positions[positions.length - 1] - positions[0] + 1;
   const spanRatio = matchSpan / query.length;
   if (spanRatio > MAX_MATCH_SPAN_RATIO) {
-    // Match is too spread out
     return null;
   }
 
-  // 3. Check average gap size
   const averageGap = positions.length > 1 ? totalGap / (positions.length - 1) : 0;
   if (averageGap > MAX_AVERAGE_GAP) {
-    // Characters are too scattered
     return null;
   }
 
@@ -236,30 +261,13 @@ function fuzzyScore(target: string, query: string): MatchResult | null {
         currentConsecutive = 1;
       }
     }
-    // Give bonus for long consecutive sequences
     score += maxConsecutive * 3;
   }
 
   return { score, positions };
 }
 
-/**
- * Calculate recency bonus based on lastAccessed timestamp
- * More recent tabs get a small boost (max 50 points)
- */
-function calculateRecencyBonus(lastAccessed: number): number {
-  const now = Date.now();
-  const ageInMinutes = (now - lastAccessed) / (1000 * 60);
-
-  // Tabs accessed within last 5 minutes get full bonus
-  if (ageInMinutes < 5) return 50;
-  // Linear decay over 60 minutes
-  if (ageInMinutes < 60) return 50 * (1 - ageInMinutes / 60);
-  // Older tabs get minimal bonus
-  return 5;
-}
-
-// Helper functions for character classification
+// Helper functions
 function isUpperCase(char: string): boolean {
   return char >= 'A' && char <= 'Z';
 }
@@ -287,4 +295,11 @@ export function createSearchUrl(query: string): string {
     return query.startsWith('http') ? query : `https://${query}`;
   }
   return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+}
+
+/**
+ * Check if a tab should be considered a history tab (older than 24 hours)
+ */
+export function isHistoryTab(lastAccessed: number): boolean {
+  return Date.now() - lastAccessed > HISTORY_THRESHOLD_MS;
 }

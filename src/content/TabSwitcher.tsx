@@ -13,12 +13,14 @@ import {
   Chip,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import type { TabInfo, Message } from '../types';
+import HistoryIcon from '@mui/icons-material/History';
+import type { TabInfo, Message, SearchResult } from '../types';
 import { createTabSearcher, createSearchUrl } from '../utils/tabSearch';
+import HighlightedText from '../components/HighlightedText';
 
 const TabSwitcher: React.FC = () => {
   const [tabs, setTabs] = useState<TabInfo[]>([]);
-  const [filteredTabs, setFilteredTabs] = useState<TabInfo[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -27,6 +29,7 @@ const TabSwitcher: React.FC = () => {
   const searchPlaceholder = chrome.i18n?.getMessage('searchPlaceholder') || 'Search tabs...';
   const noResults = chrome.i18n?.getMessage('noResults') || 'No tabs found';
   const currentTabLabel = chrome.i18n?.getMessage('currentTab') || 'Current';
+  const historyTabLabel = chrome.i18n?.getMessage('historyTab') || 'History';
 
   const currentTabId = React.useMemo(() => {
     const tabId = new URLSearchParams(window.location.search).get('tabId');
@@ -37,7 +40,8 @@ const TabSwitcher: React.FC = () => {
     chrome.runtime.sendMessage({ type: 'GET_TABS' } as Message, (response) => {
       if (response?.tabs) {
         setTabs(response.tabs);
-        setFilteredTabs(response.tabs);
+        const searcher = createTabSearcher(response.tabs);
+        setSearchResults(searcher.search(''));
       }
     });
 
@@ -45,24 +49,18 @@ const TabSwitcher: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredTabs(tabs);
-      setSelectedIndex(0);
-      return;
-    }
-
     const searcher = createTabSearcher(tabs);
     const results = searcher.search(searchQuery);
-    setFilteredTabs(results.map(r => r.item));
+    setSearchResults(results);
     setSelectedIndex(0);
   }, [searchQuery, tabs]);
 
   useEffect(() => {
-    if (listRef.current && filteredTabs.length > 0) {
+    if (listRef.current && searchResults.length > 0) {
       const selectedElement = listRef.current.children[selectedIndex] as HTMLElement;
       selectedElement?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
-  }, [selectedIndex, filteredTabs]);
+  }, [selectedIndex, searchResults]);
 
   const closeSwitcher = useCallback(() => {
     if (currentTabId != null) {
@@ -110,24 +108,24 @@ const TabSwitcher: React.FC = () => {
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        if (filteredTabs.length > 0) {
+        if (searchResults.length > 0) {
           closeSwitcher();
-          chrome.runtime.sendMessage({ type: 'SWITCH_TAB', tabId: filteredTabs[selectedIndex].id } as Message);
+          chrome.runtime.sendMessage({ type: 'SWITCH_TAB', tabId: searchResults[selectedIndex].item.id } as Message);
         } else if (searchQuery.trim()) {
           openNewTab(searchQuery);
         }
       } else if (e.key === 'ArrowDown' || (e.key === 'Tab' && !e.shiftKey)) {
         e.preventDefault();
-        setSelectedIndex(prev => (prev + 1) % Math.max(filteredTabs.length, 1));
+        setSelectedIndex(prev => (prev + 1) % Math.max(searchResults.length, 1));
       } else if (e.key === 'ArrowUp' || (e.key === 'Tab' && e.shiftKey)) {
         e.preventDefault();
-        setSelectedIndex(prev => (prev - 1 + filteredTabs.length) % Math.max(filteredTabs.length, 1));
+        setSelectedIndex(prev => (prev - 1 + searchResults.length) % Math.max(searchResults.length, 1));
       } else if (e.key === 'Escape') {
         e.preventDefault();
         closeSwitcher();
       }
     },
-    [filteredTabs, selectedIndex, searchQuery, openNewTab, closeSwitcher]
+    [searchResults, selectedIndex, searchQuery, openNewTab, closeSwitcher]
   );
 
   const handleBackdropClick = () => {
@@ -255,7 +253,7 @@ const TabSwitcher: React.FC = () => {
             },
           }}
         >
-          {filteredTabs.length === 0 ? (
+          {searchResults.length === 0 ? (
             <Box
               sx={{
                 p: 4,
@@ -274,95 +272,123 @@ const TabSwitcher: React.FC = () => {
               </Typography>
             </Box>
           ) : (
-            filteredTabs.map((tab, index) => (
-              <ListItem key={tab.id} disablePadding sx={{ px: 2, py: 0.5 }}>
-                <ListItemButton
-                  selected={index === selectedIndex}
-                  onClick={() => switchToTab(tab.id)}
-                  sx={{
-                    py: 1.5,
-                    px: 2,
-                    borderRadius: '10px',
-                    transition: 'all 0.12s cubic-bezier(0.4, 0, 0.2, 1)',
-                    willChange: 'transform, background-color',
-                    transform: 'translateX(0) translateZ(0)',
-                    '&:hover': {
-                      backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                      transform: 'translateX(4px) translateZ(0)',
-                    },
-                    '&.Mui-selected': {
-                      backgroundColor: 'rgba(99, 179, 237, 0.2)',
+            searchResults.map((result, index) => {
+              const tab = result.item;
+              return (
+                <ListItem key={tab.id} disablePadding sx={{ px: 2, py: 0.5 }}>
+                  <ListItemButton
+                    selected={index === selectedIndex}
+                    onClick={() => switchToTab(tab.id)}
+                    sx={{
+                      py: 1.5,
+                      px: 2,
+                      borderRadius: '10px',
+                      transition: 'all 0.12s cubic-bezier(0.4, 0, 0.2, 1)',
+                      willChange: 'transform, background-color',
+                      transform: 'translateX(0) translateZ(0)',
                       '&:hover': {
-                        backgroundColor: 'rgba(99, 179, 237, 0.25)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                        transform: 'translateX(4px) translateZ(0)',
                       },
-                    },
-                  }}
-                >
-                  <ListItemAvatar sx={{ minWidth: 40 }}>
-                    <Avatar
-                      src={tab.favIconUrl}
-                      variant="rounded"
-                      sx={{
-                        width: 24,
-                        height: 24,
-                        borderRadius: '6px',
-                        bgcolor: 'rgba(255, 255, 255, 0.1)',
-                        color: 'rgba(255, 255, 255, 0.9)',
-                      }}
-                    >
-                      {tab.title[0]?.toUpperCase() || '?'}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            flexGrow: 1,
-                            wordBreak: 'break-word',
-                            lineHeight: 1.4,
-                            color: 'rgba(255, 255, 255, 0.95)',
-                            fontWeight: 500,
-                          }}
-                        >
-                          {tab.title || tab.url}
-                        </Typography>
-                        {tab.active && (
-                          <Chip
-                            label={currentTabLabel}
-                            size="small"
-                            sx={{
-                              height: '20px',
-                              fontSize: '0.7rem',
-                              flexShrink: 0,
-                              backgroundColor: 'rgba(99, 179, 237, 0.3)',
-                              color: 'rgba(255, 255, 255, 0.95)',
-                              border: '1px solid rgba(99, 179, 237, 0.5)',
-                              fontWeight: 600,
-                            }}
-                          />
-                        )}
-                      </Box>
-                    }
-                    secondary={
-                      <Typography
-                        variant="body2"
+                      '&.Mui-selected': {
+                        backgroundColor: 'rgba(99, 179, 237, 0.2)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(99, 179, 237, 0.25)',
+                        },
+                      },
+                    }}
+                  >
+                    <ListItemAvatar sx={{ minWidth: 40 }}>
+                      <Avatar
+                        src={tab.favIconUrl}
+                        variant="rounded"
                         sx={{
-                          wordBreak: 'break-all',
-                          lineHeight: 1.3,
-                          mt: 0.5,
-                          color: 'rgba(255, 255, 255, 0.5)',
-                          fontSize: '0.8rem',
+                          width: 24,
+                          height: 24,
+                          borderRadius: '6px',
+                          bgcolor: 'rgba(255, 255, 255, 0.1)',
+                          color: 'rgba(255, 255, 255, 0.9)',
                         }}
                       >
-                        {tab.url}
-                      </Typography>
-                    }
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))
+                        {tab.isHistoryTab ? (
+                          <HistoryIcon sx={{ fontSize: 14 }} />
+                        ) : (
+                          tab.title[0]?.toUpperCase() || '?'
+                        )}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                          <Typography
+                            variant="body1"
+                            sx={{
+                              flexGrow: 1,
+                              wordBreak: 'break-word',
+                              lineHeight: 1.4,
+                              fontWeight: 500,
+                            }}
+                          >
+                            <HighlightedText
+                              highlight={result.titleHighlight}
+                              defaultText={tab.title || tab.url}
+                            />
+                          </Typography>
+                          {tab.active && (
+                            <Chip
+                              label={currentTabLabel}
+                              size="small"
+                              sx={{
+                                height: '20px',
+                                fontSize: '0.7rem',
+                                flexShrink: 0,
+                                backgroundColor: 'rgba(99, 179, 237, 0.3)',
+                                color: 'rgba(255, 255, 255, 0.95)',
+                                border: '1px solid rgba(99, 179, 237, 0.5)',
+                                fontWeight: 600,
+                              }}
+                            />
+                          )}
+                          {tab.isHistoryTab && (
+                            <Chip
+                              label={historyTabLabel}
+                              size="small"
+                              icon={<HistoryIcon sx={{ fontSize: '0.7rem !important' }} />}
+                              sx={{
+                                height: '20px',
+                                fontSize: '0.7rem',
+                                flexShrink: 0,
+                                backgroundColor: 'rgba(156, 39, 176, 0.3)',
+                                color: 'rgba(255, 255, 255, 0.95)',
+                                border: '1px solid rgba(156, 39, 176, 0.5)',
+                                fontWeight: 600,
+                              }}
+                            />
+                          )}
+                        </Box>
+                      }
+                      secondary={
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            wordBreak: 'break-all',
+                            lineHeight: 1.3,
+                            mt: 0.5,
+                            fontSize: '0.8rem',
+                          }}
+                        >
+                          <HighlightedText
+                            highlight={result.urlHighlight}
+                            defaultText={tab.url}
+                            color="rgba(255, 255, 255, 0.5)"
+                          />
+                        </Typography>
+                      }
+                    />
+                  </ListItemButton>
+                </ListItem>
+              );
+            })
           )}
         </List>
       </Paper>
