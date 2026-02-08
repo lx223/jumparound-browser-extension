@@ -1,26 +1,9 @@
 {
-  "extensionName": {
-    "message": "JumpAround - 标签页切换器"
-  },
-  "extensionDescription": {
-    "message": "使用键盘快捷键和模糊搜索快速切换标签页"
-  },
-  "commandToggleSwitcher": {
-    "message": "切换标签页切换器"
-  },
-  "searchPlaceholder": {
-    "message": "搜索标签页..."
-  },
-  "noResults": {
-    "message": "未找到标签页"
-  },
-  "noResultsPressEnterToSearch": {
-    "message": "无匹配标签页，按 Enter 在新标签页中通过 Google 搜索"
-  },
-  "currentTab": {
-    "message": "当前"
-  },
-  "historyTab": {
-    "message": "历史"
-  }
+  "extensionName": { "message": "JumpAround - 标签页切换器" },
+  "extensionDescription": { "message": "使用键盘快捷键和模糊搜索快速切换标签页" },
+  "commandToggleSwitcher": { "message": "切换标签页切换器" },
+  "searchPlaceholder": { "message": "搜索标签页..." },
+  "noResults": { "message": "未找到标签页" },
+  "noResultsPressEnterToSearch": { "message": "无匹配标签页，按 Enter 在新标签页中通过 Google 搜索" },
+  "currentTab": { "message": "当前" }
 }

@@ -13,7 +13,6 @@ import {
   Chip,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import HistoryIcon from '@mui/icons-material/History';
 import type { TabInfo, Message, SearchResult } from '../types';
 import { createTabSearcher, createSearchUrl } from '../utils/tabSearch';
 import HighlightedText from '../components/HighlightedText';
@@ -30,7 +29,6 @@ const TabSwitcher: React.FC = () => {
   const noResults = chrome.i18n?.getMessage('noResults') || 'No tabs found';
   const noResultsPressEnterToSearch = chrome.i18n?.getMessage('noResultsPressEnterToSearch') || 'No matching tabs. Press Enter to search on Google in a new tab';
   const currentTabLabel = chrome.i18n?.getMessage('currentTab') || 'Current';
-  const historyTabLabel = chrome.i18n?.getMessage('historyTab') || 'History';
 
   const currentTabId = React.useMemo(() => {
     const tabId = new URLSearchParams(window.location.search).get('tabId');
@@ -311,11 +309,7 @@ const TabSwitcher: React.FC = () => {
                           color: 'rgba(255, 255, 255, 0.9)',
                         }}
                       >
-                        {tab.isHistoryTab ? (
-                          <HistoryIcon sx={{ fontSize: 14 }} />
-                        ) : (
-                          tab.title[0]?.toUpperCase() || '?'
-                        )}
+                        {tab.title[0]?.toUpperCase() || '?'}
                       </Avatar>
                     </ListItemAvatar>
                     <ListItemText
@@ -346,22 +340,6 @@ const TabSwitcher: React.FC = () => {
                                 backgroundColor: 'rgba(99, 179, 237, 0.3)',
                                 color: 'rgba(255, 255, 255, 0.95)',
                                 border: '1px solid rgba(99, 179, 237, 0.5)',
-                                fontWeight: 600,
-                              }}
-                            />
-                          )}
-                          {tab.isHistoryTab && (
-                            <Chip
-                              label={historyTabLabel}
-                              size="small"
-                              icon={<HistoryIcon sx={{ fontSize: '0.7rem !important' }} />}
-                              sx={{
-                                height: '20px',
-                                fontSize: '0.7rem',
-                                flexShrink: 0,
-                                backgroundColor: 'rgba(156, 39, 176, 0.3)',
-                                color: 'rgba(255, 255, 255, 0.95)',
-                                border: '1px solid rgba(156, 39, 176, 0.5)',
                                 fontWeight: 600,
                               }}
                             />
