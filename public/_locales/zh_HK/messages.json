@@ -1,0 +1,9 @@
+{
+  "extensionName": { "message": "JumpAround - 分頁切換器" },
+  "extensionDescription": { "message": "使用鍵盤快捷鍵和模糊搜尋快速切換分頁" },
+  "commandToggleSwitcher": { "message": "切換分頁切換器" },
+  "searchPlaceholder": { "message": "搜尋分頁..." },
+  "noResults": { "message": "搵唔到分頁" },
+  "noResultsPressEnterToSearch": { "message": "冇匹配嘅分頁，撳 Enter 喺新分頁用 Google 搜尋" },
+  "currentTab": { "message": "目前" }
+}
