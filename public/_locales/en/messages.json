@@ -1,26 +1,9 @@
 {
-  "extensionName": {
-    "message": "JumpAround - Tab Switcher"
-  },
-  "extensionDescription": {
-    "message": "Quick tab switcher with keyboard shortcuts and fuzzy search"
-  },
-  "commandToggleSwitcher": {
-    "message": "Toggle tab switcher"
-  },
-  "searchPlaceholder": {
-    "message": "Search tabs..."
-  },
-  "noResults": {
-    "message": "No tabs found"
-  },
-  "noResultsPressEnterToSearch": {
-    "message": "No matching tabs. Press Enter to search on Google in a new tab"
-  },
-  "currentTab": {
-    "message": "Current"
-  },
-  "historyTab": {
-    "message": "History"
-  }
+  "extensionName": { "message": "JumpAround - Tab Switcher" },
+  "extensionDescription": { "message": "Quick tab switcher with keyboard shortcuts and fuzzy search" },
+  "commandToggleSwitcher": { "message": "Toggle tab switcher" },
+  "searchPlaceholder": { "message": "Search tabs..." },
+  "noResults": { "message": "No tabs found" },
+  "noResultsPressEnterToSearch": { "message": "No matching tabs. Press Enter to search on Google in a new tab" },
+  "currentTab": { "message": "Current" }
 }

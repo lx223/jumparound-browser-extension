@@ -1,14 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createTabSearcher, isHistoryTab } from './tabSearch';
+import { createTabSearcher } from './tabSearch';
 import type { TabInfo } from '../types';
 
-describe('tabSearch - 2-tier fuzzy search system', () => {
+describe('tabSearch - fuzzy search system', () => {
   let mockTabs: TabInfo[];
-  let mockHistoryTabs: TabInfo[];
   const now = Date.now();
 
   beforeEach(() => {
-    // Mock current tabs (active tabs)
     mockTabs = [
       {
         id: 1,
@@ -17,7 +15,6 @@ describe('tabSearch - 2-tier fuzzy search system', () => {
         windowId: 1,
         active: false,
         lastAccessed: now - 1000,
-        isHistoryTab: false,
       },
       {
         id: 2,
@@ -26,7 +23,6 @@ describe('tabSearch - 2-tier fuzzy search system', () => {
         windowId: 1,
         active: false,
         lastAccessed: now - 2000,
-        isHistoryTab: false,
       },
       {
         id: 3,
@@ -35,29 +31,6 @@ describe('tabSearch - 2-tier fuzzy search system', () => {
         windowId: 1,
         active: true,
         lastAccessed: now,
-        isHistoryTab: false,
-      },
-    ];
-
-    // Mock history tabs (from last 24 hours)
-    mockHistoryTabs = [
-      {
-        id: 101,
-        title: 'Reddit - Programming Discussion',
-        url: 'https://reddit.com/r/programming',
-        windowId: 1,
-        active: false,
-        lastAccessed: now - 20 * 60 * 60 * 1000, // 20 hours ago
-        isHistoryTab: true,
-      },
-      {
-        id: 102,
-        title: 'NPM Package Documentation',
-        url: 'https://npmjs.com/package/react',
-        windowId: 1,
-        active: false,
-        lastAccessed: now - 23 * 60 * 60 * 1000, // 23 hours ago
-        isHistoryTab: true,
       },
     ];
   });
@@ -164,133 +137,19 @@ describe('tabSearch - 2-tier fuzzy search system', () => {
     });
   });
 
-  describe('Tier 2.1: Search history tabs by URL (if no active tab matches)', () => {
-    it('should fall back to history URL search when no active tabs match', () => {
-      const allTabs = [...mockTabs, ...mockHistoryTabs];
-      const searcher = createTabSearcher(allTabs);
-      const results = searcher.search('reddit');
-
-      expect(results).toHaveLength(1);
-      expect(results[0].item.id).toBe(101);
-      expect(results[0].item.isHistoryTab).toBe(true);
-      expect(results[0].matchedField).toBe('url');
-      expect(results[0].searchTier).toBe('history-url');
-    });
-
-    it('should highlight matched characters in history tab URL', () => {
-      const allTabs = [...mockTabs, ...mockHistoryTabs];
-      const searcher = createTabSearcher(allTabs);
-      const results = searcher.search('npmjs');
-
-      expect(results[0].urlHighlight).toBeDefined();
-      expect(results[0].urlHighlight?.text).toBe('https://npmjs.com/package/react');
-    });
-
-    it('should only search history when active tabs have no matches', () => {
-      const allTabs = [...mockTabs, ...mockHistoryTabs];
-      const searcher = createTabSearcher(allTabs);
-
-      // 'github' matches active tab URL, should not search history
-      const results1 = searcher.search('github');
-      expect(results1.every(r => !r.item.isHistoryTab)).toBe(true);
-      expect(results1[0].searchTier).toBe('tabs-url');
-
-      // 'reddit' only matches history tab URL
-      const results2 = searcher.search('reddit');
-      expect(results2[0].item.isHistoryTab).toBe(true);
-      expect(results2[0].searchTier).toBe('history-url');
-    });
-  });
-
-  describe('Tier 2.2: Search history tabs by title (if still no matches)', () => {
-    it('should fall back to history title search as last resort', () => {
-      const allTabs = [...mockTabs, ...mockHistoryTabs];
-      const searcher = createTabSearcher(allTabs);
-      const results = searcher.search('Programming Discussion');
-
-      expect(results).toHaveLength(1);
-      expect(results[0].item.id).toBe(101);
-      expect(results[0].item.isHistoryTab).toBe(true);
-      expect(results[0].matchedField).toBe('title');
-      expect(results[0].searchTier).toBe('history-title');
-    });
-
-    it('should highlight matched characters in history tab title', () => {
-      const allTabs = [...mockTabs, ...mockHistoryTabs];
-      const searcher = createTabSearcher(allTabs);
-      const results = searcher.search('Documentation');
-
-      expect(results[0].titleHighlight).toBeDefined();
-      expect(results[0].titleHighlight?.text).toBe('NPM Package Documentation');
-    });
-
-    it('should respect search tier priority', () => {
-      // Create tabs with overlapping content across tiers
-      const tabs: TabInfo[] = [
-        {
-          id: 1,
-          title: 'Other Page',
-          url: 'https://example.com/test',
-          windowId: 1,
-          active: false,
-          lastAccessed: now,
-          isHistoryTab: false,
-        },
-        {
-          id: 2,
-          title: 'Test Title',
-          url: 'https://different.com',
-          windowId: 1,
-          active: false,
-          lastAccessed: now,
-          isHistoryTab: false,
-        },
-        {
-          id: 101,
-          title: 'History Page',
-          url: 'https://test.com/page',
-          windowId: 1,
-          active: false,
-          lastAccessed: now - 20 * 60 * 60 * 1000,
-          isHistoryTab: true,
-        },
-        {
-          id: 102,
-          title: 'Test History',
-          url: 'https://history.com',
-          windowId: 1,
-          active: false,
-          lastAccessed: now - 20 * 60 * 60 * 1000,
-          isHistoryTab: true,
-        },
-      ];
-
-      const searcher = createTabSearcher(tabs);
-      const results = searcher.search('test');
-
-      // Should match active tab URL first (tab 1)
-      expect(results[0].item.id).toBe(1);
-      expect(results[0].searchTier).toBe('tabs-url');
-    });
-  });
-
   describe('Empty query handling', () => {
-    it('should return all active tabs when query is empty', () => {
-      const allTabs = [...mockTabs, ...mockHistoryTabs];
-      const searcher = createTabSearcher(allTabs);
+    it('should return all tabs when query is empty', () => {
+      const searcher = createTabSearcher(mockTabs);
       const results = searcher.search('');
 
       expect(results).toHaveLength(mockTabs.length);
-      expect(results.every(r => !r.item.isHistoryTab)).toBe(true);
     });
 
-    it('should return all active tabs when query is only whitespace', () => {
-      const allTabs = [...mockTabs, ...mockHistoryTabs];
-      const searcher = createTabSearcher(allTabs);
+    it('should return all tabs when query is only whitespace', () => {
+      const searcher = createTabSearcher(mockTabs);
       const results = searcher.search('   ');
 
       expect(results).toHaveLength(mockTabs.length);
-      expect(results.every(r => !r.item.isHistoryTab)).toBe(true);
     });
   });
 
@@ -313,7 +172,6 @@ describe('tabSearch - 2-tier fuzzy search system', () => {
           windowId: 1,
           active: false,
           lastAccessed: now,
-          isHistoryTab: false,
         },
       ];
 
@@ -338,7 +196,6 @@ describe('tabSearch - 2-tier fuzzy search system', () => {
           windowId: 1,
           active: false,
           lastAccessed: now,
-          isHistoryTab: false,
         },
       ];
 
@@ -359,7 +216,6 @@ describe('tabSearch - 2-tier fuzzy search system', () => {
           windowId: 1,
           active: false,
           lastAccessed: now,
-          isHistoryTab: false,
         },
       ];
 
@@ -379,7 +235,6 @@ describe('tabSearch - 2-tier fuzzy search system', () => {
           windowId: 1,
           active: false,
           lastAccessed: now,
-          isHistoryTab: false,
         },
       ];
 
@@ -412,7 +267,6 @@ describe('tabSearch - 2-tier fuzzy search system', () => {
           windowId: 1,
           active: false,
           lastAccessed: now,
-          isHistoryTab: false,
         },
       ];
 
@@ -428,14 +282,6 @@ describe('tabSearch - 2-tier fuzzy search system', () => {
       const results = searcher.search(longQuery);
 
       expect(results).toHaveLength(0);
-    });
-
-    it('should handle tabs array with only history tabs', () => {
-      const searcher = createTabSearcher(mockHistoryTabs);
-      const results = searcher.search('reddit');
-
-      expect(results).toHaveLength(1);
-      expect(results[0].searchTier).toBe('history-url');
     });
 
     it('should handle empty tabs array', () => {
@@ -456,7 +302,6 @@ describe('tabSearch - 2-tier fuzzy search system', () => {
           windowId: 1,
           active: false,
           lastAccessed: now,
-          isHistoryTab: false,
         },
         {
           id: 2,
@@ -465,7 +310,6 @@ describe('tabSearch - 2-tier fuzzy search system', () => {
           windowId: 1,
           active: false,
           lastAccessed: now,
-          isHistoryTab: false,
         },
       ];
 
@@ -485,7 +329,6 @@ describe('tabSearch - 2-tier fuzzy search system', () => {
           windowId: 1,
           active: false,
           lastAccessed: now,
-          isHistoryTab: false,
         },
         {
           id: 2,
@@ -494,7 +337,6 @@ describe('tabSearch - 2-tier fuzzy search system', () => {
           windowId: 1,
           active: false,
           lastAccessed: now,
-          isHistoryTab: false,
         },
       ];
 
@@ -503,35 +345,5 @@ describe('tabSearch - 2-tier fuzzy search system', () => {
 
       expect(results[0].item.id).toBe(1);
     });
-  });
-});
-
-describe('isHistoryTab utility', () => {
-  it('should identify tabs older than 24 hours as history tabs', () => {
-    const now = Date.now();
-    const over24Hours = now - 25 * 60 * 60 * 1000;
-
-    expect(isHistoryTab(over24Hours)).toBe(true);
-  });
-
-  it('should identify recent tabs as not history tabs', () => {
-    const now = Date.now();
-    const recent = now - 1 * 60 * 60 * 1000; // 1 hour ago
-
-    expect(isHistoryTab(recent)).toBe(false);
-  });
-
-  it('should handle exactly 24 hours edge case', () => {
-    const now = Date.now();
-    const exactly24Hours = now - 24 * 60 * 60 * 1000;
-
-    expect(isHistoryTab(exactly24Hours)).toBe(false);
-  });
-
-  it('should handle future timestamps', () => {
-    const now = Date.now();
-    const future = now + 1000;
-
-    expect(isHistoryTab(future)).toBe(false);
   });
 });

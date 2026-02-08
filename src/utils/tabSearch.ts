@@ -19,60 +19,34 @@ const MAX_MATCH_SPAN_RATIO = 8;
 const GAP_PENALTY = 0.5;
 const MAX_AVERAGE_GAP = 15;
 
-// History threshold: 24 hours in milliseconds
-const HISTORY_THRESHOLD_MS = 24 * 60 * 60 * 1000;
-
 // Separators that indicate word boundaries
 const SEPARATORS = new Set(['/', '\\', '-', '_', '.', ' ', ':', ',', ';', '|', '(', ')', '[', ']', '{', '}']);
 
 /**
- * Two-tier fuzzy search system:
- * Tier 1 (Active tabs):
- *   1. Search by URL
- *   2. If no matches, search by title
- *
- * Tier 2 (History tabs - last 24 hours):
- *   3. If still no matches, search history by URL
- *   4. If still no matches, search history by title
+ * Fuzzy search over tabs:
+ * 1. Search by URL
+ * 2. If no matches, search by title
  */
 export function createTabSearcher(tabs: TabInfo[]) {
   return {
     search: (query: string): SearchResult[] => {
       if (!query.trim()) {
-        return tabs
-          .filter(tab => !tab.isHistoryTab)
-          .map(tab => ({
-            item: tab,
-            score: 0,
-            matchedField: 'url' as const,
-            searchTier: 'tabs-url' as const,
-          }));
+        return tabs.map(tab => ({
+          item: tab,
+          score: 0,
+          matchedField: 'url' as const,
+          searchTier: 'tabs-url' as const,
+        }));
       }
 
-      // Separate active tabs from history tabs
-      const activeTabs = tabs.filter(tab => !tab.isHistoryTab);
-      const historyTabs = tabs.filter(tab => tab.isHistoryTab);
-
-      // Tier 1.1: Search active tabs by URL
-      let results = searchByField(activeTabs, query, 'url', 'tabs-url');
+      // Tier 1: Search tabs by URL
+      let results = searchByField(tabs, query, 'url', 'tabs-url');
       if (results.length > 0) {
         return results;
       }
 
-      // Tier 1.2: Search active tabs by title
-      results = searchByField(activeTabs, query, 'title', 'tabs-title');
-      if (results.length > 0) {
-        return results;
-      }
-
-      // Tier 2.1: Search history tabs by URL
-      results = searchByField(historyTabs, query, 'url', 'history-url');
-      if (results.length > 0) {
-        return results;
-      }
-
-      // Tier 2.2: Search history tabs by title
-      results = searchByField(historyTabs, query, 'title', 'history-title');
+      // Tier 2: Search tabs by title
+      results = searchByField(tabs, query, 'title', 'tabs-title');
       return results;
     },
   };
@@ -295,11 +269,4 @@ export function createSearchUrl(query: string): string {
     return query.startsWith('http') ? query : `https://${query}`;
   }
   return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-}
-
-/**
- * Check if a tab should be considered a history tab (older than 24 hours)
- */
-export function isHistoryTab(lastAccessed: number): boolean {
-  return Date.now() - lastAccessed > HISTORY_THRESHOLD_MS;
 }

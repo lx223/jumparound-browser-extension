@@ -12,9 +12,6 @@ describe('getAllTabs', () => {
       windows: {
         getCurrent: vi.fn().mockResolvedValue({ id: currentWindowId }),
       },
-      history: {
-        search: vi.fn().mockResolvedValue([]),
-      },
     });
   });
 
