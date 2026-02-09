@@ -1,6 +1,6 @@
 {
   "extensionName": { "message": "JumpAround - Cambiar de pestaña" },
-  "extensionDescription": { "message": "Cambio rápido de pestañas con atajos de teclado y búsqueda difusa" },
+  "extensionDescription": { "message": "Un atajo para localizar tu pestaña al instante" },
   "searchPlaceholder": { "message": "Buscar pestañas..." },
   "noResults": { "message": "No se encontraron pestañas" },
   "noResultsPressEnterToSearch": { "message": "No hay pestañas coincidentes. Pulsa Enter para buscar en Google en una nueva pestaña" },
