@@ -1,13 +1,11 @@
 import type { Message } from '../types';
 import { getAllTabs, switchToTab } from '../utils/tabManager';
 
-chrome.commands.onCommand.addListener(async (command) => {
-  if (command === 'toggle-switcher') {
-    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+chrome.action.onClicked.addListener(async () => {
+  const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-    if (activeTab?.id) {
-      chrome.tabs.sendMessage(activeTab.id, { type: 'TOGGLE_SWITCHER', tabId: activeTab.id } as Message);
-    }
+  if (activeTab?.id) {
+    chrome.tabs.sendMessage(activeTab.id, { type: 'TOGGLE_SWITCHER', tabId: activeTab.id } as Message);
   }
 });
 
