@@ -1,0 +1,8 @@
+{
+  "extensionName": { "message": "JumpAround - Changeur d'onglets" },
+  "extensionDescription": { "message": "Changement rapide d'onglets avec raccourcis clavier et recherche floue" },
+  "searchPlaceholder": { "message": "Rechercher des onglets..." },
+  "noResults": { "message": "Aucun onglet trouvé" },
+  "noResultsPressEnterToSearch": { "message": "Aucun onglet correspondant. Appuyez sur Entrée pour rechercher sur Google dans un nouvel onglet" },
+  "currentTab": { "message": "Actuel" }
+}
