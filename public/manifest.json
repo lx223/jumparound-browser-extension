@@ -17,12 +17,11 @@
     }
   ],
   "commands": {
-    "toggle-switcher": {
+    "_execute_action": {
       "suggested_key": {
         "default": "Ctrl+K",
         "mac": "Command+K"
-      },
-      "description": "__MSG_commandToggleSwitcher__"
+      }
     }
   },
   "web_accessible_resources": [
@@ -31,6 +30,13 @@
       "matches": ["<all_urls>"]
     }
   ],
+  "action": {
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
