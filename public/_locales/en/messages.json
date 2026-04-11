@@ -3,6 +3,7 @@
   "extensionDescription": { "message": "One shortcut to instantly locate your tab" },
   "searchPlaceholder": { "message": "Search tabs..." },
   "noResults": { "message": "No tabs found" },
-  "noResultsPressEnterToSearch": { "message": "No matching tabs. Press Enter to search on Google in a new tab" },
+  "noMatchingTabs": { "message": "No matching tabs." },
+  "pressEnterToSearch": { "message": "Press Enter to search on Google in a new tab" },
   "historyTab": { "message": "History" }
 }

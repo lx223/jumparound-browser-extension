@@ -22,7 +22,8 @@ const TabSwitcher: React.FC = () => {
 
   const searchPlaceholder = chrome.i18n?.getMessage('searchPlaceholder') || 'Search tabs...';
   const noResults = chrome.i18n?.getMessage('noResults') || 'No tabs found';
-  const noResultsPressEnterToSearch = chrome.i18n?.getMessage('noResultsPressEnterToSearch') || 'No matching tabs. Press Enter to search on Google in a new tab';
+  const noMatchingTabs = chrome.i18n?.getMessage('noMatchingTabs') || 'No matching tabs.';
+  const pressEnterToSearch = chrome.i18n?.getMessage('pressEnterToSearch') || 'Press Enter to search on Google in a new tab';
   const historyTabLabel = chrome.i18n?.getMessage('historyTab') || 'History';
 
   useEffect(() => {
@@ -172,9 +173,14 @@ const TabSwitcher: React.FC = () => {
       >
         {searchResults.length === 0 ? (
           <li className="p-8 text-center">
-            <p className="text-text-secondary font-medium">
-              {searchQuery.trim() ? noResultsPressEnterToSearch : noResults}
-            </p>
+            {searchQuery.trim() ? (
+              <>
+                <p className="text-text-secondary font-medium">{noMatchingTabs}</p>
+                <p className="text-text-primary font-semibold mt-1">{pressEnterToSearch}</p>
+              </>
+            ) : (
+              <p className="text-text-secondary font-medium">{noResults}</p>
+            )}
           </li>
         ) : (
           searchResults.map((result, index) => {
