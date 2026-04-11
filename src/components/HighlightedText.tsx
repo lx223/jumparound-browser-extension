@@ -1,20 +1,19 @@
 import React from 'react';
-import { Box } from '@mui/material';
 import type { MatchHighlight } from '../types';
 
 interface HighlightedTextProps {
   highlight?: MatchHighlight;
   defaultText: string;
-  color?: string;
+  secondary?: boolean;
 }
 
 const HighlightedText: React.FC<HighlightedTextProps> = ({
   highlight,
   defaultText,
-  color = 'rgba(255, 255, 255, 0.95)',
+  secondary = false,
 }) => {
   if (!highlight) {
-    return <>{defaultText}</>;
+    return <span className={secondary ? 'text-text-secondary' : ''}>{defaultText}</span>;
   }
 
   const { text, positions } = highlight;
@@ -25,26 +24,15 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({
     const char = text[i];
     if (positionSet.has(i)) {
       chars.push(
-        <Box
-          key={i}
-          component="span"
-          sx={{
-            backgroundColor: 'rgba(255, 193, 7, 0.4)',
-            color,
-          }}
-        >
+        <span key={i} className={`bg-highlight ${secondary ? 'text-text-secondary' : ''}`}>
           {char}
-        </Box>
+        </span>
       );
     } else {
       chars.push(
-        <Box
-          key={i}
-          component="span"
-          sx={{ color }}
-        >
+        <span key={i} className={secondary ? 'text-text-secondary' : ''}>
           {char}
-        </Box>
+        </span>
       );
     }
   }

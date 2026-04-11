@@ -1,21 +1,15 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import {
-  Box,
-  TextField,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemAvatar,
-  ListItemText,
-  Avatar,
-  Paper,
-  Typography,
-  Chip,
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import { Search, Sun, Moon, Monitor } from 'lucide-react';
 import type { TabInfo, Message, SearchResult } from '../types';
 import { createTabSearcher, createSearchUrl } from '../utils/tabSearch';
 import HighlightedText from '../components/HighlightedText';
+import { useTheme, type ThemeMode } from './ThemeContext';
+
+const themeOptions: { mode: ThemeMode; icon: React.ReactNode; label: string }[] = [
+  { mode: 'light', icon: <Sun size={14} />, label: 'Light' },
+  { mode: 'dark', icon: <Moon size={14} />, label: 'Dark' },
+  { mode: 'auto', icon: <Monitor size={14} />, label: 'Auto' },
+];
 
 const TabSwitcher: React.FC = () => {
   const [tabs, setTabs] = useState<TabInfo[]>([]);
@@ -24,6 +18,7 @@ const TabSwitcher: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  const { mode, setMode } = useTheme();
 
   const searchPlaceholder = chrome.i18n?.getMessage('searchPlaceholder') || 'Search tabs...';
   const noResults = chrome.i18n?.getMessage('noResults') || 'No tabs found';
@@ -111,213 +106,125 @@ const TabSwitcher: React.FC = () => {
   );
 
   return (
-    <Box
-      sx={{
-        width: '800px',
-        height: '600px',
-        display: 'flex',
-        alignItems: 'stretch',
-        justifyContent: 'center',
-        background: 'rgba(30, 30, 35, 1)',
-      }}
-    >
-      <Paper
-        elevation={0}
-        sx={{
-          width: '100%',
-          maxHeight: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          background: 'transparent',
-        }}
-      >
-        <Box sx={{ p: 2, pb: 1 }}>
-          <TextField
-            fullWidth
-            variant="outlined"
+    <div className="w-[800px] h-[600px] flex flex-col bg-surface text-text-primary">
+      {/* Header with search + theme toggle */}
+      <div className="flex items-center gap-2 p-3 pb-2">
+        <div className="relative flex-1">
+          <Search
+            size={18}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none"
+          />
+          <input
+            ref={searchInputRef}
+            type="text"
             placeholder={searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            inputRef={searchInputRef}
             autoFocus
-            InputProps={{
-              startAdornment: <SearchIcon sx={{ mr: 1, color: 'rgba(255, 255, 255, 0.5)' }} />,
-            }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                color: 'rgba(255, 255, 255, 0.95)',
-                borderRadius: '12px',
-                backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
-                willChange: 'background-color, box-shadow',
-                '& fieldset': {
-                  borderColor: 'rgba(255, 255, 255, 0.12)',
-                },
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.12)',
-                  '& fieldset': {
-                    borderColor: 'rgba(255, 255, 255, 0.2)',
-                  },
-                },
-                '&.Mui-focused': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  boxShadow: '0 0 0 2px rgba(99, 179, 237, 0.4)',
-                  '& fieldset': {
-                    borderColor: 'rgba(99, 179, 237, 0.6)',
-                  },
-                },
-              },
-              '& .MuiOutlinedInput-input::placeholder': {
-                color: 'rgba(255, 255, 255, 0.4)',
-                opacity: 1,
-              },
-            }}
+            className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-surface-raised border border-border
+              text-text-primary placeholder:text-text-muted outline-none
+              transition-all duration-150
+              hover:bg-surface-hover hover:border-border/80
+              focus:bg-surface-raised focus:ring-2 focus:ring-accent-border focus:border-border-focus"
           />
-        </Box>
+        </div>
 
-        <List
-          ref={listRef}
-          sx={{
-            flexGrow: 1,
-            overflow: 'auto',
-            py: 1,
-            px: 1,
-            '&::-webkit-scrollbar': {
-              width: '8px',
-            },
-            '&::-webkit-scrollbar-track': {
-              background: 'transparent',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              background: 'rgba(255, 255, 255, 0.15)',
-              borderRadius: '4px',
-              '&:hover': {
-                background: 'rgba(255, 255, 255, 0.25)',
-              },
-            },
-          }}
-        >
-          {searchResults.length === 0 ? (
-            <Box
-              sx={{
-                p: 4,
-                textAlign: 'center',
-              }}
+        {/* Theme toggle */}
+        <div className="flex rounded-lg border border-border bg-surface-raised p-0.5 shrink-0">
+          {themeOptions.map((opt) => (
+            <button
+              key={opt.mode}
+              onClick={() => setMode(opt.mode)}
+              title={opt.label}
+              className={`flex items-center justify-center w-8 h-8 rounded-md transition-all duration-150 cursor-pointer
+                ${mode === opt.mode
+                  ? 'bg-accent-soft text-accent shadow-sm'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+                }`}
             >
-              <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: 500,
-                  color: 'rgba(255, 255, 255, 0.5)',
-                }}
-              >
-                {searchQuery.trim() ? noResultsPressEnterToSearch : noResults}
-              </Typography>
-            </Box>
-          ) : (
-            searchResults.map((result, index) => {
-              const tab = result.item;
-              return (
-                <ListItem key={tab.id} disablePadding sx={{ px: 2, py: 0.5 }}>
-                  <ListItemButton
-                    selected={index === selectedIndex}
-                    onClick={() => switchToTab(tab.id)}
-                    sx={{
-                      py: 1.5,
-                      px: 2,
-                      borderRadius: '10px',
-                      transition: 'all 0.12s cubic-bezier(0.4, 0, 0.2, 1)',
-                      willChange: 'transform, background-color',
-                      transform: 'translateX(0) translateZ(0)',
-                      '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                        transform: 'translateX(4px) translateZ(0)',
-                      },
-                      '&.Mui-selected': {
-                        backgroundColor: 'rgba(99, 179, 237, 0.2)',
-                        '&:hover': {
-                          backgroundColor: 'rgba(99, 179, 237, 0.25)',
-                        },
-                      },
-                    }}
-                  >
-                    <ListItemAvatar sx={{ minWidth: 40 }}>
-                      <Avatar
-                        src={tab.favIconUrl?.startsWith('http') ? tab.favIconUrl : undefined}
-                        variant="rounded"
-                        sx={{
-                          width: 24,
-                          height: 24,
-                          borderRadius: '6px',
-                          bgcolor: 'rgba(255, 255, 255, 0.1)',
-                          color: 'rgba(255, 255, 255, 0.9)',
+              {opt.icon}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tab list */}
+      <ul
+        ref={listRef}
+        className="flex-1 overflow-auto py-1 px-1 custom-scrollbar list-none m-0"
+      >
+        {searchResults.length === 0 ? (
+          <li className="p-8 text-center">
+            <p className="text-text-secondary font-medium">
+              {searchQuery.trim() ? noResultsPressEnterToSearch : noResults}
+            </p>
+          </li>
+        ) : (
+          searchResults.map((result, index) => {
+            const tab = result.item;
+            const isSelected = index === selectedIndex;
+            return (
+              <li key={tab.id} className="px-2 py-0.5">
+                <button
+                  type="button"
+                  onClick={() => switchToTab(tab.id)}
+                  className={`w-full flex items-center gap-2.5 py-1.5 px-2.5 rounded-lg text-left
+                    transition-all duration-100 cursor-pointer border-0
+                    ${isSelected
+                      ? 'bg-accent-soft hover:bg-accent-soft/80'
+                      : 'bg-transparent hover:bg-surface-hover hover:translate-x-1'
+                    }`}
+                >
+                  {/* Favicon */}
+                  <div className="w-5 h-5 rounded bg-surface-raised dark:bg-white/90 flex items-center justify-center shrink-0 overflow-hidden">
+                    {tab.favIconUrl?.startsWith('http') ? (
+                      <img
+                        src={tab.favIconUrl}
+                        alt=""
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
                         }}
-                      >
-                        {tab.title[0]?.toUpperCase() || '?'}
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                          <Typography
-                            variant="body1"
-                            sx={{
-                              flexGrow: 1,
-                              wordBreak: 'break-word',
-                              lineHeight: 1.4,
-                              fontWeight: 500,
-                            }}
-                          >
-                            <HighlightedText
-                              highlight={result.titleHighlight}
-                              defaultText={tab.title || tab.url}
-                            />
-                          </Typography>
-                          {tab.active && (
-                            <Chip
-                              label={currentTabLabel}
-                              size="small"
-                              sx={{
-                                height: '20px',
-                                fontSize: '0.7rem',
-                                flexShrink: 0,
-                                backgroundColor: 'rgba(99, 179, 237, 0.3)',
-                                color: 'rgba(255, 255, 255, 0.95)',
-                                border: '1px solid rgba(99, 179, 237, 0.5)',
-                                fontWeight: 600,
-                              }}
-                            />
-                          )}
-                        </Box>
-                      }
-                      secondary={
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            wordBreak: 'break-all',
-                            lineHeight: 1.3,
-                            mt: 0.5,
-                            fontSize: '0.8rem',
-                          }}
-                        >
-                          <HighlightedText
-                            highlight={result.urlHighlight}
-                            defaultText={tab.url}
-                            color="rgba(255, 255, 255, 0.5)"
-                          />
-                        </Typography>
-                      }
-                    />
-                  </ListItemButton>
-                </ListItem>
-              );
-            })
-          )}
-        </List>
-      </Paper>
-    </Box>
+                      />
+                    ) : null}
+                    <span className={`text-xs font-medium text-text-secondary ${tab.favIconUrl?.startsWith('http') ? 'hidden' : ''}`}>
+                      {tab.title[0]?.toUpperCase() || '?'}
+                    </span>
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="flex-1 truncate text-sm font-medium">
+                        <HighlightedText
+                          highlight={result.titleHighlight}
+                          defaultText={tab.title || tab.url}
+                        />
+                      </span>
+                      {tab.active && (
+                        <span className="shrink-0 text-[0.65rem] font-semibold px-1.5 py-px rounded
+                          bg-accent-soft text-accent border border-accent-border leading-none">
+                          {currentTabLabel}
+                        </span>
+                      )}
+                    </div>
+                    <div className="truncate text-xs text-text-secondary mt-0.5">
+                      <HighlightedText
+                        highlight={result.urlHighlight}
+                        defaultText={tab.url}
+                        secondary
+                      />
+                    </div>
+                  </div>
+                </button>
+              </li>
+            );
+          })
+        )}
+      </ul>
+    </div>
   );
 };
 
