@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, Sun, Moon, Monitor } from 'lucide-react';
+import { Search, Sun, Moon, Monitor, Settings } from 'lucide-react';
 import type { TabInfo, Message, SearchResult } from '../types';
 import { createTabSearcher, createSearchUrl } from '../utils/tabSearch';
 import HighlightedText from '../components/HighlightedText';
@@ -147,6 +147,17 @@ const TabSwitcher: React.FC = () => {
             </button>
           ))}
         </div>
+
+        {/* Shortcut settings */}
+        <button
+          onClick={() => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' })}
+          title="Configure keyboard shortcuts"
+          className="flex items-center justify-center w-8 h-8 rounded-lg border border-border bg-surface-raised
+            text-text-secondary hover:text-text-primary hover:bg-surface-hover
+            transition-all duration-150 cursor-pointer shrink-0"
+        >
+          <Settings size={14} />
+        </button>
       </div>
 
       {/* Tab list */}
