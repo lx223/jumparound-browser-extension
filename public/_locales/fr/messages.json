@@ -3,6 +3,7 @@
   "extensionDescription": { "message": "Un raccourci pour localiser votre onglet instantanément" },
   "searchPlaceholder": { "message": "Rechercher des onglets..." },
   "noResults": { "message": "Aucun onglet trouvé" },
-  "noResultsPressEnterToSearch": { "message": "Aucun onglet correspondant. Appuyez sur Entrée pour rechercher sur Google dans un nouvel onglet" },
+  "noMatchingTabs": { "message": "Aucun onglet correspondant." },
+  "pressEnterToSearch": { "message": "Appuyez sur Entrée pour rechercher sur Google dans un nouvel onglet" },
   "historyTab": { "message": "Historique" }
 }
