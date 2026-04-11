@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, Sun, Moon, Monitor, Settings } from 'lucide-react';
+import { Search, Sun, Moon, Monitor, Settings, History } from 'lucide-react';
 import type { TabInfo, Message, SearchResult } from '../types';
 import { createTabSearcher, createSearchUrl } from '../utils/tabSearch';
 import HighlightedText from '../components/HighlightedText';
@@ -12,7 +12,7 @@ const themeOptions: { mode: ThemeMode; icon: React.ReactNode; label: string }[] 
 ];
 
 const TabSwitcher: React.FC = () => {
-  const [tabs, setTabs] = useState<TabInfo[]>([]);
+  const [tabs, setTabs] = useState<{ open: TabInfo[]; history: TabInfo[] }>({ open: [], history: [] });
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -23,20 +23,21 @@ const TabSwitcher: React.FC = () => {
   const searchPlaceholder = chrome.i18n?.getMessage('searchPlaceholder') || 'Search tabs...';
   const noResults = chrome.i18n?.getMessage('noResults') || 'No tabs found';
   const noResultsPressEnterToSearch = chrome.i18n?.getMessage('noResultsPressEnterToSearch') || 'No matching tabs. Press Enter to search on Google in a new tab';
-  const currentTabLabel = chrome.i18n?.getMessage('currentTab') || 'Current';
+  const historyTabLabel = chrome.i18n?.getMessage('historyTab') || 'History';
 
   useEffect(() => {
     chrome.runtime.sendMessage({ type: 'GET_TABS' } as Message, (response) => {
-      if (response?.tabs) {
-        setTabs(response.tabs);
-      }
+      setTabs({
+        open: response?.tabs ?? [],
+        history: response?.historyTabs ?? [],
+      });
     });
 
     searchInputRef.current?.focus();
   }, []);
 
   useEffect(() => {
-    const searcher = createTabSearcher(tabs);
+    const searcher = createTabSearcher(tabs.open, tabs.history);
     const results = searcher.search(searchQuery);
     setSearchResults(results);
     setSelectedIndex(0);
@@ -73,9 +74,8 @@ const TabSwitcher: React.FC = () => {
     [closePopup]
   );
 
-  const openNewTab = useCallback(
-    (query: string) => {
-      const url = createSearchUrl(query);
+  const openUrl = useCallback(
+    (url: string) => {
       chrome.tabs.create({ url });
       closePopup();
     },
@@ -86,10 +86,15 @@ const TabSwitcher: React.FC = () => {
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        if (searchResults.length > 0) {
-          switchToTab(searchResults[selectedIndex].item.id);
+        const selected = searchResults[selectedIndex];
+        if (selected) {
+          if (selected.item.isHistoryTab) {
+            openUrl(selected.item.url);
+          } else {
+            switchToTab(selected.item.id);
+          }
         } else if (searchQuery.trim()) {
-          openNewTab(searchQuery);
+          openUrl(createSearchUrl(searchQuery));
         }
       } else if (e.key === 'ArrowDown' || (e.key === 'Tab' && !e.shiftKey)) {
         e.preventDefault();
@@ -102,7 +107,7 @@ const TabSwitcher: React.FC = () => {
         closePopup();
       }
     },
-    [searchResults, selectedIndex, searchQuery, openNewTab, switchToTab, closePopup]
+    [searchResults, selectedIndex, searchQuery, openUrl, switchToTab, closePopup]
   );
 
   return (
@@ -176,10 +181,10 @@ const TabSwitcher: React.FC = () => {
             const tab = result.item;
             const isSelected = index === selectedIndex;
             return (
-              <li key={tab.id} className="px-2 py-0.5">
+              <li key={`${tab.isHistoryTab ? 'h' : 't'}-${tab.id}`} className="px-2 py-0.5">
                 <button
                   type="button"
-                  onClick={() => switchToTab(tab.id)}
+                  onClick={() => tab.isHistoryTab ? openUrl(tab.url) : switchToTab(tab.id)}
                   className={`w-full flex items-center gap-2.5 py-1.5 px-2.5 rounded-lg text-left
                     transition-all duration-100 cursor-pointer border-0
                     ${isSelected
@@ -214,10 +219,12 @@ const TabSwitcher: React.FC = () => {
                           defaultText={tab.title || tab.url}
                         />
                       </span>
-                      {tab.active && (
-                        <span className="shrink-0 text-[0.65rem] font-semibold px-1.5 py-px rounded
-                          bg-accent-soft text-accent border border-accent-border leading-none">
-                          {currentTabLabel}
+                      {tab.isHistoryTab && (
+                        <span className="shrink-0 flex items-center gap-0.5 text-[0.65rem] font-semibold px-1.5 py-px rounded
+                          bg-purple-100 text-purple-700 border border-purple-200 leading-none
+                          dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700/50">
+                          <History size={10} />
+                          {historyTabLabel}
                         </span>
                       )}
                     </div>

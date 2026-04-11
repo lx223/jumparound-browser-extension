@@ -4,5 +4,5 @@
   "searchPlaceholder": { "message": "搜尋分頁..." },
   "noResults": { "message": "找不到分頁" },
   "noResultsPressEnterToSearch": { "message": "沒有符合的分頁，按 Enter 在新分頁中透過 Google 搜尋" },
-  "currentTab": { "message": "目前" }
+  "historyTab": { "message": "歷史" }
 }

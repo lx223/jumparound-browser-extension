@@ -4,5 +4,5 @@
   "searchPlaceholder": { "message": "Rechercher des onglets..." },
   "noResults": { "message": "Aucun onglet trouvé" },
   "noResultsPressEnterToSearch": { "message": "Aucun onglet correspondant. Appuyez sur Entrée pour rechercher sur Google dans un nouvel onglet" },
-  "currentTab": { "message": "Actuel" }
+  "historyTab": { "message": "Historique" }
 }
