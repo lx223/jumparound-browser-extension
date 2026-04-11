@@ -1,10 +1,11 @@
 import type { Message } from '../types';
-import { getAllTabs, switchToTab } from '../utils/tabManager';
+import { getAllTabs, searchHistory, filterHistoryItems, switchToTab } from '../utils/tabManager';
 
 chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) => {
   if (message.type === 'GET_TABS') {
-    getAllTabs().then(tabs => {
-      sendResponse({ tabs });
+    Promise.all([getAllTabs(), searchHistory()]).then(([tabs, historyItems]) => {
+      const historyTabs = filterHistoryItems(historyItems, tabs);
+      sendResponse({ tabs, historyTabs });
     });
     return true;
   }

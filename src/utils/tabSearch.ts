@@ -23,77 +23,74 @@ const MAX_AVERAGE_GAP = 15;
 const SEPARATORS = new Set(['/', '\\', '-', '_', '.', ' ', ':', ',', ';', '|', '(', ')', '[', ']', '{', '}']);
 
 /**
- * Fuzzy search over tabs:
- * 1. Search by URL
- * 2. If no matches, search by title
+ * Fuzzy search over tabs and history.
+ * Searches both URL and title for all items, takes the best match per item,
+ * and returns everything sorted by score. Open tabs and history are interleaved.
  */
-export function createTabSearcher(tabs: TabInfo[]) {
+export function createTabSearcher(tabs: TabInfo[], historyTabs: TabInfo[] = []) {
   return {
     search: (query: string): SearchResult[] => {
       if (!query.trim()) {
-        return tabs.map(tab => ({
+        const tabResults: SearchResult[] = tabs.map(tab => ({
           item: tab,
           score: 0,
           matchedField: 'url' as const,
           searchTier: 'tabs-url' as const,
         }));
+        const historyResults: SearchResult[] = historyTabs.map(tab => ({
+          item: tab,
+          score: 0,
+          matchedField: 'url' as const,
+          searchTier: 'history-url' as const,
+        }));
+        return [...tabResults, ...historyResults];
       }
 
-      // Tier 1: Search tabs by URL
-      let results = searchByField(tabs, query, 'url', 'tabs-url');
-      if (results.length > 0) {
-        return results;
+      const allItems: { tab: TabInfo; tierPrefix: 'tabs' | 'history' }[] = [
+        ...tabs.map(tab => ({ tab, tierPrefix: 'tabs' as const })),
+        ...historyTabs.map(tab => ({ tab, tierPrefix: 'history' as const })),
+      ];
+
+      const results: SearchResult[] = [];
+
+      for (const { tab, tierPrefix } of allItems) {
+        const urlMatch = fuzzyScore(tab.url, query);
+        const titleMatch = fuzzyScore(tab.title, query);
+
+        const best = getBestMatch(urlMatch, titleMatch);
+        if (!best) continue;
+
+        const result: SearchResult = {
+          item: tab,
+          score: best.score,
+          matchedField: best.field,
+          searchTier: best.field === 'url' ? `${tierPrefix}-url` as const : `${tierPrefix}-title` as const,
+        };
+
+        if (best.field === 'url') {
+          result.urlHighlight = { text: tab.url, positions: best.positions };
+        } else {
+          result.titleHighlight = { text: tab.title, positions: best.positions };
+        }
+
+        results.push(result);
       }
 
-      // Tier 2: Search tabs by title
-      results = searchByField(tabs, query, 'title', 'tabs-title');
-      return results;
+      return results.sort((a, b) => b.score - a.score);
     },
   };
 }
 
-/**
- * Search tabs by a specific field (url or title)
- */
-function searchByField(
-  tabs: TabInfo[],
-  query: string,
-  field: 'url' | 'title',
-  tier: SearchResult['searchTier']
-): SearchResult[] {
-  const results: SearchResult[] = [];
-
-  for (const tab of tabs) {
-    const target = field === 'url' ? tab.url : tab.title;
-    const match = fuzzyScore(target, query);
-
-    if (match) {
-      const result: SearchResult = {
-        item: tab,
-        score: match.score,
-        matchedField: field,
-        searchTier: tier,
-      };
-
-      // Add highlight information
-      if (field === 'url') {
-        result.urlHighlight = {
-          text: tab.url,
-          positions: match.positions,
-        };
-      } else {
-        result.titleHighlight = {
-          text: tab.title,
-          positions: match.positions,
-        };
-      }
-
-      results.push(result);
-    }
-  }
-
-  // Sort by score descending
-  return results.sort((a, b) => b.score - a.score);
+function getBestMatch(
+  urlMatch: MatchResult | null,
+  titleMatch: MatchResult | null,
+): { score: number; positions: number[]; field: 'url' | 'title' } | null {
+  if (!urlMatch && !titleMatch) return null;
+  if (!urlMatch) return { ...titleMatch!, field: 'title' };
+  if (!titleMatch) return { ...urlMatch, field: 'url' };
+  return urlMatch.score >= titleMatch.score
+    ? { ...urlMatch, field: 'url' }
+    : { ...titleMatch, field: 'title' };
 }
 
 /**

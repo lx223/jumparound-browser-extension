@@ -4,5 +4,5 @@
   "searchPlaceholder": { "message": "Buscar pestañas..." },
   "noResults": { "message": "No se encontraron pestañas" },
   "noResultsPressEnterToSearch": { "message": "No hay pestañas coincidentes. Pulsa Enter para buscar en Google en una nueva pestaña" },
-  "currentTab": { "message": "Actual" }
+  "historyTab": { "message": "Historial" }
 }
