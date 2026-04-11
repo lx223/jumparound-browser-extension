@@ -6,6 +6,7 @@ export interface TabInfo {
   windowId: number;
   active: boolean;
   lastAccessed: number;
+  isHistoryTab?: boolean;
 }
 
 export interface MatchHighlight {
@@ -19,11 +20,12 @@ export interface SearchResult {
   titleHighlight?: MatchHighlight;
   urlHighlight?: MatchHighlight;
   matchedField: 'url' | 'title';
-  searchTier: 'tabs-url' | 'tabs-title';
+  searchTier: 'tabs-url' | 'tabs-title' | 'history-url' | 'history-title';
 }
 
 export interface Message {
   type: 'GET_TABS' | 'SWITCH_TAB';
   tabId?: number;
   tabs?: TabInfo[];
+  historyTabs?: TabInfo[];
 }
