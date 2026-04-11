@@ -23,7 +23,7 @@ export interface SearchResult {
 }
 
 export interface Message {
-  type: 'TOGGLE_SWITCHER' | 'GET_TABS' | 'SWITCH_TAB' | 'CLOSE_SWITCHER';
+  type: 'GET_TABS' | 'SWITCH_TAB';
   tabId?: number;
   tabs?: TabInfo[];
 }
