@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import { resolve } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
@@ -21,6 +22,7 @@ function injectManifestVersion() {
 export default defineConfig({
   plugins: [
     react(),
+    tailwindcss(),
     viteStaticCopy({
       targets: [
         { src: 'public/manifest.json', dest: '.' },
