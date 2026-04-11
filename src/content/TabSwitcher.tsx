@@ -30,17 +30,10 @@ const TabSwitcher: React.FC = () => {
   const noResultsPressEnterToSearch = chrome.i18n?.getMessage('noResultsPressEnterToSearch') || 'No matching tabs. Press Enter to search on Google in a new tab';
   const currentTabLabel = chrome.i18n?.getMessage('currentTab') || 'Current';
 
-  const currentTabId = React.useMemo(() => {
-    const tabId = new URLSearchParams(window.location.search).get('tabId');
-    return tabId ? Number(tabId) : null;
-  }, []);
-
   useEffect(() => {
     chrome.runtime.sendMessage({ type: 'GET_TABS' } as Message, (response) => {
       if (response?.tabs) {
         setTabs(response.tabs);
-        const searcher = createTabSearcher(response.tabs);
-        setSearchResults(searcher.search(''));
       }
     });
 
@@ -61,46 +54,37 @@ const TabSwitcher: React.FC = () => {
     }
   }, [selectedIndex, searchResults]);
 
-  const closeSwitcher = useCallback(() => {
-    if (currentTabId != null) {
-      chrome.tabs.sendMessage(currentTabId, { type: 'CLOSE_SWITCHER' } as Message);
-    } else {
-      chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-        if (tab?.id) chrome.tabs.sendMessage(tab.id, { type: 'CLOSE_SWITCHER' } as Message);
-      });
-    }
-  }, [currentTabId]);
+  const closePopup = useCallback(() => {
+    window.close();
+  }, []);
 
-  // Global Escape in iframe: focus is inside the iframe when switcher is open,
-  // so the content script's window listener never sees keydown. Handle Escape here.
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
-        closeSwitcher();
+        closePopup();
       }
     };
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [closeSwitcher]);
+  }, [closePopup]);
 
   const switchToTab = useCallback(
     (tabId: number) => {
-      closeSwitcher();
-
       chrome.runtime.sendMessage({ type: 'SWITCH_TAB', tabId } as Message, () => {
+        closePopup();
       });
     },
-    [closeSwitcher]
+    [closePopup]
   );
 
   const openNewTab = useCallback(
     (query: string) => {
       const url = createSearchUrl(query);
       chrome.tabs.create({ url });
-      closeSwitcher();
+      closePopup();
     },
-    [closeSwitcher]
+    [closePopup]
   );
 
   const handleKeyDown = useCallback(
@@ -108,8 +92,7 @@ const TabSwitcher: React.FC = () => {
       if (e.key === 'Enter') {
         e.preventDefault();
         if (searchResults.length > 0) {
-          closeSwitcher();
-          chrome.runtime.sendMessage({ type: 'SWITCH_TAB', tabId: searchResults[selectedIndex].item.id } as Message);
+          switchToTab(searchResults[selectedIndex].item.id);
         } else if (searchQuery.trim()) {
           openNewTab(searchQuery);
         }
@@ -121,70 +104,35 @@ const TabSwitcher: React.FC = () => {
         setSelectedIndex(prev => (prev - 1 + searchResults.length) % Math.max(searchResults.length, 1));
       } else if (e.key === 'Escape') {
         e.preventDefault();
-        closeSwitcher();
+        closePopup();
       }
     },
-    [searchResults, selectedIndex, searchQuery, openNewTab, closeSwitcher]
+    [searchResults, selectedIndex, searchQuery, openNewTab, switchToTab, closePopup]
   );
-
-  const handleBackdropClick = () => {
-    closeSwitcher();
-  };
-
-  const handlePaperClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
 
   return (
     <Box
-      onClick={handleBackdropClick}
       sx={{
-        width: '100vw',
-        height: '100vh',
+        width: '800px',
+        height: '600px',
         display: 'flex',
-        alignItems: 'flex-start',
+        alignItems: 'stretch',
         justifyContent: 'center',
-        paddingTop: '15vh',
-        background: 'rgba(0, 0, 0, 0.5)',
-        animation: 'fadeIn 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
-        willChange: 'opacity',
-        '@keyframes fadeIn': {
-          from: { opacity: 0 },
-          to: { opacity: 1 },
-        },
+        background: 'rgba(30, 30, 35, 1)',
       }}
     >
       <Paper
         elevation={0}
-        onClick={handlePaperClick}
         sx={{
-          width: '900px',
-          maxWidth: '90vw',
-          maxHeight: '70vh',
+          width: '100%',
+          maxHeight: '100%',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
-          background: 'rgba(30, 30, 35, 0.95)',
-          backdropFilter: 'blur(16px) saturate(180%)',
-          borderRadius: '16px',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08)',
-          animation: 'slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-          willChange: 'transform, opacity',
-          transform: 'translateZ(0)',
-          '@keyframes slideUp': {
-            from: {
-              opacity: 0,
-              transform: 'translateY(12px) translateZ(0)',
-            },
-            to: {
-              opacity: 1,
-              transform: 'translateY(0) translateZ(0)',
-            },
-          },
+          background: 'transparent',
         }}
       >
-        <Box sx={{ p: 3, pb: 2 }}>
+        <Box sx={{ p: 2, pb: 1 }}>
           <TextField
             fullWidth
             variant="outlined"
@@ -234,7 +182,6 @@ const TabSwitcher: React.FC = () => {
           sx={{
             flexGrow: 1,
             overflow: 'auto',
-            maxHeight: 'calc(70vh - 120px)',
             py: 1,
             px: 1,
             '&::-webkit-scrollbar': {
@@ -257,7 +204,6 @@ const TabSwitcher: React.FC = () => {
               sx={{
                 p: 4,
                 textAlign: 'center',
-                animation: 'fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
               <Typography
