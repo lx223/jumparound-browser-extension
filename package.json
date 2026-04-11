@@ -1,6 +1,6 @@
 {
   "name": "jumparound",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Cross-browser tab switcher with keyboard shortcuts",
   "type": "module",
   "scripts": {
