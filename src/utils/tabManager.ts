@@ -2,6 +2,7 @@ import type { TabInfo } from '../types';
 
 const HISTORY_MAX_RESULTS = 100;
 const HISTORY_DAYS = 3;
+const HISTORY_MAX_PER_DOMAIN = 3;
 
 export async function getAllTabs(): Promise<TabInfo[]> {
   const tabs = await chrome.tabs.query({});
@@ -37,8 +38,21 @@ export function filterHistoryItems(
 ): TabInfo[] {
   const openUrls = new Set(openTabs.map(tab => tab.url));
 
+  const domainCount = new Map<string, number>();
+
   return historyItems
-    .filter(item => item.url && !openUrls.has(item.url))
+    .filter(item => {
+      if (!item.url || openUrls.has(item.url)) return false;
+      try {
+        const domain = new URL(item.url).hostname;
+        const count = domainCount.get(domain) ?? 0;
+        if (count >= HISTORY_MAX_PER_DOMAIN) return false;
+        domainCount.set(domain, count + 1);
+        return true;
+      } catch {
+        return true;
+      }
+    })
     .map((item, index) => ({
       id: -(index + 1),
       title: item.title || '',
