@@ -37,3 +37,6 @@ Thumbs.db
 
 # Optional: test coverage
 coverage/
+
+# Synthetic popup performance build
+.perf-dist/
