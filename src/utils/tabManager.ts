@@ -1,7 +1,7 @@
 import type { TabInfo } from '../types';
 
 const HISTORY_MAX_RESULTS = 100;
-const HISTORY_DAYS = 3;
+const HISTORY_DAYS = 30;
 const HISTORY_MAX_PER_DOMAIN = 3;
 
 export async function getAllTabs(): Promise<TabInfo[]> {
