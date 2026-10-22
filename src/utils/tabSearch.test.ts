@@ -344,3 +344,48 @@ describe('tabSearch - fuzzy search system', () => {
     });
   });
 });
+
+describe('navigation relevance', () => {
+  const tab = (id: number, title: string, url: string, lastAccessed = 0): TabInfo => ({
+    id, title, url, lastAccessed, windowId: 1, active: false,
+  });
+
+  it('matches words across site and title in either order with accurate highlights', () => {
+    const item = tab(1, 'Billing settings', 'https://github.com/organizations/acme');
+    const searcher = createTabSearcher([item]);
+    for (const query of ['github billing', 'billing github', '  GitHub   BILLING  ']) {
+      const [result] = searcher.search(query);
+      expect(result.item.id).toBe(1);
+      expect(result.titleHighlight?.positions.map(i => item.title[i]).join('')).toBe('Billing');
+      expect(result.urlHighlight?.positions.map(i => item.url[i]).join('')).toBe('github');
+    }
+    expect(searcher.search('github billing missing')).toEqual([]);
+  });
+
+  it('finds title words regardless of query order and merges overlapping highlights', () => {
+    const item = tab(1, 'Quarterly budget', 'https://example.com');
+    const [result] = createTabSearcher([item]).search('budget quarterly budget');
+    expect(result.titleHighlight?.positions).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15]);
+  });
+
+  it('puts matching open tabs before exact history matches', () => {
+    const open = tab(1, 'Pull requests · GitHub', 'https://github.com/pulls');
+    const history = { ...tab(2, 'GitHub', 'https://github.com/old'), isHistoryTab: true };
+    expect(createTabSearcher([open], [history]).search('github').map(r => r.item.id)).toEqual([1, 2]);
+  });
+
+  it('uses recency for equal matches, while keeping stronger matches first', () => {
+    const items = [tab(1, 'Budget overview', '', 1), tab(2, 'Budget overview', '', 10), tab(3, 'budget', '', 0)];
+    expect(createTabSearcher(items).search('budget').map(r => r.item.id)).toEqual([3, 2, 1]);
+  });
+
+  it('prefers a site name over an incidental query-string match', () => {
+    const items = [tab(1, 'Other page', 'https://example.com/?q=github'), tab(2, 'Pull requests', 'https://github.com/pulls')];
+    expect(createTabSearcher(items).search('github').map(r => r.item.id)).toEqual([2, 1]);
+  });
+
+  it('finds short contiguous matches after an earlier scattered character', () => {
+    const [result] = createTabSearcher([tab(1, 'A long way to ab', '')]).search('ab');
+    expect(result.titleHighlight?.positions).toEqual([14, 15]);
+  });
+});

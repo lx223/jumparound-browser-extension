@@ -22,76 +22,97 @@ const MAX_AVERAGE_GAP = 15;
 // Separators that indicate word boundaries
 const SEPARATORS = new Set(['/', '\\', '-', '_', '.', ' ', ':', ',', ';', '|', '(', ')', '[', ']', '{', '}']);
 
-/**
- * Fuzzy search over tabs and history.
- * Searches both URL and title for all items, takes the best match per item,
- * and returns everything sorted by score. Open tabs and history are interleaved.
- */
+interface SearchField {
+  text: string;
+  lower: string;
+  field: 'url' | 'title';
+  offset: number;
+  weight: number;
+}
+
+// Keep offsets into the original URL so highlights also work with escaped URLs.
+function indexFields(tab: TabInfo): SearchField[] {
+  const fields: SearchField[] = [];
+  const add = (text: string, field: 'url' | 'title', offset = 0, weight = 1) => {
+    if (text) fields.push({ text, lower: text.toLowerCase(), field, offset, weight });
+  };
+  add(tab.title, 'title');
+  const parts = /^[a-z][a-z0-9+.-]*:\/\/([^/?#]+)([^?#]*)/i.exec(tab.url);
+  if (parts) {
+    add(parts[1], 'url', parts[0].indexOf(parts[1]));
+    add(parts[2], 'url', parts[0].length - parts[2].length, 0.9);
+  }
+  // Full URLs remain searchable, but incidental query/fragment matches rank lower.
+  add(tab.url, 'url', 0, parts ? 0.4 : 1);
+  return fields;
+}
+
+/** Search every query word across title and URL; prefer open tabs to history. */
 export function createTabSearcher(tabs: TabInfo[], historyTabs: TabInfo[] = []) {
   const allItems = [
     ...tabs.map(tab => ({ tab, tierPrefix: 'tabs' as const })),
     ...historyTabs.map(tab => ({ tab, tierPrefix: 'history' as const })),
-  ].map(item => ({ ...item, urlLower: item.tab.url.toLowerCase(), titleLower: item.tab.title.toLowerCase() }));
+  ].map(item => ({ ...item, fields: indexFields(item.tab) }));
+
   return {
-    search: (query: string): SearchResult[] => {
-      if (!query.trim()) {
-        const tabResults: SearchResult[] = tabs.map(tab => ({
+    search: (input: string): SearchResult[] => {
+      const query = input.trim();
+      if (!query) {
+        return allItems.map(({ tab, tierPrefix }) => ({
           item: tab,
           score: 0,
           matchedField: 'url' as const,
-          searchTier: 'tabs-url' as const,
+          searchTier: `${tierPrefix}-url` as const,
         }));
-        const historyResults: SearchResult[] = historyTabs.map(tab => ({
-          item: tab,
-          score: 0,
-          matchedField: 'url' as const,
-          searchTier: 'history-url' as const,
-        }));
-        return [...tabResults, ...historyResults];
       }
-
-      const queryLower = query.toLowerCase();
-
+      const words = [...new Set(query.toLowerCase().split(/\s+/))];
       const results: SearchResult[] = [];
-
-      for (const { tab, tierPrefix, urlLower, titleLower } of allItems) {
-        const urlMatch = fuzzyScore(tab.url, query, urlLower, queryLower);
-        const titleMatch = fuzzyScore(tab.title, query, titleLower, queryLower);
-
-        const best = getBestMatch(urlMatch, titleMatch);
-        if (!best) continue;
-
-        const result: SearchResult = {
-          item: tab,
-          score: best.score,
-          matchedField: best.field,
-          searchTier: best.field === 'url' ? `${tierPrefix}-url` as const : `${tierPrefix}-title` as const,
-        };
-
-        if (best.field === 'url') {
-          result.urlHighlight = { text: tab.url, positions: best.positions };
-        } else {
-          result.titleHighlight = { text: tab.title, positions: best.positions };
+      for (const { tab, tierPrefix, fields } of allItems) {
+        let score = 0;
+        const positions = { title: new Set<number>(), url: new Set<number>() };
+        const fieldScores = { title: 0, url: 0 };
+        let matched = true;
+        for (const word of words) {
+          let best: (MatchResult & { field: SearchField }) | null = null;
+          for (const field of fields) {
+            const match = fuzzyScore(field.text, word, field.lower, word);
+            if (!match) continue;
+            // An explicitly typed URL should retain its full exact/prefix score.
+            const weight = field.field === 'url' && field.text === tab.url && word.includes('://')
+              ? 1 : field.weight;
+            const weighted = match.score * weight;
+            if (!best || weighted > best.score) best = { ...match, score: weighted, field };
+          }
+          if (!best) {
+            matched = false;
+            break;
+          }
+          score += best.score;
+          fieldScores[best.field.field] += best.score;
+          for (const position of best.positions) positions[best.field.field].add(position + best.field.offset);
         }
-
-        results.push(result);
+        if (!matched) continue;
+        const matchedField = fieldScores.url >= fieldScores.title ? 'url' : 'title';
+        results.push({
+          item: tab,
+          score,
+          matchedField,
+          searchTier: `${tierPrefix}-${matchedField}` as const,
+          ...(positions.title.size ? {
+            titleHighlight: { text: tab.title, positions: [...positions.title].sort((a, b) => a - b) },
+          } : {}),
+          ...(positions.url.size ? {
+            urlHighlight: { text: tab.url, positions: [...positions.url].sort((a, b) => a - b) },
+          } : {}),
+        });
       }
-
-      return results.sort((a, b) => b.score - a.score);
+      // Match quality wins within each source; recency resolves equally good matches.
+      return results.sort((a, b) =>
+        Number(Boolean(a.item.isHistoryTab)) - Number(Boolean(b.item.isHistoryTab)) ||
+        b.score - a.score || b.item.lastAccessed - a.item.lastAccessed,
+      );
     },
   };
-}
-
-function getBestMatch(
-  urlMatch: MatchResult | null,
-  titleMatch: MatchResult | null,
-): { score: number; positions: number[]; field: 'url' | 'title' } | null {
-  if (!urlMatch && !titleMatch) return null;
-  if (!urlMatch) return { ...titleMatch!, field: 'title' };
-  if (!titleMatch) return { ...urlMatch, field: 'url' };
-  return urlMatch.score >= titleMatch.score
-    ? { ...urlMatch, field: 'url' }
-    : { ...titleMatch, field: 'title' };
 }
 
 /**
@@ -116,8 +137,8 @@ function fuzzyScore(target: string, query: string, targetLower: string, queryLow
     };
   }
 
-  // Quick contains check for short queries (boost for substring matches)
-  if (query.length >= 3 && targetLower.includes(queryLower)) {
+  // Prefer contiguous matches even for one- and two-character queries.
+  if (targetLower.includes(queryLower)) {
     const index = targetLower.indexOf(queryLower);
     let bonusScore = 0;
 
@@ -260,6 +281,7 @@ export function isUrl(text: string): boolean {
 }
 
 export function createSearchUrl(query: string): string {
+  query = query.trim();
   if (isUrl(query)) {
     return query.startsWith('http') ? query : `https://${query}`;
   }
