@@ -84,3 +84,16 @@ describe('getAllTabs', () => {
     });
   });
 });
+
+it('requests tabs and the current window concurrently', async () => {
+  let resolveTabs!: (tabs: chrome.tabs.Tab[]) => void;
+  vi.stubGlobal('chrome', {
+    tabs: { query: vi.fn(() => new Promise<chrome.tabs.Tab[]>(resolve => { resolveTabs = resolve; })) },
+    windows: { getCurrent: vi.fn().mockResolvedValue({ id: 1 }) },
+  });
+  const pending = getAllTabs();
+  expect(chrome.windows.getCurrent).toHaveBeenCalledOnce();
+  resolveTabs([]);
+  await expect(pending).resolves.toEqual([]);
+  vi.unstubAllGlobals();
+});

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect } from 'react';
 import { Search, Sun, Moon, Monitor, Settings, History } from 'lucide-react';
-import type { TabInfo, Message, SearchResult } from '../types';
+import type { TabInfo, Message } from '../types';
 import { createTabSearcher, createSearchUrl } from '../utils/tabSearch';
 import HighlightedText from '../components/HighlightedText';
 import { useTheme, type ThemeMode } from './ThemeContext';
@@ -11,9 +11,14 @@ const themeOptions: { mode: ThemeMode; icon: React.ReactNode; label: string }[] 
   { mode: 'auto', icon: <Monitor size={14} />, label: 'Auto' },
 ];
 
+// Keep the row box fixed so scrolling does not require measuring DOM nodes.
+const ROW_HEIGHT = 56;
+const OVERSCAN = 4;
+const VIEWPORT_HEIGHT = 536;
+
 const TabSwitcher: React.FC = () => {
   const [tabs, setTabs] = useState<{ open: TabInfo[]; history: TabInfo[] }>({ open: [], history: [] });
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [scrollTop, setScrollTop] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -37,18 +42,25 @@ const TabSwitcher: React.FC = () => {
     searchInputRef.current?.focus();
   }, []);
 
-  useEffect(() => {
-    const searcher = createTabSearcher(tabs.open, tabs.history);
-    const results = searcher.search(searchQuery);
-    setSearchResults(results);
-    setSelectedIndex(0);
-  }, [searchQuery, tabs]);
+  const searcher = useMemo(() => createTabSearcher(tabs.open, tabs.history), [tabs]);
+  const searchResults = useMemo(() => searcher.search(searchQuery), [searcher, searchQuery]);
+  const startIndex = Math.min(
+    Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - OVERSCAN),
+    Math.max(0, searchResults.length - 1),
+  );
+  const endIndex = Math.min(searchResults.length,
+    startIndex + Math.ceil(VIEWPORT_HEIGHT / ROW_HEIGHT) + OVERSCAN * 2);
 
-  useEffect(() => {
-    if (listRef.current && searchResults.length > 0) {
-      const selectedElement = listRef.current.children[selectedIndex] as HTMLElement;
-      selectedElement?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    if (!list || !searchResults.length) return;
+    const top = selectedIndex * ROW_HEIGHT;
+    const height = list.clientHeight || VIEWPORT_HEIGHT;
+    if (top < list.scrollTop) list.scrollTop = top;
+    else if (top + ROW_HEIGHT > list.scrollTop + height) {
+      list.scrollTop = top + ROW_HEIGHT - height;
     }
+    setScrollTop(list.scrollTop);
   }, [selectedIndex, searchResults]);
 
   const closePopup = useCallback(() => {
@@ -125,7 +137,12 @@ const TabSwitcher: React.FC = () => {
             type="text"
             placeholder={searchPlaceholder}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setSelectedIndex(0);
+              setScrollTop(0);
+              if (listRef.current) listRef.current.scrollTop = 0;
+            }}
             onKeyDown={handleKeyDown}
             autoFocus
             className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-surface-raised border border-border
@@ -169,7 +186,9 @@ const TabSwitcher: React.FC = () => {
       {/* Tab list */}
       <ul
         ref={listRef}
-        className="flex-1 overflow-auto py-1 px-1 custom-scrollbar list-none m-0"
+        style={{ overflowAnchor: 'none' }}
+        onScroll={(e) => setScrollTop(e.currentTarget.scrollTop)}
+        className="flex-1 min-h-0 overflow-auto py-1 px-1 custom-scrollbar list-none m-0"
       >
         {searchResults.length === 0 ? (
           <li className="p-8 text-center">
@@ -183,15 +202,19 @@ const TabSwitcher: React.FC = () => {
             )}
           </li>
         ) : (
-          searchResults.map((result, index) => {
+          <>
+          <li aria-hidden="true" style={{ height: startIndex * ROW_HEIGHT }} />
+          {searchResults.slice(startIndex, endIndex).map((result, offset) => {
+            const index = startIndex + offset;
             const tab = result.item;
             const isSelected = index === selectedIndex;
             return (
-              <li key={`${tab.isHistoryTab ? 'h' : 't'}-${tab.id}`} className="px-2 py-0.5">
+              <li key={`${tab.isHistoryTab ? 'h' : 't'}-${tab.id}`} aria-posinset={index + 1} aria-setsize={searchResults.length}
+                style={{ height: ROW_HEIGHT }} className="px-2 py-0.5">
                 <button
                   type="button"
                   onClick={() => tab.isHistoryTab ? openUrl(tab.url) : switchToTab(tab.id)}
-                  className={`w-full flex items-center gap-2.5 py-1.5 px-2.5 rounded-lg text-left
+                  className={`w-full h-full flex items-center gap-2.5 py-1.5 px-2.5 rounded-lg text-left
                     transition-all duration-100 cursor-pointer border-0
                     ${isSelected
                       ? 'bg-accent-soft hover:bg-accent-soft/80'
@@ -204,6 +227,7 @@ const TabSwitcher: React.FC = () => {
                       <img
                         src={tab.favIconUrl}
                         alt=""
+                        decoding="async"
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = 'none';
@@ -245,7 +269,9 @@ const TabSwitcher: React.FC = () => {
                 </button>
               </li>
             );
-          })
+          })}
+          <li aria-hidden="true" style={{ height: (searchResults.length - endIndex) * ROW_HEIGHT }} />
+          </>
         )}
       </ul>
     </div>

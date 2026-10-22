@@ -20,21 +20,18 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({
   const positionSet = new Set(positions);
   const chars: React.ReactNode[] = [];
 
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    if (positionSet.has(i)) {
-      chars.push(
-        <span key={i} className={`bg-highlight ${secondary ? 'text-text-secondary' : ''}`}>
-          {char}
-        </span>
-      );
-    } else {
-      chars.push(
-        <span key={i} className={secondary ? 'text-text-secondary' : ''}>
-          {char}
-        </span>
-      );
-    }
+  // One node per highlighted/plain run, rather than one per character.
+  let start = 0;
+  while (start < text.length) {
+    const highlighted = positionSet.has(start);
+    let end = start + 1;
+    while (end < text.length && positionSet.has(end) === highlighted) end++;
+    chars.push(
+      <span key={start} className={`${highlighted ? 'bg-highlight' : ''} ${secondary ? 'text-text-secondary' : ''}`}>
+        {text.slice(start, end)}
+      </span>
+    );
+    start = end;
   }
 
   return <>{chars}</>;

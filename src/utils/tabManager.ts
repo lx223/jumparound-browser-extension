@@ -5,8 +5,10 @@ const HISTORY_DAYS = 3;
 const HISTORY_MAX_PER_DOMAIN = 3;
 
 export async function getAllTabs(): Promise<TabInfo[]> {
-  const tabs = await chrome.tabs.query({});
-  const currentWindow = await chrome.windows.getCurrent();
+  const [tabs, currentWindow] = await Promise.all([
+    chrome.tabs.query({}),
+    chrome.windows.getCurrent(),
+  ]);
 
   const now = Date.now();
   const currentTabs: TabInfo[] = tabs.map((tab, index) => ({

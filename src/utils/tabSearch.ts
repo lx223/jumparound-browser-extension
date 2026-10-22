@@ -28,6 +28,10 @@ const SEPARATORS = new Set(['/', '\\', '-', '_', '.', ' ', ':', ',', ';', '|', '
  * and returns everything sorted by score. Open tabs and history are interleaved.
  */
 export function createTabSearcher(tabs: TabInfo[], historyTabs: TabInfo[] = []) {
+  const allItems = [
+    ...tabs.map(tab => ({ tab, tierPrefix: 'tabs' as const })),
+    ...historyTabs.map(tab => ({ tab, tierPrefix: 'history' as const })),
+  ].map(item => ({ ...item, urlLower: item.tab.url.toLowerCase(), titleLower: item.tab.title.toLowerCase() }));
   return {
     search: (query: string): SearchResult[] => {
       if (!query.trim()) {
@@ -46,16 +50,13 @@ export function createTabSearcher(tabs: TabInfo[], historyTabs: TabInfo[] = []) 
         return [...tabResults, ...historyResults];
       }
 
-      const allItems: { tab: TabInfo; tierPrefix: 'tabs' | 'history' }[] = [
-        ...tabs.map(tab => ({ tab, tierPrefix: 'tabs' as const })),
-        ...historyTabs.map(tab => ({ tab, tierPrefix: 'history' as const })),
-      ];
+      const queryLower = query.toLowerCase();
 
       const results: SearchResult[] = [];
 
-      for (const { tab, tierPrefix } of allItems) {
-        const urlMatch = fuzzyScore(tab.url, query);
-        const titleMatch = fuzzyScore(tab.title, query);
+      for (const { tab, tierPrefix, urlLower, titleLower } of allItems) {
+        const urlMatch = fuzzyScore(tab.url, query, urlLower, queryLower);
+        const titleMatch = fuzzyScore(tab.title, query, titleLower, queryLower);
 
         const best = getBestMatch(urlMatch, titleMatch);
         if (!best) continue;
@@ -96,11 +97,8 @@ function getBestMatch(
 /**
  * Fuzzy scoring algorithm with quality checks and position tracking.
  */
-function fuzzyScore(target: string, query: string): MatchResult | null {
+function fuzzyScore(target: string, query: string, targetLower: string, queryLower: string): MatchResult | null {
   if (!target || !query) return null;
-
-  const queryLower = query.toLowerCase();
-  const targetLower = target.toLowerCase();
 
   // Quick exact match check
   if (targetLower === queryLower) {
