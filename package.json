@@ -12,8 +12,7 @@
     "generate-icons": "node scripts/generate-icons.js",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage",
-    "perf": "vite build --config vite.perf.config.ts && vite preview --config vite.perf.config.ts"
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "lucide-react": "^1.8.0",
