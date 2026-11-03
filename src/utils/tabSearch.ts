@@ -129,6 +129,22 @@ function fuzzyScore(target: string, query: string, targetLower: string, queryLow
     };
   }
 
+  // A complete word beats a prefix ("flight" in "Book a flight" beats
+  // "Flights"), and highlights use the best occurrence rather than the first.
+  let wordIndex = targetLower.indexOf(queryLower);
+  while (wordIndex !== -1) {
+    const end = wordIndex + query.length;
+    const startsWord = wordIndex === 0 || SEPARATORS.has(target[wordIndex - 1]);
+    const endsWord = end === target.length || SEPARATORS.has(target[end]);
+    if (startsWord && endsWord) {
+      return {
+        score: SCORE_WORD_START * query.length + query.length * 70,
+        positions: Array.from({ length: query.length }, (_, i) => wordIndex + i),
+      };
+    }
+    wordIndex = targetLower.indexOf(queryLower, wordIndex + 1);
+  }
+
   // Quick prefix check
   if (targetLower.startsWith(queryLower)) {
     return {
