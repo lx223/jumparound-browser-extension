@@ -80,3 +80,31 @@ it('opens a web search when there are no matching results', () => {
   act(() => { container.querySelector('input')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); });
   expect(chrome.tabs.create).toHaveBeenCalledWith({ url: 'https://www.google.com/search?q=zzzzzz' });
 });
+
+it('tracks absolute rank for a clicked result after scrolling, without browsing data', () => {
+  act(() => root.render(<TabSwitcher />));
+  const list = container.querySelector('ul')!;
+  act(() => {
+    list.scrollTop = 30 * 56;
+    list.dispatchEvent(new Event('scroll', { bubbles: true }));
+  });
+  const row = list.querySelector('li[aria-posinset]')!;
+  const rank = Number(row.getAttribute('aria-posinset'));
+  act(() => (row.querySelector('button') as HTMLButtonElement).click());
+  expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+    type: 'ANALYTICS_SELECTION', openId: expect.any(String),
+    metadata: { position: rank, input_method: 'pointer', has_query: false, result_count: 1000, result_type: 'tab' },
+  }, expect.any(Function));
+});
+it('tracks Enter selections and emits only one opening under Strict Mode', async () => {
+  const { StrictMode } = await import('react');
+  act(() => root.render(<StrictMode><TabSwitcher /></StrictMode>));
+  const input = container.querySelector('input')!;
+  act(() => input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })));
+  const calls = vi.mocked(chrome.runtime.sendMessage).mock.calls;
+  expect(calls.filter(call => (call[0] as unknown as { type: string }).type === 'ANALYTICS_OPEN')).toHaveLength(1);
+  expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+    type: 'ANALYTICS_SELECTION', openId: expect.any(String),
+    metadata: { position: 1, input_method: 'keyboard', has_query: false, result_count: 1000, result_type: 'tab' },
+  }, expect.any(Function));
+});
