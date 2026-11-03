@@ -389,3 +389,34 @@ describe('navigation relevance', () => {
     expect(result.titleHighlight?.positions).toEqual([14, 15]);
   });
 });
+
+// Product contract: assert visible ordering, not implementation-specific scores.
+describe('search ranking contract', () => {
+  const item = (id: number, title: string): TabInfo => ({
+    id, title, url: '', windowId: 1, active: false, lastAccessed: id,
+  });
+
+  it.each([
+    ['exact field before a whole word', 'flight', 'Book a flight today'],
+    ['whole word before a prefix', 'Book a flight today', 'Flights tomorrow'],
+    ['prefix before an internal substring', 'Flights tomorrow', 'Inflight entertainment'],
+    ['contiguous substring before scattered characters', 'Inflight entertainment', 'F - light'],
+    ['whole word before scattered characters', 'Book a flight today', 'F - light'],
+  ])('%s', (_rule, stronger, weaker) => {
+    // The weaker result is newer and listed first: relevance must still win.
+    const results = createTabSearcher([item(2, weaker), item(1, stronger)]).search('flight');
+    expect(results.map(result => result.item.id)).toEqual([1, 2]);
+  });
+
+  it('highlights the whole word even when an earlier occurrence is a substring', () => {
+    const title = 'Inflight or flight';
+    const [result] = createTabSearcher([item(1, title)]).search('flight');
+    expect(result.titleHighlight?.positions).toEqual([12, 13, 14, 15, 16, 17]);
+  });
+
+  it('applies whole-word preference to URL path segments too', () => {
+    const whole = { ...item(1, ''), url: 'https://example.com/book/flight' };
+    const prefix = { ...item(2, ''), url: 'https://example.com/flights' };
+    expect(createTabSearcher([prefix, whole]).search('flight').map(result => result.item.id)).toEqual([1, 2]);
+  });
+});
