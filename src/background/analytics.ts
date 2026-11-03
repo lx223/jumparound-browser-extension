@@ -35,7 +35,7 @@ export async function capture(event: string, properties: Record<string, unknown>
   const id = state.analyticsId || crypto.randomUUID();
   const queue: QueuedEvent[] = state.analyticsQueue || [];
   queue.push({ uuid: crypto.randomUUID(), event, distinct_id: id, timestamp: new Date().toISOString(),
-    properties: { ...properties, $process_person_profile: false, extension_version: chrome.runtime.getManifest().version } });
+    properties: { ...properties, project: 'jumparound', $process_person_profile: false, extension_version: chrome.runtime.getManifest().version } });
   await chrome.storage.local.set({ analyticsId: id, analyticsQueue: queue.slice(-100) });
   await chrome.alarms.create('analytics-retry', { delayInMinutes: 1 });
 }

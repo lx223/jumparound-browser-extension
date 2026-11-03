@@ -56,4 +56,13 @@ it('bounds the offline queue and preserves UUIDs for retry', async () => {
   const payload = JSON.parse(vi.mocked(fetch).mock.calls[1][1]!.body as string);
   expect(payload.api_key).toBe('test-token');
   expect(payload.batch[0].properties.$process_person_profile).toBe(false);
+  expect(payload.batch.every((event: { properties: { project: string } }) => event.properties.project === 'jumparound')).toBe(true);
+});
+
+it('tags opening and selection events with the fixed product project', async () => {
+  state.analyticsConsent = true;
+  await analytics.capture('extension_opened', { source: 'shortcut', project: 'other' });
+  await analytics.capture('result_selected', { position: 1 });
+  expect(state.analyticsQueue.map((event: { properties: { project: string } }) => event.properties.project))
+    .toEqual(['jumparound', 'jumparound']);
 });
