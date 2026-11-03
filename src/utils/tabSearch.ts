@@ -22,6 +22,11 @@ const MAX_AVERAGE_GAP = 15;
 // Separators that indicate word boundaries
 const SEPARATORS = new Set(['/', '\\', '-', '_', '.', ' ', ':', ',', ';', '|', '(', ')', '[', ']', '{', '}']);
 
+// Include punctuation used by every locale (e.g. l’écran, «pestaña», 「標籤」).
+function isWordBoundary(char: string): boolean {
+  return SEPARATORS.has(char) || /[\p{P}\p{Z}\s]/u.test(char);
+}
+
 interface SearchField {
   text: string;
   lower: string;
@@ -134,8 +139,8 @@ function fuzzyScore(target: string, query: string, targetLower: string, queryLow
   let wordIndex = targetLower.indexOf(queryLower);
   while (wordIndex !== -1) {
     const end = wordIndex + query.length;
-    const startsWord = wordIndex === 0 || SEPARATORS.has(target[wordIndex - 1]);
-    const endsWord = end === target.length || SEPARATORS.has(target[end]);
+    const startsWord = wordIndex === 0 || isWordBoundary(target[wordIndex - 1]);
+    const endsWord = end === target.length || isWordBoundary(target[end]);
     if (startsWord && endsWord) {
       return {
         score: SCORE_WORD_START * query.length + query.length * 70,
@@ -159,7 +164,7 @@ function fuzzyScore(target: string, query: string, targetLower: string, queryLow
     let bonusScore = 0;
 
     // Bonus if it starts at a word boundary
-    if (index === 0 || SEPARATORS.has(target[index - 1])) {
+    if (index === 0 || isWordBoundary(target[index - 1])) {
       bonusScore = SCORE_WORD_START * query.length;
     }
 
@@ -210,7 +215,7 @@ function fuzzyScore(target: string, query: string, targetLower: string, queryLow
       } else {
         const prevChar = target[targetIndex - 1];
 
-        if (SEPARATORS.has(prevChar)) {
+        if (isWordBoundary(prevChar)) {
           charScore += SCORE_SEPARATOR;
         } else if (
           isLowerCase(prevChar) &&

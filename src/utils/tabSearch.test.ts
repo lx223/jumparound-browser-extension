@@ -420,3 +420,58 @@ describe('search ranking contract', () => {
     expect(createTabSearcher([prefix, whole]).search('flight').map(result => result.item.id)).toEqual([1, 2]);
   });
 });
+
+// Keep this matrix in sync with the shipped Chrome locale directories.
+describe('search ranking across supported locales', () => {
+  const locales = [
+    { locale: 'en', query: 'flight', whole: 'Book a “flight” today', prefix: 'Flights today', substring: 'Inflight entertainment', fuzzy: 'F - light', first: 'book', second: 'flight' },
+    { locale: 'es', query: 'pestaña', whole: 'Abrir «pestaña» ahora', prefix: 'Pestañas abiertas', substring: 'Multipestañas', fuzzy: 'P - estaña', first: 'abrir', second: 'pestaña' },
+    { locale: 'fr', query: 'écran', whole: 'Ouvrir l’écran maintenant', prefix: 'Écrans ouverts', substring: 'Multiécrans', fuzzy: 'É - cran', first: 'ouvrir', second: 'écran' },
+    { locale: 'zh_CN', query: '标签', whole: '打开「标签」页面', prefix: '标签页', substring: '打开标签页面', fuzzy: '标记和签名', first: '打开', second: '标签' },
+    { locale: 'zh_HK', query: '分頁', whole: '打開「分頁」畫面', prefix: '分頁列表', substring: '打開分頁畫面', fuzzy: '分類和頁面', first: '打開', second: '分頁' },
+    { locale: 'zh_TW', query: '標籤', whole: '開啟「標籤」頁面', prefix: '標籤列表', substring: '開啟標籤頁面', fuzzy: '標記與籤文', first: '開啟', second: '標籤' },
+  ];
+  const tab = (id: number, title: string, url = ''): TabInfo => ({
+    id, title, url, windowId: 1, active: false, lastAccessed: id,
+  });
+
+  it('covers every shipped locale so adding a language requires ranking examples', () => {
+    const shipped = Object.keys(import.meta.glob('/public/_locales/*/messages.json'))
+      .map(path => path.split('/')[3]).sort();
+    expect(shipped.length).toBeGreaterThan(0);
+    expect(locales.map(({ locale }) => locale).sort()).toEqual(shipped);
+  });
+
+  describe.each(locales)('$locale', ({ query, whole, prefix, substring, fuzzy, first, second }) => {
+    it('ranks exact, whole-word, prefix, substring, and scattered matches in order', () => {
+      const titles = [query, whole, prefix, substring, fuzzy];
+      const items = titles.map((title, index) => tab(index + 1, title));
+      const results = createTabSearcher([...items].reverse()).search(query.toUpperCase());
+      expect(results.map(result => result.item.id)).toEqual([1, 2, 3, 4, 5]);
+    });
+
+    it('highlights a complete word after an earlier substring in UTF-16 positions', () => {
+      const title = `✈️ ${substring} — ${whole}`;
+      const [result] = createTabSearcher([tab(1, title)]).search(query);
+      const start = title.lastIndexOf(query);
+      expect(result.titleHighlight?.positions).toEqual(Array.from({ length: query.length }, (_, i) => start + i));
+    });
+
+    it('matches query words across title and hostname in either order', () => {
+      const item = tab(1, whole, 'https://example.com');
+      for (const input of [`example ${first} ${second}`, `${second} ${first} example`]) {
+        const [result] = createTabSearcher([item]).search(input);
+        expect(result.item.id).toBe(1);
+        expect(result.titleHighlight?.positions.map(i => item.title[i]).join('').toLowerCase()).toBe(first + second);
+        expect(result.urlHighlight?.positions.map(i => item.url[i]).join('')).toBe('example');
+      }
+    });
+
+    it('keeps matching open tabs ahead of exact history and resolves equal scores by recency', () => {
+      const older = tab(1, whole);
+      const newer = tab(2, whole);
+      const history = { ...tab(3, query), isHistoryTab: true };
+      expect(createTabSearcher([older, newer], [history]).search(query).map(result => result.item.id)).toEqual([2, 1, 3]);
+    });
+  });
+});
