@@ -4,16 +4,22 @@
   "description": "__MSG_extensionDescription__",
   "version": "0.1.2",
   "default_locale": "en",
-  "permissions": ["tabs", "history"],
+  "permissions": [
+    "tabs",
+    "history",
+    "storage",
+    "alarms"
+  ],
   "background": {
     "service_worker": "background.js"
   },
   "commands": {
-    "_execute_action": {
+    "open-switcher": {
       "suggested_key": {
         "default": "Ctrl+K",
         "mac": "Command+K"
-      }
+      },
+      "description": "Open JumpAround"
     }
   },
   "action": {
@@ -28,5 +34,9 @@
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  }
+  },
+  "host_permissions": [
+    "https://eu.i.posthog.com/*"
+  ],
+  "minimum_chrome_version": "127"
 }

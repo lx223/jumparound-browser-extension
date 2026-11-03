@@ -21,6 +21,16 @@ const TabSwitcher: React.FC = () => {
   const [scrollTop, setScrollTop] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [analyticsConsent, setAnalyticsConsent] = useState(false);
+  const openId = useRef(crypto.randomUUID());
+  const opened = useRef(false);
+  useEffect(() => {
+    if (!opened.current) {
+      opened.current = true;
+      chrome.runtime.sendMessage({ type: 'ANALYTICS_OPEN', openId: openId.current }, () => void chrome.runtime.lastError);
+    }
+    void chrome.storage?.local.get('analyticsConsent').then(state => setAnalyticsConsent(state.analyticsConsent === true));
+  }, []);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const { mode, setMode } = useTheme();
@@ -95,17 +105,31 @@ const TabSwitcher: React.FC = () => {
     [closePopup]
   );
 
+  const selectResult = useCallback((index: number, inputMethod: 'keyboard' | 'pointer') => {
+    const selected = searchResults[index];
+    if (!selected) return;
+    let activated = false;
+    const activate = () => {
+      if (activated) return;
+      activated = true;
+      if (selected.item.isHistoryTab) openUrl(selected.item.url);
+      else switchToTab(selected.item.id);
+    };
+    const fallback = window.setTimeout(activate, 150);
+    // Wait only for local queue persistence, never network delivery.
+    chrome.runtime.sendMessage({ type: 'ANALYTICS_SELECTION', openId: openId.current, metadata: {
+      position: index + 1, input_method: inputMethod, has_query: Boolean(searchQuery.trim()),
+      result_count: searchResults.length, result_type: selected.item.isHistoryTab ? 'history' : 'tab',
+    } }, () => { void chrome.runtime.lastError; window.clearTimeout(fallback); activate(); });
+  }, [searchResults, searchQuery, openUrl, switchToTab]);
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
         e.preventDefault();
         const selected = searchResults[selectedIndex];
         if (selected) {
-          if (selected.item.isHistoryTab) {
-            openUrl(selected.item.url);
-          } else {
-            switchToTab(selected.item.id);
-          }
+          selectResult(selectedIndex, 'keyboard');
         } else if (searchQuery.trim()) {
           openUrl(createSearchUrl(searchQuery));
         }
@@ -120,7 +144,7 @@ const TabSwitcher: React.FC = () => {
         closePopup();
       }
     },
-    [searchResults, selectedIndex, searchQuery, openUrl, switchToTab, closePopup]
+    [searchResults, selectedIndex, searchQuery, openUrl, selectResult, closePopup]
   );
 
   return (
@@ -183,6 +207,15 @@ const TabSwitcher: React.FC = () => {
         </button>
       </div>
 
+      <label className="flex items-center gap-2 px-4 pb-2 text-xs text-text-secondary">
+        <input type="checkbox" checked={analyticsConsent} onChange={e => {
+          const enabled = e.target.checked;
+          chrome.runtime.sendMessage({ type: 'ANALYTICS_CONSENT', enabled }, response => {
+            if (!chrome.runtime.lastError && response?.success) setAnalyticsConsent(enabled);
+          });
+        }} />
+        Share usage analytics (opening method and result position only)
+      </label>
       {/* Tab list */}
       <ul
         ref={listRef}
@@ -213,7 +246,7 @@ const TabSwitcher: React.FC = () => {
                 style={{ height: ROW_HEIGHT }} className="px-2 py-0.5">
                 <button
                   type="button"
-                  onClick={() => tab.isHistoryTab ? openUrl(tab.url) : switchToTab(tab.id)}
+                  onClick={() => selectResult(index, 'pointer')}
                   className={`w-full h-full flex items-center gap-2.5 py-1.5 px-2.5 rounded-lg text-left
                     transition-all duration-100 cursor-pointer border-0
                     ${isSelected
