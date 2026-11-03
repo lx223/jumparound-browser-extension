@@ -46,12 +46,15 @@ Events:
 - `result_selected`: `position` (1-based absolute result rank), `input_method`
   (`keyboard` or `pointer`), `has_query`, `result_count`, `result_type` (`tab` or
   `history`), and `open_id`.
-- Both include timestamp, random installation ID, and extension version. No
+- Both include `project: "jumparound"`, timestamp, random installation ID, and extension version. No
   query text, URLs, titles, or history entries are transmitted. Person profile
   processing is disabled. The queue retains at most 100 events, retries with
   stable event UUIDs, and is cleared along with the ID when consent is withdrawn.
 
-In PostHog, chart total `extension_opened` events broken down by `source`.
+In PostHog, filter all JumpAround insights by `project = jumparound` to distinguish
+this extension from other products sharing the same PostHog project.
+
+Chart total `extension_opened` events broken down by `source`.
 For result preference, compare `result_selected` with `position = 1` against
 `position > 1`; filter `has_query = true` for actual searches. Break down by
 `input_method` to compare clicks with Enter selections. These describe opted-in
