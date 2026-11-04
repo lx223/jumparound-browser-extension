@@ -24,7 +24,7 @@ Cmd+K → "local" → Enter (localhost). Cmd+K → "stack" → Enter (Stack Over
 
 PRIVACY
 
-Zero data collection. Zero tracking. Runs 100% locally in your browser.
+Tab and history search runs locally. Optional usage analytics is off by default and can be enabled or disabled in the popup. If enabled, opening and result-selection metadata is sent to PostHog EU Cloud with random identifiers; search text, tab titles, URLs and browsing history are never sent. The analytics service receives network information such as your IP address. Disabling analytics deletes the local identifier and pending events.
 
 ---
 
@@ -50,7 +50,7 @@ Cmd+K → "local" → Enter (localhost). Cmd+K → "stack" → Enter (Stack Over
 
 PRIVACIDAD
 
-Cero recopilación de datos. Cero rastreo. Funciona 100% en local en tu navegador.
+La búsqueda de pestañas e historial se realiza localmente. Las estadísticas de uso opcionales están desactivadas por defecto y se pueden activar o desactivar en la ventana emergente. Si las activas, se envían a PostHog EU Cloud metadatos de apertura y selección de resultados con identificadores aleatorios; nunca se envían el texto de búsqueda, los títulos, las URL ni el historial. El servicio recibe información de red, como tu dirección IP. Al desactivarlas, se eliminan el identificador local y los eventos pendientes.
 
 ---
 
@@ -76,7 +76,7 @@ Cmd+K → "local" → Entrée (localhost). Cmd+K → "stack" → Entrée (Stack 
 
 CONFIDENTIALITÉ
 
-Zéro collecte de données. Zéro suivi. Fonctionne 100% en local dans votre navigateur.
+La recherche dans les onglets et l’historique s’effectue localement. Les statistiques d’utilisation facultatives sont désactivées par défaut et peuvent être activées ou désactivées dans la fenêtre de l’extension. Si vous les activez, des métadonnées d’ouverture et de sélection des résultats sont envoyées à PostHog EU Cloud avec des identifiants aléatoires ; le texte recherché, les titres, les URL et l’historique ne sont jamais envoyés. Le service reçoit des informations réseau, comme votre adresse IP. La désactivation supprime l’identifiant local et les événements en attente.
 
 ---
 
@@ -102,7 +102,7 @@ Cmd+K → "local" → Enter（localhost）。Cmd+K → "stack" → Enter（Stack
 
 隐私保护
 
-零数据收集。零追踪。100% 在浏览器本地运行。
+标签页和历史记录搜索在本地进行。可选的使用统计默认关闭，可在弹出窗口中开启或关闭。开启后，打开方式和结果选择等元数据会连同随机标识符发送至 PostHog EU Cloud；搜索文字、标签页标题、网址和浏览历史绝不会发送。统计服务会接收到 IP 地址等网络信息。关闭统计会删除本地标识符及待发送事件。
 
 ---
 
@@ -128,7 +128,7 @@ Cmd+K → "local" → Enter（localhost）。Cmd+K → "stack" → Enter（Stack
 
 私隱保護
 
-零數據收集。零追蹤。100% 喺瀏覽器本機運行。
+分頁同瀏覽記錄搜尋喺本機進行。可選嘅使用統計預設關閉，可以喺彈出視窗開啟或關閉。開啟後，開啟方式同結果選擇等中繼資料會連同隨機識別碼傳送至 PostHog EU Cloud；搜尋文字、分頁標題、網址同瀏覽記錄絕不會傳送。統計服務會接收到 IP 位址等網絡資訊。關閉統計會刪除本機識別碼同待傳送事件。
 
 ---
 
@@ -154,7 +154,7 @@ Cmd+K → "local" → Enter（localhost）。Cmd+K → "stack" → Enter（Stack
 
 隱私保護
 
-零資料收集。零追蹤。100% 在瀏覽器本機執行。
+分頁與歷史紀錄搜尋在本機進行。選用的使用統計預設關閉，可在彈出視窗中開啟或關閉。開啟後，開啟方式與結果選擇等中繼資料會連同隨機識別碼傳送至 PostHog EU Cloud；搜尋文字、分頁標題、網址與瀏覽紀錄絕不會傳送。統計服務會接收到 IP 位址等網路資訊。關閉統計會刪除本機識別碼及待傳送事件。
 
 ---
 
@@ -176,3 +176,33 @@ Required to read information about all open tabs (titles, URLs, favicons) in ord
 history
 Required to retrieve recent browsing history so users can quickly navigate back to recently visited pages that are no longer open in any tab, displayed alongside open tabs in the search results.
 
+storage
+Stores the user’s optional analytics consent, a random installation identifier, and a bounded queue of up to 100 pending usage events in chrome.storage.local. Analytics is off by default. Disabling analytics deletes the identifier and pending events. Search text, tab titles, URLs and browsing history are never stored in the analytics queue.
+
+alarms
+Schedules retries for pending usage analytics events after network failures so delivery can continue when the extension service worker restarts. Events are queued only after the user opts in to analytics. Retry alarms are cleared when the queue is delivered or the user disables analytics. Alarms are not used to collect browsing history or track visited websites.
+
+Host permission: https://eu.i.posthog.com/*
+Access is limited to https://eu.i.posthog.com/* to send optional usage analytics to PostHog EU Cloud over HTTPS. Analytics is off by default and requires consent in the popup. Events describe opening method and result-selection metadata, with random identifiers and extension version. Search text, tab titles, URLs and browsing history are never transmitted. No remote scripts or executable code are downloaded.
+
+## Remote Code
+
+No, I am not using remote code. All JavaScript is included in the extension package. The PostHog host is used only for HTTPS event ingestion.
+
+## Data Usage Disclosures
+
+The dashboard asks about data handled by the extension, including data processed only locally. Select:
+
+- Personally identifiable information: the optional analytics installation identifier is a random persistent identifier; no names or email addresses are collected.
+- Location: the analytics service receives the request IP address when opted-in events are delivered. The extension does not request GPS location.
+- Web history: tab and browsing-history URLs, titles and access times are processed locally for search and navigation; they are never included in analytics.
+- User activity: optional analytics records opening method and result-selection metadata, including result position, keyboard or pointer input, whether a query was present, result count and result type. It does not send the query text.
+- Website content: tab titles and favicons are used locally to display search results; page bodies are not scraped or sent to analytics.
+
+Leave health information, financial and payment information, authentication information, and personal communications unselected.
+
+Analytics is off by default. Turning it off deletes the local identifier and pending queue and stops future collection; previously transmitted events are not deleted by this action. Re-enabling creates a new installation identifier.
+
+Privacy policy URL: https://github.com/lx223/jumparound-browser-extension/blob/main/privacy-policy.html
+
+Disclosure reference: https://developer.chrome.com/docs/webstore/program-policies/user-data-faq (local processing must also be disclosed).
