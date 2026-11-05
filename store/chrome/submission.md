@@ -216,9 +216,9 @@ No account or analytics opt-in is required. Use Chrome 127 or later.
 3. Search for the title or hostname of the inactive tab. The corresponding open-tab result appears. Select it to focus that tab and its window.
 4. If testing the shortcut, assign `open-switcher` at chrome://extensions/shortcuts first; existing installations may retain an older command binding. The toolbar icon works without shortcut configuration.
 
-Implementation: `src/content/TabSwitcher.tsx` sends GET_TABS when the popup opens. `src/background/index.ts` calls `getAllTabs()` in `src/utils/tabManager.ts`, which calls `chrome.tabs.query({})` and reads `tab.title`, `tab.url` and `tab.favIconUrl`. These values are rendered and searched in the popup. The same reads are present in the distributed v0.1.4 `background.js`.
+Implementation: `src/content/TabSwitcher.tsx` sends GET_TABS when the popup opens. `src/background/index.ts` calls `getAllTabs()` in `src/utils/tabManager.ts`, which calls `chrome.tabs.query({})` and reads `tab.title`, `tab.url` and `tab.favIconUrl`. These values are rendered and searched in the popup.
 
-## Permission Audit for v0.1.4
+## Permission Audit
 
 | Permission | Active use | Why narrower access is insufficient |
 | --- | --- | --- |
@@ -227,16 +227,3 @@ Implementation: `src/content/TabSwitcher.tsx` sends GET_TABS when the popup open
 | storage | chrome.storage.local saves analytics consent, installation identifier and bounded event queue; chrome.storage.session holds a short-lived shortcut marker across service-worker restarts. | Service workers cannot use window.localStorage; in-memory state would be lost on restart. |
 | alarms | chrome.alarms.create and onAlarm retry queued opted-in analytics; clear removes retries on delivery or opt-out. | A worker timer does not survive service-worker suspension. |
 | https://eu.i.posthog.com/* | HTTPS POST to the PostHog /batch/ endpoint for opted-in usage events. | Access is limited to the configured ingestion host, with no broad website host patterns. |
-
-## Purple Potassium Appeal
-
-Item ID: kgjjlongdlmjcegnjicbpnkpnmoblkae
-Rejected version: 0.1.4
-Reason: The action against my item was a mistake
-
-### Dashboard appeal notes
-
-Hi, JumpAround is a tab switcher, and tabs is needed for its main feature: searching titles and URLs across all open tabs. In the submitted v0.1.4, getAllTabs() calls chrome.tabs.query({}) and reads each tab’s title, url and favIconUrl. activeTab would only cover the current tab, so it cannot replace this permission. To check: open two websites, click JumpAround’s toolbar icon, and search for the inactive tab. No login or analytics opt-in is needed. Please review the tabs finding again. Thank you.
-
-Reference: https://developer.chrome.com/docs/extensions/reference/api/tabs#permissions
-Appeal guidance: https://developer.chrome.com/docs/webstore/troubleshooting/#excessive-permissions
