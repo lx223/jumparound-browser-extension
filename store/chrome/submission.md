@@ -171,7 +171,7 @@ JumpAround is a keyboard-driven tab switcher that enables users to quickly find 
 ---
 
 tabs
-Required to read information about all open tabs (titles, URLs, favicons) in order to display them in the searchable tab list and enable switching between them.
+Required to read title, url and favIconUrl from all open tabs returned by chrome.tabs.query({}). JumpAround displays these fields in its popup and searches tab titles and URLs across every browser window. This is the extension’s core tab-search feature, not a permission needed merely to call tabs.update or tabs.create. The only host permission is https://eu.i.posthog.com/*, which does not grant access to other tabs’ metadata. activeTab would expose only the invoked tab and cannot support searching all open tabs. Tab metadata is processed locally and is never sent to analytics.
 
 history
 Required to retrieve recent browsing history so users can quickly navigate back to recently visited pages that are no longer open in any tab, displayed alongside open tabs in the search results.
@@ -206,3 +206,41 @@ Analytics is off by default. Turning it off deletes the local identifier and pen
 Privacy policy URL: https://github.com/lx223/jumparound-browser-extension/blob/main/privacy-policy.html
 
 Disclosure reference: https://developer.chrome.com/docs/webstore/program-policies/user-data-faq (local processing must also be disclosed).
+
+## Reviewer Test Instructions
+
+No account or analytics opt-in is required. Use Chrome 127 or later.
+
+1. Open https://example.com and https://developer.chrome.com in separate tabs; leave one inactive, preferably in a second window.
+2. Open JumpAround using its toolbar icon. The popup lists open tabs by title and URL with available favicons.
+3. Search for the title or hostname of the inactive tab. The corresponding open-tab result appears. Select it to focus that tab and its window.
+4. If testing the shortcut, assign `open-switcher` at chrome://extensions/shortcuts first; existing installations may retain an older command binding. The toolbar icon works without shortcut configuration.
+
+Implementation: `src/content/TabSwitcher.tsx` sends GET_TABS when the popup opens. `src/background/index.ts` calls `getAllTabs()` in `src/utils/tabManager.ts`, which calls `chrome.tabs.query({})` and reads `tab.title`, `tab.url` and `tab.favIconUrl`. These values are rendered and searched in the popup. The same reads are present in the distributed v0.1.4 `background.js`.
+
+## Permission Audit for v0.1.4
+
+| Permission | Active use | Why narrower access is insufficient |
+| --- | --- | --- |
+| tabs | Reads title, URL and favicon for all open tabs, including inactive tabs in other windows. | activeTab covers only the invoked tab. Broad website host access would grant more capabilities than tabs. |
+| history | chrome.history.search retrieves recent history for local history search results. | Tab metadata does not include closed pages from browsing history. |
+| storage | chrome.storage.local saves analytics consent, installation identifier and bounded event queue; chrome.storage.session holds a short-lived shortcut marker across service-worker restarts. | Service workers cannot use window.localStorage; in-memory state would be lost on restart. |
+| alarms | chrome.alarms.create and onAlarm retry queued opted-in analytics; clear removes retries on delivery or opt-out. | A worker timer does not survive service-worker suspension. |
+| https://eu.i.posthog.com/* | HTTPS POST to the PostHog /batch/ endpoint for opted-in usage events. | Access is limited to the configured ingestion host, with no broad website host patterns. |
+
+## Purple Potassium Appeal Draft
+
+Item ID: kgjjlongdlmjcegnjicbpnkpnmoblkae
+Rejected version: 0.1.4
+Permission identified by review: tabs
+
+Please reconsider the finding that the tabs permission is unused. JumpAround’s core feature is searching all open tabs by title and URL across browser windows. On every popup opening, it calls chrome.tabs.query({}) and reads each tab’s title, url and favIconUrl. These fields populate the visible tab list and search results. The implementation is in getAllTabs() in src/utils/tabManager.ts and is included in the submitted v0.1.4 background.js. It is reached through the GET_TABS message from the popup.
+
+The permission is required for these sensitive Tab properties, not merely for invoking methods on the tabs API. Our only host permission is https://eu.i.posthog.com/* for optional analytics ingestion, so we do not have host access to arbitrary websites that could otherwise expose tab metadata. activeTab cannot replace tabs because it grants temporary access only to the invoked tab, while our feature searches inactive tabs in all windows. Removing tabs would withhold titles, URLs and favicons for those tabs and break the core search feature. Tab titles, URLs and history are never sent to analytics.
+
+To verify: open example.com and developer.chrome.com in separate tabs/windows, open JumpAround through its toolbar icon, and search for the inactive tab’s title or hostname. Select that result to focus its tab/window. No account or analytics opt-in is needed. If testing the shortcut on an existing installation, assign open-switcher at chrome://extensions/shortcuts, or use the toolbar icon directly.
+
+We audited the other permissions: history powers recent-history results; storage saves consent, the bounded analytics queue and a session shortcut marker; alarms retries opted-in event delivery; the sole host permission permits HTTPS ingestion to PostHog EU Cloud. No broad website access or remote executable code is requested.
+
+Reference: https://developer.chrome.com/docs/extensions/reference/api/tabs#permissions
+Appeal guidance: https://developer.chrome.com/docs/webstore/troubleshooting/#excessive-permissions
