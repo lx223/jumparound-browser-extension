@@ -228,23 +228,15 @@ Implementation: `src/content/TabSwitcher.tsx` sends GET_TABS when the popup open
 | alarms | chrome.alarms.create and onAlarm retry queued opted-in analytics; clear removes retries on delivery or opt-out. | A worker timer does not survive service-worker suspension. |
 | https://eu.i.posthog.com/* | HTTPS POST to the PostHog /batch/ endpoint for opted-in usage events. | Access is limited to the configured ingestion host, with no broad website host patterns. |
 
-## Purple Potassium Appeal Draft
+## Purple Potassium Appeal
 
 Item ID: kgjjlongdlmjcegnjicbpnkpnmoblkae
 Rejected version: 0.1.4
-Permission identified by review: tabs
+Reason: The action against my item was a mistake
 
-Please reconsider the finding that the tabs permission is unused. JumpAround’s core feature is searching all open tabs by title and URL across browser windows. On every popup opening, it calls chrome.tabs.query({}) and reads each tab’s title, url and favIconUrl. These fields populate the visible tab list and search results. The implementation is in getAllTabs() in src/utils/tabManager.ts and is included in the submitted v0.1.4 background.js. It is reached through the GET_TABS message from the popup.
+### Dashboard appeal notes
 
-The permission is required for these sensitive Tab properties, not merely for invoking methods on the tabs API. Our only host permission is https://eu.i.posthog.com/* for optional analytics ingestion, so we do not have host access to arbitrary websites that could otherwise expose tab metadata. activeTab cannot replace tabs because it grants temporary access only to the invoked tab, while our feature searches inactive tabs in all windows. Removing tabs would withhold titles, URLs and favicons for those tabs and break the core search feature. Tab titles, URLs and history are never sent to analytics.
-
-To verify: open example.com and developer.chrome.com in separate tabs/windows, open JumpAround through its toolbar icon, and search for the inactive tab’s title or hostname. Select that result to focus its tab/window. No account or analytics opt-in is needed. If testing the shortcut on an existing installation, assign open-switcher at chrome://extensions/shortcuts, or use the toolbar icon directly.
-
-We audited the other permissions: history powers recent-history results; storage saves consent, the bounded analytics queue and a session shortcut marker; alarms retries opted-in event delivery; the sole host permission permits HTTPS ingestion to PostHog EU Cloud. No broad website access or remote executable code is requested.
+Hi, JumpAround is a tab switcher, and tabs is needed for its main feature: searching titles and URLs across all open tabs. In the submitted v0.1.4, getAllTabs() calls chrome.tabs.query({}) and reads each tab’s title, url and favIconUrl. activeTab would only cover the current tab, so it cannot replace this permission. To check: open two websites, click JumpAround’s toolbar icon, and search for the inactive tab. No login or analytics opt-in is needed. Please review the tabs finding again. Thank you.
 
 Reference: https://developer.chrome.com/docs/extensions/reference/api/tabs#permissions
 Appeal guidance: https://developer.chrome.com/docs/webstore/troubleshooting/#excessive-permissions
-
-### Dashboard appeal notes (954 / 1000 characters)
-
-Please reconsider Purple Potassium for v0.1.4. The tabs permission is actively used for our core feature: searching all open tabs by title and URL across windows. On popup open, GET_TABS calls getAllTabs() in src/utils/tabManager.ts. It runs chrome.tabs.query({}) and reads tab.title, tab.url and tab.favIconUrl. These reads are also present in the submitted background.js and populate the popup/search results. Our sole host permission is https://eu.i.posthog.com/*; it cannot expose other tabs’ metadata. activeTab covers only the invoked tab, so removing tabs would break searching inactive tabs across windows. Test: open example.com and developer.chrome.com in separate tabs/windows, open JumpAround using its toolbar icon, search for the inactive tab’s title/hostname and select it. No account or analytics opt-in is needed. We audited all permissions; each is actively used. See developer.chrome.com/docs/extensions/reference/api/tabs#permissions.
