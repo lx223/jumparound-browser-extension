@@ -244,3 +244,7 @@ We audited the other permissions: history powers recent-history results; storage
 
 Reference: https://developer.chrome.com/docs/extensions/reference/api/tabs#permissions
 Appeal guidance: https://developer.chrome.com/docs/webstore/troubleshooting/#excessive-permissions
+
+### Dashboard appeal notes (954 / 1000 characters)
+
+Please reconsider Purple Potassium for v0.1.4. The tabs permission is actively used for our core feature: searching all open tabs by title and URL across windows. On popup open, GET_TABS calls getAllTabs() in src/utils/tabManager.ts. It runs chrome.tabs.query({}) and reads tab.title, tab.url and tab.favIconUrl. These reads are also present in the submitted background.js and populate the popup/search results. Our sole host permission is https://eu.i.posthog.com/*; it cannot expose other tabs’ metadata. activeTab covers only the invoked tab, so removing tabs would break searching inactive tabs across windows. Test: open example.com and developer.chrome.com in separate tabs/windows, open JumpAround using its toolbar icon, search for the inactive tab’s title/hostname and select it. No account or analytics opt-in is needed. We audited all permissions; each is actively used. See developer.chrome.com/docs/extensions/reference/api/tabs#permissions.
