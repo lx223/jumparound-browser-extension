@@ -15,6 +15,7 @@ beforeEach(() => {
     runtime: { sendMessage: vi.fn((_message, callback) => callback({ tabs, historyTabs: [] })) },
     i18n: { getMessage: () => '' },
     tabs: { create: vi.fn() },
+    commands: { getAll: vi.fn(callback => callback([{ name: 'open-switcher', shortcut: 'Ctrl+Shift+K' }])) },
   });
   container = document.createElement('div');
   document.body.append(container);
@@ -32,6 +33,24 @@ function type(query: string) {
     input.dispatchEvent(new Event('input', { bubbles: true }));
   });
 }
+it('shows the assigned shortcut and opens shortcut configuration', () => {
+  act(() => root.render(<TabSwitcher />));
+  expect(container.querySelector('kbd')?.textContent).toBe('Ctrl + Shift + K');
+  const configure = container.querySelector<HTMLButtonElement>('button[title="Configure keyboard shortcuts"]')!;
+  expect(configure.textContent).toContain('Configure shortcut');
+  act(() => configure.click());
+  expect(chrome.tabs.create).toHaveBeenCalledWith({ url: 'chrome://extensions/shortcuts' });
+});
+it('shows when the opening shortcut is not assigned', () => {
+  vi.mocked(chrome.commands.getAll).mockImplementation(callback => callback([{ name: 'open-switcher', shortcut: '' }]));
+  act(() => root.render(<TabSwitcher />));
+  expect(container.querySelector('kbd')?.textContent).toBe('Not assigned');
+});
+it('separates Mac modifier symbols with plus signs', () => {
+  vi.mocked(chrome.commands.getAll).mockImplementation(callback => callback([{ name: 'open-switcher', shortcut: '⌘⇧K' }]));
+  act(() => root.render(<TabSwitcher />));
+  expect(container.querySelector('kbd')?.textContent).toBe('⌘ + ⇧ + K');
+});
 it('bounds DOM work for 1,000 tabs, including highlighted long URLs', () => {
   act(() => root.render(<TabSwitcher />));
   const list = container.querySelector('ul')!;
@@ -80,7 +99,6 @@ it('opens a web search when there are no matching results', () => {
   act(() => { container.querySelector('input')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); });
   expect(chrome.tabs.create).toHaveBeenCalledWith({ url: 'https://www.google.com/search?q=zzzzzz' });
 });
-
 it('tracks absolute rank for a clicked result after scrolling, without browsing data', () => {
   act(() => root.render(<TabSwitcher />));
   const list = container.querySelector('ul')!;

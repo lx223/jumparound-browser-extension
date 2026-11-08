@@ -22,6 +22,14 @@ const TabSwitcher: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [analyticsConsent, setAnalyticsConsent] = useState(false);
+  const [shortcut, setShortcut] = useState('Loading…');
+  useEffect(() => {
+    chrome.commands.getAll(commands => {
+      setShortcut(chrome.runtime.lastError
+        ? 'Unavailable'
+        : commands.find(command => command.name === 'open-switcher')?.shortcut || 'Not assigned');
+    });
+  }, []);
   const openId = useRef(crypto.randomUUID());
   const opened = useRef(false);
   useEffect(() => {
@@ -195,15 +203,23 @@ const TabSwitcher: React.FC = () => {
           ))}
         </div>
 
-        {/* Shortcut settings */}
+      </div>
+
+      <div className="flex items-center justify-between gap-2 px-4 pb-2 text-xs text-text-secondary">
+        <span className="flex items-center gap-1.5">Open JumpAround:
+          <kbd className="font-sans text-xs font-medium text-text-primary">
+            {shortcut.replace(/([⌘⌃⌥⇧])\s*\+?\s*/g, '$1+').split('+').map(key => key.trim()).join(' + ')}
+          </kbd>
+        </span>
         <button
           onClick={() => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' })}
           title="Configure keyboard shortcuts"
-          className="flex items-center justify-center w-8 h-8 rounded-lg border border-border bg-surface-raised
-            text-text-secondary hover:text-text-primary hover:bg-surface-hover
+          className="flex items-center gap-1.5 rounded px-2 py-1
+            text-text-secondary underline underline-offset-2 hover:text-text-primary hover:bg-surface-hover
             transition-all duration-150 cursor-pointer shrink-0"
         >
           <Settings size={14} />
+          Configure shortcut
         </button>
       </div>
 
