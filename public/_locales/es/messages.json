@@ -1,9 +1,59 @@
 {
-  "extensionName": { "message": "JumpAround - Cambiar de pestaña" },
-  "extensionDescription": { "message": "Un atajo para localizar tu pestaña al instante" },
-  "searchPlaceholder": { "message": "Buscar pestañas..." },
-  "noResults": { "message": "No se encontraron pestañas" },
-  "noMatchingTabs": { "message": "No hay pestañas coincidentes." },
-  "pressEnterToSearch": { "message": "Pulsa Enter para buscar en Google en una nueva pestaña" },
-  "historyTab": { "message": "Historial" }
+  "extensionName": {
+    "message": "JumpAround - Cambiar de pestaña"
+  },
+  "extensionDescription": {
+    "message": "Un atajo para localizar tu pestaña al instante"
+  },
+  "searchPlaceholder": {
+    "message": "Buscar pestañas..."
+  },
+  "noResults": {
+    "message": "No se encontraron pestañas"
+  },
+  "noMatchingTabs": {
+    "message": "No hay pestañas coincidentes."
+  },
+  "pressEnterToSearch": {
+    "message": "Presiona Enter para buscar en Google en una pestaña nueva"
+  },
+  "historyTab": {
+    "message": "Historial"
+  },
+  "themeLight": {
+    "message": "Claro"
+  },
+  "themeDark": {
+    "message": "Oscuro"
+  },
+  "themeAuto": {
+    "message": "Automático"
+  },
+  "shortcutLoading": {
+    "message": "Cargando…"
+  },
+  "shortcutUnavailable": {
+    "message": "No disponible"
+  },
+  "shortcutNotAssigned": {
+    "message": "Sin asignar"
+  },
+  "openJumpAround": {
+    "message": "Abrir JumpAround:"
+  },
+  "configureShortcutsTitle": {
+    "message": "Configurar atajos de teclado"
+  },
+  "configureShortcut": {
+    "message": "Configurar atajo"
+  },
+  "analyticsConsent": {
+    "message": "Compartir estadísticas de uso opcionales (incluyen identificadores aleatorios; sin texto de búsqueda ni direcciones web visitadas)"
+  },
+  "openSwitcherCommand": {
+    "message": "Abrir JumpAround"
+  },
+  "safariShortcutSettings": {
+    "message": "Configura los atajos en Ajustes de Safari → Extensiones (Safari 26+)"
+  }
 }

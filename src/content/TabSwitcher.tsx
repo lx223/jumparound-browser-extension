@@ -5,10 +5,12 @@ import { createTabSearcher, createSearchUrl } from '../utils/tabSearch';
 import HighlightedText from '../components/HighlightedText';
 import { useTheme, type ThemeMode } from './ThemeContext';
 
+const message = (key: string, fallback: string) => chrome.i18n?.getMessage(key) || fallback;
+
 const themeOptions: { mode: ThemeMode; icon: React.ReactNode; label: string }[] = [
-  { mode: 'light', icon: <Sun size={14} />, label: 'Light' },
-  { mode: 'dark', icon: <Moon size={14} />, label: 'Dark' },
-  { mode: 'auto', icon: <Monitor size={14} />, label: 'Auto' },
+  { mode: 'light', icon: <Sun size={14} />, label: 'themeLight' },
+  { mode: 'dark', icon: <Moon size={14} />, label: 'themeDark' },
+  { mode: 'auto', icon: <Monitor size={14} />, label: 'themeAuto' },
 ];
 
 // Keep the row box fixed so scrolling does not require measuring DOM nodes.
@@ -22,12 +24,12 @@ const TabSwitcher: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [analyticsConsent, setAnalyticsConsent] = useState(false);
-  const [shortcut, setShortcut] = useState('Loading…');
+  const [shortcut, setShortcut] = useState(() => message('shortcutLoading', 'Loading…'));
   useEffect(() => {
     chrome.commands.getAll(commands => {
       setShortcut(chrome.runtime.lastError
-        ? 'Unavailable'
-        : commands.find(command => command.name === 'open-switcher')?.shortcut || 'Not assigned');
+        ? message('shortcutUnavailable', 'Unavailable')
+        : commands.find(command => command.name === 'open-switcher')?.shortcut || message('shortcutNotAssigned', 'Not assigned'));
     });
   }, []);
   const openId = useRef(crypto.randomUUID());
@@ -191,7 +193,7 @@ const TabSwitcher: React.FC = () => {
             <button
               key={opt.mode}
               onClick={() => setMode(opt.mode)}
-              title={opt.label}
+              title={message(opt.label, { light: 'Light', dark: 'Dark', auto: 'Auto' }[opt.mode])}
               className={`flex items-center justify-center w-8 h-8 rounded-md transition-all duration-150 cursor-pointer
                 ${mode === opt.mode
                   ? 'bg-accent-soft text-accent shadow-sm'
@@ -206,20 +208,20 @@ const TabSwitcher: React.FC = () => {
       </div>
 
       <div className="flex items-center justify-between gap-2 px-4 pb-2 text-xs text-text-secondary">
-        <span className="flex items-center gap-1.5">Open JumpAround:
+        <span className="flex items-center gap-1.5">{message('openJumpAround', 'Open JumpAround:')}
           <kbd className="font-sans text-xs font-medium text-text-primary">
             {shortcut.replace(/([⌘⌃⌥⇧])\s*\+?\s*/g, '$1+').split('+').map(key => key.trim()).join(' + ')}
           </kbd>
         </span>
         <button
           onClick={() => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' })}
-          title="Configure keyboard shortcuts"
+          title={message('configureShortcutsTitle', 'Configure keyboard shortcuts')}
           className="flex items-center gap-1.5 rounded px-2 py-1
             text-text-secondary underline underline-offset-2 hover:text-text-primary hover:bg-surface-hover
             transition-all duration-150 cursor-pointer shrink-0"
         >
           <Settings size={14} />
-          Configure shortcut
+          {message('configureShortcut', 'Configure shortcut')}
         </button>
       </div>
 
@@ -230,7 +232,7 @@ const TabSwitcher: React.FC = () => {
             if (!chrome.runtime.lastError && response?.success) setAnalyticsConsent(enabled);
           });
         }} />
-        Share usage analytics (opening method and result position only)
+        {message('analyticsConsent', 'Share optional usage analytics (includes random identifiers; no search text or browsing URLs)')}
       </label>
       {/* Tab list */}
       <ul
