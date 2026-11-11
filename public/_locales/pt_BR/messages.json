@@ -1,0 +1,20 @@
+{
+  "extensionName": { "message": "JumpAround - Alternador de abas" },
+  "extensionDescription": { "message": "Um atalho para encontrar sua aba instantaneamente" },
+  "searchPlaceholder": { "message": "Pesquisar abas..." },
+  "noResults": { "message": "Nenhuma aba encontrada" },
+  "noMatchingTabs": { "message": "Nenhuma aba corresponde à pesquisa." },
+  "pressEnterToSearch": { "message": "Pressione Enter para pesquisar no Google em uma nova aba" },
+  "historyTab": { "message": "Histórico" },
+  "themeLight": { "message": "Claro" },
+  "themeDark": { "message": "Escuro" },
+  "themeAuto": { "message": "Automático" },
+  "shortcutLoading": { "message": "Carregando…" },
+  "shortcutUnavailable": { "message": "Indisponível" },
+  "shortcutNotAssigned": { "message": "Não atribuído" },
+  "openJumpAround": { "message": "Abrir JumpAround:" },
+  "configureShortcutsTitle": { "message": "Configurar atalhos de teclado" },
+  "configureShortcut": { "message": "Configurar atalho" },
+  "analyticsConsent": { "message": "Compartilhar estatísticas de uso opcionais (incluem identificadores aleatórios; sem texto de pesquisa nem endereços visitados)" },
+  "openSwitcherCommand": { "message": "Abrir JumpAround" }
+}

@@ -158,6 +158,75 @@ Cmd+K → "local" → Enter（localhost）。Cmd+K → "stack" → Enter（Stack
 
 ---
 
+### Português (Brasil)
+
+---
+
+Encontre qualquer aba instantaneamente com Cmd+K. Como o Quick Open do VS Code, mas no navegador.
+
+Dezenas de abas em várias janelas? Pressione Cmd+K (Ctrl+K no Windows/Linux), digite algumas letras e pressione Enter para ir à aba desejada.
+
+RECURSOS
+
+• Pesquisa aproximada — encontre abas por partes do título ou endereço.
+• Histórico recente — encontre páginas visitadas que já não estão abertas.
+• Ordenação inteligente — as abas usadas mais recentemente aparecem primeiro.
+• Todas as janelas — pesquise suas abas abertas em um só lugar.
+• Navegação pelo teclado — use as setas para selecionar, Enter para abrir e Escape para fechar.
+• Temas claro, escuro e automático.
+
+PRIVACIDADE
+
+A pesquisa de abas e histórico é feita localmente. As estatísticas de uso são opcionais e vêm desativadas. Se você as ativar, o JumpAround enviará metadados de abertura e seleção, identificadores aleatórios, horários e a versão da extensão ao PostHog EU Cloud. Esses eventos nunca incluem o texto da pesquisa, títulos de abas, endereços ou itens do histórico. O serviço recebe seu endereço IP nas solicitações. Você pode desativar as estatísticas na janela da extensão; isso apaga o identificador local e os eventos pendentes, mas não os já enviados. Abrir uma pesquisa no Google envia sua consulta ao Google. Consulte a política de privacidade para mais detalhes.
+
+---
+
+### Deutsch
+
+---
+
+Mit Cmd+K sofort den richtigen Tab finden. Wie Quick Open in VS Code, direkt im Browser.
+
+Dutzende Tabs in mehreren Fenstern? Cmd+K drücken (Ctrl+K unter Windows/Linux), ein paar Buchstaben eingeben und mit Enter zum gewünschten Tab wechseln.
+
+FUNKTIONEN
+
+• Unscharfe Suche — Tabs anhand von Teilen des Titels oder der Webadresse finden.
+• Kürzlich besuchte Seiten — auch Seiten finden, die nicht mehr geöffnet sind.
+• Intelligente Sortierung — zuletzt verwendete Tabs erscheinen zuerst.
+• Alle Fenster — geöffnete Tabs an einer Stelle durchsuchen.
+• Tastaturbedienung — mit den Pfeiltasten auswählen, mit Enter öffnen und mit Escape schließen.
+• Helles, dunkles oder automatisches Design.
+
+DATENSCHUTZ
+
+Tabs und Verlauf werden lokal durchsucht. Optionale Nutzungsstatistiken sind standardmäßig deaktiviert. Wenn Sie diese aktivieren, sendet JumpAround Metadaten zum Öffnen und zur Ergebnisauswahl, zufällige Kennungen, Zeitstempel und die Erweiterungsversion an PostHog EU Cloud. Suchtext, Tab-Titel, Webadressen und Verlaufseinträge sind nie in diesen Ereignissen enthalten. Der Dienst erhält bei Anfragen Ihre IP-Adresse. Sie können die Statistiken im Erweiterungsfenster deaktivieren. Dabei werden die lokale Kennung und ausstehende Ereignisse gelöscht, jedoch keine bereits gesendeten Ereignisse. Wenn Sie eine Google-Suche öffnen, wird Ihre Suchanfrage an Google übermittelt. Einzelheiten finden Sie in der Datenschutzerklärung.
+
+---
+
+### 日本語
+
+---
+
+Cmd+K で目的のタブをすぐに見つける。VS Code の Quick Open のような操作をブラウザでも。
+
+複数のウィンドウにタブがたくさん開いていませんか？ Cmd+K（Windows/Linux では Ctrl+K）を押し、数文字入力して Enter を押すと、目的のタブに切り替えられます。
+
+主な機能
+
+• あいまい検索 — タイトルや URL の一部からタブを検索できます。
+• 最近の閲覧履歴 — すでに閉じたページも検索結果に表示します。
+• 最近使った順に表示 — よく使うタブにすばやく移動できます。
+• すべてのウィンドウを検索 — 開いているタブをまとめて探せます。
+• キーボードで操作 — 矢印キーで選択、Enter で開く、Escape で閉じます。
+• ライト・ダーク・自動テーマに対応。
+
+プライバシー
+
+タブと履歴の検索は端末内で行います。任意の利用統計は初期状態では無効です。有効にすると、開き方や検索結果の選択に関するメタデータ、ランダムな識別子、日時、拡張機能のバージョンを PostHog EU Cloud に送信します。検索語句、タブのタイトル、URL、履歴の項目は統計に含まれません。送信先のサービスはリクエスト時に IP アドレスを受け取ります。利用統計は拡張機能のポップアップで無効にできます。無効にすると端末内の識別子と未送信のイベントを削除しますが、送信済みのイベントは削除されません。Google 検索を開くと検索語句が Google に送信されます。詳しくはプライバシーポリシーをご覧ください。
+
+---
+
 ## Single Purpose
 
 ---

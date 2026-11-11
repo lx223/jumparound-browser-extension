@@ -1,0 +1,20 @@
+{
+  "extensionName": { "message": "JumpAround - タブ切り替え" },
+  "extensionDescription": { "message": "ショートカットひとつで目的のタブをすぐに見つける" },
+  "searchPlaceholder": { "message": "タブを検索..." },
+  "noResults": { "message": "タブが見つかりません" },
+  "noMatchingTabs": { "message": "一致するタブがありません。" },
+  "pressEnterToSearch": { "message": "Enter キーを押すと、新しいタブで Google 検索します" },
+  "historyTab": { "message": "履歴" },
+  "themeLight": { "message": "ライト" },
+  "themeDark": { "message": "ダーク" },
+  "themeAuto": { "message": "自動" },
+  "shortcutLoading": { "message": "読み込み中…" },
+  "shortcutUnavailable": { "message": "利用できません" },
+  "shortcutNotAssigned": { "message": "未設定" },
+  "openJumpAround": { "message": "JumpAround を開く：" },
+  "configureShortcutsTitle": { "message": "キーボードショートカットを設定" },
+  "configureShortcut": { "message": "ショートカットを設定" },
+  "analyticsConsent": { "message": "任意の利用統計を共有する（ランダムな識別子を含みます。検索語句や閲覧先の URL は含みません）" },
+  "openSwitcherCommand": { "message": "JumpAround を開く" }
+}
