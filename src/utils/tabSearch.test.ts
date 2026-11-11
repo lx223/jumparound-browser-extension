@@ -424,6 +424,9 @@ describe('search ranking contract', () => {
 // Keep this matrix in sync with the shipped Chrome locale directories.
 describe('search ranking across supported locales', () => {
   const locales = [
+    { locale: 'de', query: 'fenster', whole: 'Öffnen „fenster“ jetzt', prefix: 'Fensterliste', substring: 'Unterfenster', fuzzy: 'F - enster', first: 'öffnen', second: 'fenster' },
+    { locale: 'ja', query: 'タブ', whole: '開く「タブ」画面', prefix: 'タブ一覧', substring: '開くタブ画面', fuzzy: 'タイトルとブログ', first: '開く', second: 'タブ' },
+    { locale: 'pt_BR', query: 'página', whole: 'Abrir «página» agora', prefix: 'Páginas abertas', substring: 'Multipáginas', fuzzy: 'P - ágina', first: 'abrir', second: 'página' },
     { locale: 'en', query: 'flight', whole: 'Book a “flight” today', prefix: 'Flights today', substring: 'Inflight entertainment', fuzzy: 'F - light', first: 'book', second: 'flight' },
     { locale: 'es', query: 'pestaña', whole: 'Abrir «pestaña» ahora', prefix: 'Pestañas abiertas', substring: 'Multipestañas', fuzzy: 'P - estaña', first: 'abrir', second: 'pestaña' },
     { locale: 'fr', query: 'écran', whole: 'Ouvrir l’écran maintenant', prefix: 'Écrans ouverts', substring: 'Multiécrans', fuzzy: 'É - cran', first: 'ouvrir', second: 'écran' },
