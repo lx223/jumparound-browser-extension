@@ -1,59 +1,20 @@
 {
-  "extensionName": {
-    "message": "JumpAround - Changeur d'onglets"
-  },
-  "extensionDescription": {
-    "message": "Un raccourci pour localiser votre onglet instantanément"
-  },
-  "searchPlaceholder": {
-    "message": "Rechercher des onglets..."
-  },
-  "noResults": {
-    "message": "Aucun onglet trouvé"
-  },
-  "noMatchingTabs": {
-    "message": "Aucun onglet correspondant."
-  },
-  "pressEnterToSearch": {
-    "message": "Appuyez sur Entrée pour rechercher sur Google dans un nouvel onglet"
-  },
-  "historyTab": {
-    "message": "Historique"
-  },
-  "themeLight": {
-    "message": "Clair"
-  },
-  "themeDark": {
-    "message": "Sombre"
-  },
-  "themeAuto": {
-    "message": "Automatique"
-  },
-  "shortcutLoading": {
-    "message": "Chargement…"
-  },
-  "shortcutUnavailable": {
-    "message": "Indisponible"
-  },
-  "shortcutNotAssigned": {
-    "message": "Non attribué"
-  },
-  "openJumpAround": {
-    "message": "Ouvrir JumpAround :"
-  },
-  "configureShortcutsTitle": {
-    "message": "Configurer les raccourcis clavier"
-  },
-  "configureShortcut": {
-    "message": "Configurer le raccourci"
-  },
-  "analyticsConsent": {
-    "message": "Partager des statistiques d’utilisation facultatives (avec des identifiants aléatoires ; sans texte de recherche ni URL de navigation)"
-  },
-  "openSwitcherCommand": {
-    "message": "Ouvrir JumpAround"
-  },
-  "safariShortcutSettings": {
-    "message": "Gérez les raccourcis dans Réglages de Safari → Extensions (Safari 26+)"
-  }
+  "extensionName": { "message": "JumpAround - Changeur d'onglets" },
+  "extensionDescription": { "message": "Un raccourci pour localiser votre onglet instantanément" },
+  "searchPlaceholder": { "message": "Rechercher des onglets..." },
+  "noResults": { "message": "Aucun onglet trouvé" },
+  "noMatchingTabs": { "message": "Aucun onglet correspondant." },
+  "pressEnterToSearch": { "message": "Appuyez sur Entrée pour rechercher sur Google dans un nouvel onglet" },
+  "historyTab": { "message": "Historique" },
+  "themeLight": { "message": "Clair" },
+  "themeDark": { "message": "Sombre" },
+  "themeAuto": { "message": "Automatique" },
+  "shortcutLoading": { "message": "Chargement…" },
+  "shortcutUnavailable": { "message": "Indisponible" },
+  "shortcutNotAssigned": { "message": "Non attribué" },
+  "openJumpAround": { "message": "Ouvrir JumpAround :" },
+  "configureShortcutsTitle": { "message": "Configurer les raccourcis clavier" },
+  "configureShortcut": { "message": "Configurer le raccourci" },
+  "analyticsConsent": { "message": "Partager des statistiques d’utilisation facultatives (avec des identifiants aléatoires ; sans texte de recherche ni URL de navigation)" },
+  "openSwitcherCommand": { "message": "Ouvrir JumpAround" }
 }

@@ -7,7 +7,7 @@ Complete localization before choosing a regional rollout. No distribution settin
 - `es` uses shared Spanish wording; prefer “Presiona” over “Pulsa”, “Orden inteligente” over “Ranking Inteligente”, and “direcciones web” over “URLs” in user-facing copy. The existing catalog can serve Spanish-speaking users across Spain and Latin America without duplicating identical country catalogs.
 - `fr` uses shared French wording and consistent formal address. France, French-speaking Canada, Belgium, Switzerland and other Francophone audiences can share this catalog; country availability and language choice are separate decisions. Add a regional variant only when an actual terminology or behavior difference requires it.
 - `en`, `zh_CN`, `zh_HK` and `zh_TW` retain their existing language coverage. A country's inclusion does not guarantee every language spoken there is supported.
-- Command descriptions, popup document language/title, theme labels, shortcut help and analytics consent are localized. A regression check verifies catalog parity and referenced UI/manifest keys, including Safari shortcut guidance.
+- Command descriptions, popup document language/title, theme labels, shortcut help and analytics consent are localized. A regression check verifies catalog parity and referenced UI/manifest keys.
 - Spanish and French store descriptions use the same terminology as the popup. Store copy remains a local draft until updated in the developer dashboard.
 
 ### Remaining release checks
