@@ -1,0 +1,20 @@
+{
+  "extensionName": { "message": "JumpAround - Tab-Wechsler" },
+  "extensionDescription": { "message": "Mit einem Tastenkürzel sofort den richtigen Tab finden" },
+  "searchPlaceholder": { "message": "Tabs durchsuchen..." },
+  "noResults": { "message": "Keine Tabs gefunden" },
+  "noMatchingTabs": { "message": "Keine passenden Tabs." },
+  "pressEnterToSearch": { "message": "Enter drücken, um in einem neuen Tab mit Google zu suchen" },
+  "historyTab": { "message": "Verlauf" },
+  "themeLight": { "message": "Hell" },
+  "themeDark": { "message": "Dunkel" },
+  "themeAuto": { "message": "Automatisch" },
+  "shortcutLoading": { "message": "Wird geladen…" },
+  "shortcutUnavailable": { "message": "Nicht verfügbar" },
+  "shortcutNotAssigned": { "message": "Nicht zugewiesen" },
+  "openJumpAround": { "message": "JumpAround öffnen:" },
+  "configureShortcutsTitle": { "message": "Tastenkürzel konfigurieren" },
+  "configureShortcut": { "message": "Tastenkürzel festlegen" },
+  "analyticsConsent": { "message": "Optionale Nutzungsstatistiken teilen (mit zufälligen Kennungen; ohne Suchtext oder besuchte Webadressen)" },
+  "openSwitcherCommand": { "message": "JumpAround öffnen" }
+}
