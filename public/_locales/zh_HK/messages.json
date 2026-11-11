@@ -1,59 +1,20 @@
 {
-  "extensionName": {
-    "message": "JumpAround - 分頁切換器"
-  },
-  "extensionDescription": {
-    "message": "一個快捷鍵，即刻搵到你嘅分頁"
-  },
-  "searchPlaceholder": {
-    "message": "搜尋分頁..."
-  },
-  "noResults": {
-    "message": "搵唔到分頁"
-  },
-  "noMatchingTabs": {
-    "message": "冇匹配嘅分頁"
-  },
-  "pressEnterToSearch": {
-    "message": "撳 Enter 喺新分頁用 Google 搜尋"
-  },
-  "historyTab": {
-    "message": "歷史"
-  },
-  "themeLight": {
-    "message": "淺色"
-  },
-  "themeDark": {
-    "message": "深色"
-  },
-  "themeAuto": {
-    "message": "跟隨系統"
-  },
-  "shortcutLoading": {
-    "message": "載入中…"
-  },
-  "shortcutUnavailable": {
-    "message": "無法使用"
-  },
-  "shortcutNotAssigned": {
-    "message": "未設定"
-  },
-  "openJumpAround": {
-    "message": "開啟 JumpAround："
-  },
-  "configureShortcutsTitle": {
-    "message": "設定鍵盤快捷鍵"
-  },
-  "configureShortcut": {
-    "message": "設定快捷鍵"
-  },
-  "analyticsConsent": {
-    "message": "分享可選嘅使用情況分析數據（包括隨機識別碼；唔包括搜尋文字或瀏覽網址）"
-  },
-  "openSwitcherCommand": {
-    "message": "開啟 JumpAround"
-  },
-  "safariShortcutSettings": {
-    "message": "喺 Safari 設定 → 延伸功能管理快捷鍵（Safari 26 或以上版本）"
-  }
+  "extensionName": { "message": "JumpAround - 分頁切換器" },
+  "extensionDescription": { "message": "一個快捷鍵，即刻搵到你嘅分頁" },
+  "searchPlaceholder": { "message": "搜尋分頁..." },
+  "noResults": { "message": "搵唔到分頁" },
+  "noMatchingTabs": { "message": "冇匹配嘅分頁" },
+  "pressEnterToSearch": { "message": "撳 Enter 喺新分頁用 Google 搜尋" },
+  "historyTab": { "message": "歷史" },
+  "themeLight": { "message": "淺色" },
+  "themeDark": { "message": "深色" },
+  "themeAuto": { "message": "跟隨系統" },
+  "shortcutLoading": { "message": "載入中…" },
+  "shortcutUnavailable": { "message": "無法使用" },
+  "shortcutNotAssigned": { "message": "未設定" },
+  "openJumpAround": { "message": "開啟 JumpAround：" },
+  "configureShortcutsTitle": { "message": "設定鍵盤快捷鍵" },
+  "configureShortcut": { "message": "設定快捷鍵" },
+  "analyticsConsent": { "message": "分享可選嘅使用情況分析數據（包括隨機識別碼；唔包括搜尋文字或瀏覽網址）" },
+  "openSwitcherCommand": { "message": "開啟 JumpAround" }
 }

@@ -1,59 +1,20 @@
 {
-  "extensionName": {
-    "message": "JumpAround - Tab Switcher"
-  },
-  "extensionDescription": {
-    "message": "One shortcut to instantly locate your tab"
-  },
-  "searchPlaceholder": {
-    "message": "Search tabs..."
-  },
-  "noResults": {
-    "message": "No tabs found"
-  },
-  "noMatchingTabs": {
-    "message": "No matching tabs."
-  },
-  "pressEnterToSearch": {
-    "message": "Press Enter to search on Google in a new tab"
-  },
-  "historyTab": {
-    "message": "History"
-  },
-  "themeLight": {
-    "message": "Light"
-  },
-  "themeDark": {
-    "message": "Dark"
-  },
-  "themeAuto": {
-    "message": "Auto"
-  },
-  "shortcutLoading": {
-    "message": "Loading…"
-  },
-  "shortcutUnavailable": {
-    "message": "Unavailable"
-  },
-  "shortcutNotAssigned": {
-    "message": "Not assigned"
-  },
-  "openJumpAround": {
-    "message": "Open JumpAround:"
-  },
-  "configureShortcutsTitle": {
-    "message": "Configure keyboard shortcuts"
-  },
-  "configureShortcut": {
-    "message": "Configure shortcut"
-  },
-  "analyticsConsent": {
-    "message": "Share optional usage analytics (includes random identifiers; no search text or browsing URLs)"
-  },
-  "openSwitcherCommand": {
-    "message": "Open JumpAround"
-  },
-  "safariShortcutSettings": {
-    "message": "Manage shortcuts in Safari Settings → Extensions (Safari 26+)"
-  }
+  "extensionName": { "message": "JumpAround - Tab Switcher" },
+  "extensionDescription": { "message": "One shortcut to instantly locate your tab" },
+  "searchPlaceholder": { "message": "Search tabs..." },
+  "noResults": { "message": "No tabs found" },
+  "noMatchingTabs": { "message": "No matching tabs." },
+  "pressEnterToSearch": { "message": "Press Enter to search on Google in a new tab" },
+  "historyTab": { "message": "History" },
+  "themeLight": { "message": "Light" },
+  "themeDark": { "message": "Dark" },
+  "themeAuto": { "message": "Auto" },
+  "shortcutLoading": { "message": "Loading…" },
+  "shortcutUnavailable": { "message": "Unavailable" },
+  "shortcutNotAssigned": { "message": "Not assigned" },
+  "openJumpAround": { "message": "Open JumpAround:" },
+  "configureShortcutsTitle": { "message": "Configure keyboard shortcuts" },
+  "configureShortcut": { "message": "Configure shortcut" },
+  "analyticsConsent": { "message": "Share optional usage analytics (includes random identifiers; no search text or browsing URLs)" },
+  "openSwitcherCommand": { "message": "Open JumpAround" }
 }
