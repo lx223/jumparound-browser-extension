@@ -29,7 +29,7 @@ const TabSwitcher: React.FC = () => {
     chrome.commands.getAll(commands => {
       setShortcut(chrome.runtime.lastError
         ? message('shortcutUnavailable', 'Unavailable')
-        : commands.find(command => command.name === 'open-switcher')?.shortcut || message('shortcutNotAssigned', 'Not assigned'));
+        : commands.find(command => command.name === '_execute_action')?.shortcut || message('shortcutNotAssigned', 'Not assigned'));
     });
   }, []);
   const openId = useRef(crypto.randomUUID());
