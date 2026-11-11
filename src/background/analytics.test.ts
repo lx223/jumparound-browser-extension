@@ -20,7 +20,7 @@ beforeEach(async () => {
 });
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 it('never queues or sends events without consent', async () => {
-  await analytics.capture('extension_opened', { source: 'shortcut' });
+  await analytics.capture('extension_opened', { source: 'action' });
   await analytics.flush();
   expect(state.analyticsQueue).toBeUndefined();
   expect(fetch).not.toHaveBeenCalled();
@@ -61,7 +61,7 @@ it('bounds the offline queue and preserves UUIDs for retry', async () => {
 
 it('tags opening and selection events with the fixed product project', async () => {
   state.analyticsConsent = true;
-  await analytics.capture('extension_opened', { source: 'shortcut', project: 'other' });
+  await analytics.capture('extension_opened', { source: 'action', project: 'other' });
   await analytics.capture('result_selected', { position: 1 });
   expect(state.analyticsQueue.map((event: { properties: { project: string } }) => event.properties.project))
     .toEqual(['jumparound', 'jumparound']);

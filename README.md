@@ -42,7 +42,7 @@ never send events. If changing region/host, also update `host_permissions` in
 `public/manifest.json` and the privacy policy. No SDK or remote code is loaded.
 
 Events:
-- `extension_opened`: `source` (`shortcut` or `action`) and `open_id`.
+- `extension_opened`: `source` (`action`, including shortcut opens) and `open_id`.
 - `result_selected`: `position` (1-based absolute result rank), `input_method`
   (`keyboard` or `pointer`), `has_query`, `result_count`, `result_type` (`tab` or
   `history`), and `open_id`.
@@ -54,19 +54,19 @@ Events:
 In PostHog, filter all JumpAround insights by `project = jumparound` to distinguish
 this extension from other products sharing the same PostHog project.
 
-Chart total `extension_opened` events broken down by `source`.
+Chart total `extension_opened` events for popup usage.
 For result preference, compare `result_selected` with `position = 1` against
 `position > 1`; filter `has_query = true` for actual searches. Break down by
 `input_method` to compare clicks with Enter selections. These describe opted-in
 users only. `open_id` can link opens to selections without using PostHog sessions.
 
-The shortcut now uses the named `open-switcher` command so its source can be
-measured, and requires Chrome 127+ for `action.openPopup()`. Existing users may
-need to reassign their shortcut at `chrome://extensions/shortcuts` after updating.
-The action source includes browser action activations via accessibility or the
-extensions menu, not only mouse clicks. Shortcut markers expire after two seconds;
-unusually delayed popup startup can be classified as an action open. Safari
-compatibility needs manual verification before shipping a Safari release.
+The shortcut uses the native `_execute_action` command. Chrome shows one entry,
+“Activate the extension”, at `chrome://extensions/shortcuts`. Existing users who
+assigned the old “Open JumpAround” command may need to reassign their shortcut
+there after updating; custom bindings cannot be migrated automatically.
+Native action commands do not report whether the popup opened via shortcut,
+toolbar, accessibility, or the extensions menu, so all are recorded as `action`.
+Safari compatibility needs manual verification before shipping a Safari release.
 
 Before publishing, update Chrome Web Store privacy disclosures. Smoke-test a
 configured production build: opt out (no requests), opt in and reopen using both

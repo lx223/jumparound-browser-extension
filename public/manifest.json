@@ -14,12 +14,11 @@
     "service_worker": "background.js"
   },
   "commands": {
-    "open-switcher": {
+    "_execute_action": {
       "suggested_key": {
         "default": "Ctrl+K",
         "mac": "Command+K"
-      },
-      "description": "__MSG_openSwitcherCommand__"
+      }
     }
   },
   "action": {
