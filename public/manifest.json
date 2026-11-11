@@ -19,7 +19,7 @@
         "default": "Ctrl+K",
         "mac": "Command+K"
       },
-      "description": "Open JumpAround"
+      "description": "__MSG_openSwitcherCommand__"
     }
   },
   "action": {

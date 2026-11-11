@@ -24,7 +24,7 @@ Cmd+K → "local" → Enter (localhost). Cmd+K → "stack" → Enter (Stack Over
 
 PRIVACY
 
-Tab and history search runs locally. Optional usage analytics is off by default and can be enabled or disabled in the popup. If enabled, opening and result-selection metadata is sent to PostHog EU Cloud with random identifiers; search text, tab titles, URLs and browsing history are never sent. The analytics service receives network information such as your IP address. Disabling analytics deletes the local identifier and pending events.
+Tab and history search runs locally. Optional usage analytics is off by default. If you enable it, JumpAround sends opening and selection metadata, random identifiers, timestamps and extension version to PostHog EU Cloud. Analytics never includes your search text, tab titles, URLs or history entries. The service receives your IP address with requests. You can disable analytics in the popup; this clears the local identifier and pending events but does not delete events already sent. Opening a Google search sends your query to Google. See the privacy policy for details.
 
 ---
 
@@ -34,13 +34,13 @@ Tab and history search runs locally. Optional usage analytics is off by default 
 
 Cmd+K para encontrar cualquier pestaña al instante. Como el Quick Open de VS Code, pero para tu navegador.
 
-¿50+ pestañas en múltiples ventanas? Deja de hacer clic. Pulsa Cmd+K (Ctrl+K en Windows/Linux), escribe unas letras, Enter. Ya está.
+¿50+ pestañas en múltiples ventanas? Deja de hacer clic. Presiona Cmd+K (Ctrl+K en Windows/Linux), escribe unas letras, Enter. Ya está.
 
 CARACTERÍSTICAS PRINCIPALES
 
-• Búsqueda Difusa - Escribe "gh iss" para encontrar "GitHub Issues", o "dmd" para "DocsMainDashboard" (coincidencia camelCase)
+• Búsqueda aproximada - Escribe "gh iss" para encontrar "GitHub Issues", o "dmd" para "DocsMainDashboard" (coincidencia camelCase)
 • Historial Reciente - ¿Cerraste una pestaña? Tu historial de navegación reciente aparece junto a las pestañas abiertas
-• Ranking Inteligente - Las pestañas más recientes aparecen primero
+• Orden inteligente - Las pestañas usadas más recientemente aparecen primero
 • Todas las Ventanas - Una lista unificada y buscable en todas las ventanas
 • 100% Con Teclado - Flechas para navegar, Enter para cambiar, Escape para cerrar
 
@@ -50,7 +50,7 @@ Cmd+K → "local" → Enter (localhost). Cmd+K → "stack" → Enter (Stack Over
 
 PRIVACIDAD
 
-La búsqueda de pestañas e historial se realiza localmente. Las estadísticas de uso opcionales están desactivadas por defecto y se pueden activar o desactivar en la ventana emergente. Si las activas, se envían a PostHog EU Cloud metadatos de apertura y selección de resultados con identificadores aleatorios; nunca se envían el texto de búsqueda, los títulos, las URL ni el historial. El servicio recibe información de red, como tu dirección IP. Al desactivarlas, se eliminan el identificador local y los eventos pendientes.
+La búsqueda de pestañas e historial se realiza localmente. Las estadísticas de uso son opcionales y están desactivadas por defecto. Si las activas, JumpAround envía a PostHog EU Cloud metadatos de apertura y selección, identificadores aleatorios, marcas de tiempo y la versión de la extensión. Nunca incluyen el texto de búsqueda, títulos de pestañas, URLs ni entradas del historial. El servicio recibe tu dirección IP con las solicitudes. Puedes desactivarlas en la ventana de la extensión; se borran el identificador local y los eventos pendientes, pero no los ya enviados. Abrir una búsqueda en Google envía tu consulta a Google. Consulta la política de privacidad.
 
 ---
 
@@ -64,7 +64,7 @@ Cmd+K pour trouver n'importe quel onglet instantanément. Comme le Quick Open de
 
 FONCTIONNALITÉS CLÉS
 
-• Recherche Floue - Tapez "gh iss" pour trouver "GitHub Issues", ou "dmd" pour "DocsMainDashboard" (correspondance camelCase)
+• Recherche approximative - Tapez "gh iss" pour trouver "GitHub Issues", ou "dmd" pour "DocsMainDashboard" (correspondance camelCase)
 • Historique Récent - Fermé un onglet ? Votre historique de navigation récent apparaît aux côtés des onglets ouverts
 • Classement Intelligent - Les onglets les plus récents apparaissent en premier
 • Toutes les Fenêtres - Une liste unifiée et recherchable sur toutes les fenêtres
@@ -76,7 +76,7 @@ Cmd+K → "local" → Entrée (localhost). Cmd+K → "stack" → Entrée (Stack 
 
 CONFIDENTIALITÉ
 
-La recherche dans les onglets et l’historique s’effectue localement. Les statistiques d’utilisation facultatives sont désactivées par défaut et peuvent être activées ou désactivées dans la fenêtre de l’extension. Si vous les activez, des métadonnées d’ouverture et de sélection des résultats sont envoyées à PostHog EU Cloud avec des identifiants aléatoires ; le texte recherché, les titres, les URL et l’historique ne sont jamais envoyés. Le service reçoit des informations réseau, comme votre adresse IP. La désactivation supprime l’identifiant local et les événements en attente.
+La recherche dans les onglets et l’historique s’effectue localement. Les statistiques d’utilisation sont facultatives et désactivées par défaut. Si vous les activez, JumpAround envoie à PostHog EU Cloud des métadonnées d’ouverture et de sélection, des identifiants aléatoires, des horodatages et la version de l’extension. Elles ne contiennent jamais vos recherches, titres d’onglets, URL ou entrées d’historique. Le service reçoit votre adresse IP avec les requêtes. Vous pouvez les désactiver dans la fenêtre de l’extension : l’identifiant local et les événements en attente sont supprimés, mais pas les événements déjà envoyés. Ouvrir une recherche Google transmet votre requête à Google. Consultez la politique de confidentialité.
 
 ---
 
@@ -102,7 +102,7 @@ Cmd+K → "local" → Enter（localhost）。Cmd+K → "stack" → Enter（Stack
 
 隐私保护
 
-标签页和历史记录搜索在本地进行。可选的使用统计默认关闭，可在弹出窗口中开启或关闭。开启后，打开方式和结果选择等元数据会连同随机标识符发送至 PostHog EU Cloud；搜索文字、标签页标题、网址和浏览历史绝不会发送。统计服务会接收到 IP 地址等网络信息。关闭统计会删除本地标识符及待发送事件。
+标签页和历史记录搜索在本地完成。使用情况分析默认关闭，可自行选择开启。开启后，JumpAround 会向 PostHog 欧盟云服务发送打开和选择操作的元数据、随机标识符、时间戳及扩展版本，绝不包含搜索文字、标签页标题、网址或历史记录条目。服务会随请求接收到你的 IP 地址。你可在弹出窗口中关闭分析，这会清除本地标识符和待发送事件，但不会删除已发送的事件。打开 Google 搜索会将查询发送给 Google。详情请参阅隐私政策。
 
 ---
 
@@ -128,7 +128,7 @@ Cmd+K → "local" → Enter（localhost）。Cmd+K → "stack" → Enter（Stack
 
 私隱保護
 
-分頁同瀏覽記錄搜尋喺本機進行。可選嘅使用統計預設關閉，可以喺彈出視窗開啟或關閉。開啟後，開啟方式同結果選擇等中繼資料會連同隨機識別碼傳送至 PostHog EU Cloud；搜尋文字、分頁標題、網址同瀏覽記錄絕不會傳送。統計服務會接收到 IP 位址等網絡資訊。關閉統計會刪除本機識別碼同待傳送事件。
+分頁同歷史記錄搜尋喺本機完成。使用情況分析預設關閉，你可以自行開啟。開啟後，JumpAround 會向 PostHog 歐盟雲端服務傳送開啟同選取操作嘅中繼資料、隨機識別碼、時間戳記同擴充功能版本，絕不包括搜尋文字、分頁標題、網址或歷史記錄項目。服務會隨請求收到你嘅 IP 位址。你可以喺彈出視窗關閉分析，清除本機識別碼同待傳送事件，但唔會刪除已傳送嘅事件。開啟 Google 搜尋會將查詢傳送畀 Google。詳情請參閱私隱政策。
 
 ---
 
@@ -154,7 +154,7 @@ Cmd+K → "local" → Enter（localhost）。Cmd+K → "stack" → Enter（Stack
 
 隱私保護
 
-分頁與歷史紀錄搜尋在本機進行。選用的使用統計預設關閉，可在彈出視窗中開啟或關閉。開啟後，開啟方式與結果選擇等中繼資料會連同隨機識別碼傳送至 PostHog EU Cloud；搜尋文字、分頁標題、網址與瀏覽紀錄絕不會傳送。統計服務會接收到 IP 位址等網路資訊。關閉統計會刪除本機識別碼及待傳送事件。
+分頁與歷史紀錄搜尋在本機完成。使用情況分析預設關閉，可自行選擇開啟。開啟後，JumpAround 會向 PostHog 歐盟雲端服務傳送開啟與選取操作的中繼資料、隨機識別碼、時間戳記及擴充功能版本，絕不包含搜尋文字、分頁標題、網址或歷史紀錄項目。服務會隨請求收到你的 IP 位址。你可在彈出視窗關閉分析，清除本機識別碼及待傳送事件，但不會刪除已傳送的事件。開啟 Google 搜尋會將查詢傳送給 Google。詳情請參閱隱私權政策。
 
 ---
 
