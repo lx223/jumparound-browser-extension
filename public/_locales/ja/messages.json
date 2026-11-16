@@ -4,7 +4,7 @@
   "searchPlaceholder": { "message": "タブを検索..." },
   "noResults": { "message": "タブが見つかりません" },
   "noMatchingTabs": { "message": "一致するタブがありません。" },
-  "pressEnterToSearch": { "message": "Enter キーを押すと、新しいタブで Google 検索します" },
+  "pressEnterToSearch": { "message": "Enter キーを押すと、新しいタブでウェブ検索します" },
   "historyTab": { "message": "履歴" },
   "themeLight": { "message": "ライト" },
   "themeDark": { "message": "ダーク" },

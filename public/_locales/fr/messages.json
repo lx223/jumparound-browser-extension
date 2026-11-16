@@ -4,7 +4,7 @@
   "searchPlaceholder": { "message": "Rechercher des onglets..." },
   "noResults": { "message": "Aucun onglet trouvé" },
   "noMatchingTabs": { "message": "Aucun onglet correspondant." },
-  "pressEnterToSearch": { "message": "Appuyez sur Entrée pour rechercher sur Google dans un nouvel onglet" },
+  "pressEnterToSearch": { "message": "Appuyez sur Entrée pour rechercher sur le Web dans un nouvel onglet" },
   "historyTab": { "message": "Historique" },
   "themeLight": { "message": "Clair" },
   "themeDark": { "message": "Sombre" },
