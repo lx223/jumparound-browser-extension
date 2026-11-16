@@ -478,3 +478,25 @@ describe('search ranking across supported locales', () => {
     });
   });
 });
+
+describe('recently closed tabs', () => {
+  const now = Date.now();
+  const open: TabInfo = { id: 1, title: 'Current', url: 'https://current.example/', windowId: 1, active: true, lastAccessed: now };
+  const closed = (id: number, ageMs: number, title: string): TabInfo => ({ id: -id, title, url: `https://closed${id}.example/`,
+    windowId: -1, active: false, lastAccessed: now - ageMs, isClosedTab: true, sessionId: `s${id}` });
+  const history: TabInfo = { id: -10, title: 'Report history', url: 'https://history.example/', windowId: -1, active: false,
+    lastAccessed: now - 1_000_000, isHistoryTab: true };
+
+  it('lists a tab closed in the last 30 seconds first when nothing is typed', () => {
+    const results = createTabSearcher([open], [history, closed(1, 5_000, 'Just closed'), closed(2, 60_000, 'Closed earlier')]).search('');
+    expect(results.map(r => r.item.title)).toEqual(['Just closed', 'Current', 'Closed earlier', 'Report history']);
+    expect(results[0].searchTier).toBe('closed-url');
+  });
+
+  it('ranks closed tabs between open tabs and history when searching, even if just closed', () => {
+    const results = createTabSearcher([{ ...open, title: 'Report draft' }],
+      [history, closed(1, 5_000, 'Report final')]).search('report');
+    expect(results.map(r => r.item.title)).toEqual(['Report draft', 'Report final', 'Report history']);
+    expect(results[1].searchTier).toBe('closed-title');
+  });
+});

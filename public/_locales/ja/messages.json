@@ -7,6 +7,7 @@
   "noDuplicateTabs": { "message": "重複しているタブはありません。" },
   "pressEnterToSearch": { "message": "Enter キーを押すと、新しいタブでウェブ検索します" },
   "historyTab": { "message": "履歴" },
+  "closedTab": { "message": "閉じたタブ" },
   "themeLight": { "message": "ライト" },
   "themeDark": { "message": "ダーク" },
   "themeAuto": { "message": "自動" },

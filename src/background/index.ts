@@ -1,12 +1,14 @@
 import { analyticsTask, capture, flush, getShortcutState, recordShortcut, selectionMetadata, setConsent } from './analytics';
 import type { Message } from '../types';
-import { getAllTabs, searchHistory, filterHistoryItems, switchToTab } from '../utils/tabManager';
+import { getAllTabs, getRecentlyClosedTabs, searchHistory, filterHistoryItems, switchToTab } from '../utils/tabManager';
 
 chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) => {
   if (message.type === 'GET_TABS') {
-    Promise.all([getAllTabs(), searchHistory()]).then(([tabs, historyItems]) => {
+    Promise.all([getAllTabs(), searchHistory()]).then(async ([tabs, historyItems]) => {
       const historyTabs = filterHistoryItems(historyItems, tabs);
-      sendResponse({ tabs, historyTabs });
+      // Without chrome.sessions (or if reading it fails), still return tabs and history.
+      const closedTabs = await getRecentlyClosedTabs(tabs).catch(() => []);
+      sendResponse({ tabs, historyTabs, closedTabs });
     });
     return true;
   }
@@ -16,6 +18,14 @@ chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) =
     Promise.all([getAllTabs(), searchHistory(message.query.trim())]).then(([tabs, historyItems]) => {
       sendResponse({ historyTabs: filterHistoryItems(historyItems, tabs, Infinity) });
     }).catch(() => sendResponse({ historyTabs: [] }));
+    return true;
+  }
+
+  if (message.type === 'RESTORE_TAB' && typeof message.sessionId === 'string') {
+    chrome.sessions.restore(message.sessionId).then(
+      () => sendResponse({ success: true }),
+      () => sendResponse({ success: false }),
+    );
     return true;
   }
 

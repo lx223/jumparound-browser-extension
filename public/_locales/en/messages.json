@@ -7,6 +7,7 @@
   "noDuplicateTabs": { "message": "No duplicate tabs." },
   "pressEnterToSearch": { "message": "Press Enter to search the web in a new tab" },
   "historyTab": { "message": "History" },
+  "closedTab": { "message": "Closed" },
   "themeLight": { "message": "Light" },
   "themeDark": { "message": "Dark" },
   "themeAuto": { "message": "Auto" },

@@ -89,3 +89,7 @@ it('reports shortcut changes only for opted-in users and forgets them on withdra
   await analytics.setConsent(false);
   expect(state.analyticsShortcut).toBeUndefined();
 });
+it('accepts recently closed tabs as a result type', () => {
+  const metadata = { position: 1, input_method: 'keyboard', has_query: false, result_count: 3, result_type: 'closed' };
+  expect(analytics.selectionMetadata(metadata)).toEqual(metadata);
+});
