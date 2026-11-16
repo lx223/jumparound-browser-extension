@@ -48,8 +48,8 @@ Events:
 - `shortcut_changed`: `from` and `to`, using the same `shortcut` values. Sent on the
   first opening after an opted-in user's shortcut differs from the last one seen.
 - `result_selected`: `position` (1-based absolute result rank), `input_method`
-  (`keyboard` or `pointer`), `has_query`, `result_count`, `result_type` (`tab` or
-  `history`), and `open_id`.
+  (`keyboard` or `pointer`), `has_query`, `result_count`, `result_type` (`tab`,
+  `closed` or `history`), and `open_id`.
 - Both include `project: "jumparound"`, timestamp, random installation ID, and extension version. No
   query text, URLs, titles, or history entries are transmitted. Person profile
   processing is disabled. The queue retains at most 100 events, retries with

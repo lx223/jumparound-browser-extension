@@ -4,7 +4,7 @@ export interface SelectionMetadata {
   input_method: 'keyboard' | 'pointer';
   has_query: boolean;
   result_count: number;
-  result_type: 'tab' | 'history';
+  result_type: 'tab' | 'closed' | 'history';
 }
 const token = import.meta.env.VITE_POSTHOG_PROJECT_TOKEN;
 const host = import.meta.env.VITE_POSTHOG_HOST || 'https://eu.i.posthog.com';
@@ -56,7 +56,7 @@ export function selectionMetadata(value: unknown): SelectionMetadata | undefined
   if (!value || typeof value !== 'object') return;
   const v = value as SelectionMetadata;
   if (!Number.isInteger(v.position) || !Number.isInteger(v.result_count) || v.position < 1 || v.position > v.result_count ||
-      !['keyboard', 'pointer'].includes(v.input_method) || typeof v.has_query !== 'boolean' || !['tab', 'history'].includes(v.result_type)) return;
+      !['keyboard', 'pointer'].includes(v.input_method) || typeof v.has_query !== 'boolean' || !['tab', 'closed', 'history'].includes(v.result_type)) return;
   return { position: v.position, result_count: v.result_count, input_method: v.input_method, has_query: v.has_query, result_type: v.result_type };
 }
 

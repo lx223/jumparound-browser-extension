@@ -6,6 +6,7 @@
   "noMatchingTabs": { "message": "Aucun onglet correspondant." },
   "pressEnterToSearch": { "message": "Appuyez sur Entrée pour rechercher sur le Web dans un nouvel onglet" },
   "historyTab": { "message": "Historique" },
+  "closedTab": { "message": "Fermé" },
   "themeLight": { "message": "Clair" },
   "themeDark": { "message": "Sombre" },
   "themeAuto": { "message": "Automatique" },

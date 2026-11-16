@@ -254,6 +254,9 @@ Schedules retries for pending usage analytics events after network failures so d
 search
 When no tab or history result matches, pressing Enter passes the typed text to chrome.search.query so it opens in a new tab with the user's own default search engine, instead of a hardcoded engine. The extension does not read or change search settings.
 
+sessions
+Required to list recently closed tabs with chrome.sessions.getRecentlyClosed so they appear in the popup's search results, and to reopen the chosen one with chrome.sessions.restore, which returns it to its window with its back/forward history. Closed-tab titles and URLs are processed locally and never transmitted.
+
 Host permission: https://eu.i.posthog.com/*
 Access is limited to https://eu.i.posthog.com/* to send optional usage analytics to PostHog EU Cloud over HTTPS. Analytics is off by default and requires consent in the popup. Events describe how the extension is used and set up, such as how the popup is opened and which result position is chosen, with random identifiers and extension version. Search text, tab titles, URLs and browsing history are never transmitted. No remote scripts or executable code are downloaded.
 
@@ -267,7 +270,7 @@ The dashboard asks about data handled by the extension, including data processed
 
 - Personally identifiable information: the optional analytics installation identifier is a random persistent identifier; no names or email addresses are collected.
 - Location: the analytics service receives the request IP address when opted-in events are delivered. The extension does not request GPS location.
-- Web history: tab and browsing-history URLs, titles and access times are processed locally for search and navigation; they are never included in analytics.
+- Web history: open-tab, recently-closed-tab and browsing-history URLs, titles and access times are processed locally for search and navigation; they are never included in analytics.
 - User activity: optional analytics records how the extension is used and set up, such as how the popup is opened and which result position is chosen. It never sends the query text, tab titles, URLs or history. The README lists each event and property.
 - Website content: tab titles and favicons are used locally to display search results; page bodies are not scraped or sent to analytics.
 
@@ -299,4 +302,5 @@ Implementation: `src/content/TabSwitcher.tsx` sends GET_TABS when the popup open
 | storage | chrome.storage.local saves analytics consent, installation identifier and bounded event queue; chrome.storage.session holds a short-lived shortcut marker across service-worker restarts. | Service workers cannot use window.localStorage; in-memory state would be lost on restart. |
 | alarms | chrome.alarms.create and onAlarm retry queued opted-in analytics; clear removes retries on delivery or opt-out. | A worker timer does not survive service-worker suspension. |
 | search | chrome.search.query opens the typed query with the user's default search engine when nothing matches. | Opening a hardcoded engine URL would ignore the user's chosen search engine. |
+| sessions | chrome.sessions.getRecentlyClosed lists recently closed tabs for local search; chrome.sessions.restore reopens the chosen one. | History cannot restore a closed tab to its window with its back/forward history. |
 | https://eu.i.posthog.com/* | HTTPS POST to the PostHog /batch/ endpoint for opted-in usage events. | Access is limited to the configured ingestion host, with no broad website host patterns. |

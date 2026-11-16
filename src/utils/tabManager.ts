@@ -82,3 +82,29 @@ export async function switchToTab(tabId: number): Promise<void> {
 export function getI18nMessage(key: string): string {
   return chrome.i18n.getMessage(key);
 }
+
+const RECENTLY_CLOSED_MAX = 25;
+
+/** Recently closed tabs that are not open again, newest first. Closed windows are skipped. */
+export async function getRecentlyClosedTabs(openTabs: TabInfo[]): Promise<TabInfo[]> {
+  const sessions = await chrome.sessions.getRecentlyClosed({ maxResults: RECENTLY_CLOSED_MAX });
+  const seen = new Set(openTabs.map(tab => tab.url));
+  const closed: TabInfo[] = [];
+  for (const { tab, lastModified } of sessions) {
+    if (!tab?.url || !tab.sessionId || seen.has(tab.url)) continue;
+    seen.add(tab.url);
+    closed.push({
+      id: -(closed.length + 1),
+      title: tab.title || '',
+      url: tab.url,
+      favIconUrl: tab.favIconUrl,
+      windowId: -1,
+      active: false,
+      // Chrome reports seconds since the epoch; accept milliseconds too.
+      lastAccessed: lastModified < 1e12 ? lastModified * 1000 : lastModified,
+      isClosedTab: true,
+      sessionId: tab.sessionId,
+    });
+  }
+  return closed;
+}

@@ -6,6 +6,7 @@
   "noMatchingTabs": { "message": "No hay pestañas coincidentes." },
   "pressEnterToSearch": { "message": "Presiona Enter para buscar en la web en una pestaña nueva" },
   "historyTab": { "message": "Historial" },
+  "closedTab": { "message": "Cerrada" },
   "themeLight": { "message": "Claro" },
   "themeDark": { "message": "Oscuro" },
   "themeAuto": { "message": "Automático" },

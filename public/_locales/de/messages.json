@@ -6,6 +6,7 @@
   "noMatchingTabs": { "message": "Keine passenden Tabs." },
   "pressEnterToSearch": { "message": "Enter drücken, um in einem neuen Tab im Web zu suchen" },
   "historyTab": { "message": "Verlauf" },
+  "closedTab": { "message": "Geschlossen" },
   "themeLight": { "message": "Hell" },
   "themeDark": { "message": "Dunkel" },
   "themeAuto": { "message": "Automatisch" },

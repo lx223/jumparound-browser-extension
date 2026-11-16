@@ -9,7 +9,8 @@
     "history",
     "storage",
     "alarms",
-    "search"
+    "search",
+    "sessions"
   ],
   "background": {
     "service_worker": "background.js"

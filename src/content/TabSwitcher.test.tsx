@@ -150,6 +150,21 @@ it('tracks absolute rank for a clicked result after scrolling, without browsing 
     metadata: { position: rank, input_method: 'pointer', has_query: false, result_count: 1000, result_type: 'tab' },
   }, expect.any(Function));
 });
+it('starts on a tab closed moments ago and reopens it with Enter', () => {
+  const justClosed = { id: -1, title: 'Oops page', url: 'https://closed.example/', windowId: -1, active: false,
+    lastAccessed: Date.now() - 2_000, isClosedTab: true, sessionId: 'session-1' };
+  const withActive = tabs.map((tab, i) => ({ ...tab, active: i === 0 }));
+  vi.mocked(chrome.runtime.sendMessage).mockImplementation(((message: { type: string }, callback: (r: unknown) => void) =>
+    callback(message.type === 'RESTORE_TAB' ? { success: true } : { tabs: withActive, historyTabs: [], closedTabs: [justClosed] })) as never);
+  act(() => root.render(<TabSwitcher />));
+  const firstRow = container.querySelector('li[aria-posinset]')!;
+  expect(firstRow.textContent).toContain('Oops page');
+  expect(firstRow.textContent).toContain('Closed');
+  act(() => { container.querySelector('input')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); });
+  expect(chrome.runtime.sendMessage).toHaveBeenCalledWith(expect.objectContaining({ type: 'ANALYTICS_SELECTION',
+    metadata: expect.objectContaining({ position: 1, result_type: 'closed' }) }), expect.any(Function));
+  expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({ type: 'RESTORE_TAB', sessionId: 'session-1' }, expect.any(Function));
+});
 it('tracks Enter selections and emits only one opening under Strict Mode', async () => {
   const { StrictMode } = await import('react');
   act(() => root.render(<StrictMode><TabSwitcher /></StrictMode>));
