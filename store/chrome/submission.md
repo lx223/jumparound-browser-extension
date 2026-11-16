@@ -255,7 +255,7 @@ search
 When no tab or history result matches, pressing Enter passes the typed text to chrome.search.query so it opens in a new tab with the user's own default search engine, instead of a hardcoded engine. The extension does not read or change search settings.
 
 Host permission: https://eu.i.posthog.com/*
-Access is limited to https://eu.i.posthog.com/* to send optional usage analytics to PostHog EU Cloud over HTTPS. Analytics is off by default and requires consent in the popup. Events describe opening method and result-selection metadata, with random identifiers and extension version. Search text, tab titles, URLs and browsing history are never transmitted. No remote scripts or executable code are downloaded.
+Access is limited to https://eu.i.posthog.com/* to send optional usage analytics to PostHog EU Cloud over HTTPS. Analytics is off by default and requires consent in the popup. Events describe how the extension is used and set up, such as how the popup is opened and which result position is chosen, with random identifiers and extension version. Search text, tab titles, URLs and browsing history are never transmitted. No remote scripts or executable code are downloaded.
 
 ## Remote Code
 
@@ -268,7 +268,7 @@ The dashboard asks about data handled by the extension, including data processed
 - Personally identifiable information: the optional analytics installation identifier is a random persistent identifier; no names or email addresses are collected.
 - Location: the analytics service receives the request IP address when opted-in events are delivered. The extension does not request GPS location.
 - Web history: tab and browsing-history URLs, titles and access times are processed locally for search and navigation; they are never included in analytics.
-- User activity: optional analytics records opening method and result-selection metadata, including result position, keyboard or pointer input, whether a query was present, result count and result type. It does not send the query text.
+- User activity: optional analytics records how the extension is used and set up, such as how the popup is opened and which result position is chosen. It never sends the query text, tab titles, URLs or history. The README lists each event and property.
 - Website content: tab titles and favicons are used locally to display search results; page bodies are not scraped or sent to analytics.
 
 Leave health information, financial and payment information, authentication information, and personal communications unselected.
