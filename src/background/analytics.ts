@@ -25,7 +25,7 @@ export function analyticsTask<T>(task: () => Promise<T>): Promise<T> {
 export async function setConsent(consent: boolean) {
   await chrome.storage.local.set({ analyticsConsent: consent });
   if (!consent) {
-    await chrome.storage.local.remove(['analyticsQueue', 'analyticsId']);
+    await chrome.storage.local.remove(['analyticsQueue', 'analyticsId', 'analyticsShortcut']);
     await chrome.alarms.clear('analytics-retry');
   }
 }
@@ -58,4 +58,30 @@ export function selectionMetadata(value: unknown): SelectionMetadata | undefined
   if (!Number.isInteger(v.position) || !Number.isInteger(v.result_count) || v.position < 1 || v.position > v.result_count ||
       !['keyboard', 'pointer'].includes(v.input_method) || typeof v.has_query !== 'boolean' || !['tab', 'history'].includes(v.result_type)) return;
   return { position: v.position, result_count: v.result_count, input_method: v.input_method, has_query: v.has_query, result_type: v.result_type };
+}
+
+// Whether the user kept the suggested Ctrl+K / Cmd+K binding. Never send the keys themselves.
+export type ShortcutState = 'default' | 'custom' | 'unassigned' | 'unknown';
+export function classifyShortcut(shortcut: string | undefined): ShortcutState {
+  if (shortcut === undefined) return 'unknown';
+  if (!shortcut) return 'unassigned';
+  // Chrome reports "Ctrl+K" on Windows, Linux and ChromeOS, and "⌘K" on macOS.
+  const keys = shortcut.replace(/[\s+]/g, '').replace(/^Command/, '⌘');
+  return keys === 'CtrlK' || keys === '⌘K' ? 'default' : 'custom';
+}
+export async function getShortcutState(): Promise<ShortcutState> {
+  try {
+    const commands = await chrome.commands.getAll();
+    return classifyShortcut(commands.find(command => command.name === '_execute_action')?.shortcut ?? '');
+  } catch {
+    return 'unknown';
+  }
+}
+/** Emit shortcut_changed when an opted-in user's shortcut differs from the last one seen. */
+export async function recordShortcut(current: ShortcutState) {
+  const state = await chrome.storage.local.get<{ analyticsConsent?: boolean; analyticsShortcut?: ShortcutState }>(['analyticsConsent', 'analyticsShortcut']);
+  if (!enabled || state.analyticsConsent !== true || current === 'unknown') return;
+  if (state.analyticsShortcut && state.analyticsShortcut !== current)
+    await capture('shortcut_changed', { from: state.analyticsShortcut, to: current });
+  await chrome.storage.local.set({ analyticsShortcut: current });
 }

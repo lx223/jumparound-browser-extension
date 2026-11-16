@@ -42,7 +42,11 @@ never send events. If changing region/host, also update `host_permissions` in
 `public/manifest.json` and the privacy policy. No SDK or remote code is loaded.
 
 Events:
-- `extension_opened`: `source` (`action`, including shortcut opens) and `open_id`.
+- `extension_opened`: `source` (`action`, including shortcut opens), `open_id`, and
+  `shortcut` (`default` for Ctrl+K / ⌘K, `custom`, `unassigned`, or `unknown`). The
+  keys of a custom shortcut are never sent.
+- `shortcut_changed`: `from` and `to`, using the same `shortcut` values. Sent on the
+  first opening after an opted-in user's shortcut differs from the last one seen.
 - `result_selected`: `position` (1-based absolute result rank), `input_method`
   (`keyboard` or `pointer`), `has_query`, `result_count`, `result_type` (`tab` or
   `history`), and `open_id`.
@@ -59,6 +63,11 @@ For result preference, compare `result_selected` with `position = 1` against
 `position > 1`; filter `has_query = true` for actual searches. Break down by
 `input_method` to compare clicks with Enter selections. These describe opted-in
 users only. `open_id` can link opens to selections without using PostHog sessions.
+
+To see whether people move off the default shortcut, break down `extension_opened` by
+`shortcut` (counting unique installations), and chart `shortcut_changed` broken down by
+`from` and `to`. Users who changed the shortcut before opting in show up as `custom`
+on `extension_opened` but never send `shortcut_changed`.
 
 The shortcut uses the native `_execute_action` command. Chrome shows one entry,
 “Activate the extension”, at `chrome://extensions/shortcuts`. Existing users who
