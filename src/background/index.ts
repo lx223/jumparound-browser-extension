@@ -11,6 +11,14 @@ chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) =
     return true;
   }
 
+  if (message.type === 'SEARCH_HISTORY' && typeof message.query === 'string' && message.query.trim()) {
+    // Typed searches are explicit, so don't cap results per domain.
+    Promise.all([getAllTabs(), searchHistory(message.query.trim())]).then(([tabs, historyItems]) => {
+      sendResponse({ historyTabs: filterHistoryItems(historyItems, tabs, Infinity) });
+    }).catch(() => sendResponse({ historyTabs: [] }));
+    return true;
+  }
+
   if (message.type === 'SWITCH_TAB' && message.tabId) {
     switchToTab(message.tabId).then(() => {
       sendResponse({ success: true });

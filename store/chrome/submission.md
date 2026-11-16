@@ -243,7 +243,7 @@ tabs
 Required to read title, url and favIconUrl from all open tabs returned by chrome.tabs.query({}). JumpAround displays these fields in its popup and searches tab titles and URLs across every browser window. This is the extension’s core tab-search feature, not a permission needed merely to call tabs.update or tabs.create. The only host permission is https://eu.i.posthog.com/*, which does not grant access to other tabs’ metadata. activeTab would expose only the invoked tab and cannot support searching all open tabs. Tab metadata is processed locally and is never sent to analytics.
 
 history
-Required to retrieve recent browsing history so users can quickly navigate back to recently visited pages that are no longer open in any tab, displayed alongside open tabs in the search results.
+Required to retrieve recent browsing history so users can quickly navigate back to recently visited pages that are no longer open in any tab, displayed alongside open tabs in the search results. When the user types a query, chrome.history.search is also called with that text so older matching pages can be found. History is searched locally and never transmitted.
 
 storage
 Stores the user’s optional analytics consent, a random installation identifier, and a bounded queue of up to 100 pending usage events in chrome.storage.local. Analytics is off by default. Disabling analytics deletes the identifier and pending events. Search text, tab titles, URLs and browsing history are never stored in the analytics queue.
@@ -295,7 +295,7 @@ Implementation: `src/content/TabSwitcher.tsx` sends GET_TABS when the popup open
 | Permission | Active use | Why narrower access is insufficient |
 | --- | --- | --- |
 | tabs | Reads title, URL and favicon for all open tabs, including inactive tabs in other windows. | activeTab covers only the invoked tab. Broad website host access would grant more capabilities than tabs. |
-| history | chrome.history.search retrieves recent history for local history search results. | Tab metadata does not include closed pages from browsing history. |
+| history | chrome.history.search retrieves recent history, plus matches for the typed query, for local history search results. | Tab metadata does not include closed pages from browsing history. |
 | storage | chrome.storage.local saves analytics consent, installation identifier and bounded event queue; chrome.storage.session holds a short-lived shortcut marker across service-worker restarts. | Service workers cannot use window.localStorage; in-memory state would be lost on restart. |
 | alarms | chrome.alarms.create and onAlarm retry queued opted-in analytics; clear removes retries on delivery or opt-out. | A worker timer does not survive service-worker suspension. |
 | search | chrome.search.query opens the typed query with the user's default search engine when nothing matches. | Opening a hardcoded engine URL would ignore the user's chosen search engine. |

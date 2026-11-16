@@ -24,8 +24,9 @@ export interface SearchResult {
 }
 
 export interface Message {
-  type: 'GET_TABS' | 'SWITCH_TAB';
+  type: 'GET_TABS' | 'SWITCH_TAB' | 'SEARCH_HISTORY';
   tabId?: number;
+  query?: string;
   tabs?: TabInfo[];
   historyTabs?: TabInfo[];
 }
