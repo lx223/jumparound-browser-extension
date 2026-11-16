@@ -10,8 +10,8 @@ function injectManifestVersion() {
   return {
     name: 'inject-manifest-version',
     closeBundle() {
-      const pkg = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf-8'));
-      const manifestPath = resolve(__dirname, 'dist/manifest.json');
+      const pkg = JSON.parse(readFileSync(resolve(import.meta.dirname, 'package.json'), 'utf-8'));
+      const manifestPath = resolve(import.meta.dirname, 'dist/manifest.json');
       const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
       manifest.version = pkg.version;
       writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
@@ -25,19 +25,19 @@ export default defineConfig({
     tailwindcss(),
     viteStaticCopy({
       targets: [
-        { src: 'public/manifest.json', dest: '.' },
-        { src: 'public/_locales', dest: '.' },
-        { src: 'public/icons', dest: '.' },
+        { src: 'public/manifest.json', dest: '.', rename: { stripBase: 1 } },
+        { src: 'public/_locales', dest: '.', rename: { stripBase: 1 } },
+        { src: 'public/icons', dest: '.', rename: { stripBase: 1 } },
       ],
     }),
     injectManifestVersion(),
   ],
   build: {
     outDir: 'dist',
-    rollupOptions: {
+    rolldownOptions: {
       input: {
-        'content-ui': resolve(__dirname, 'src/content/index.html'),
-        background: resolve(__dirname, 'src/background/index.ts'),
+        'content-ui': resolve(import.meta.dirname, 'src/content/index.html'),
+        background: resolve(import.meta.dirname, 'src/background/index.ts'),
       },
       output: {
         entryFileNames: (chunkInfo) => {
