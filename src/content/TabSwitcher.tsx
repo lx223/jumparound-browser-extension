@@ -22,7 +22,8 @@ const TabSwitcher: React.FC = () => {
   const [tabs, setTabs] = useState<{ open: TabInfo[]; history: TabInfo[] }>({ open: [], history: [] });
   const [scrollTop, setScrollTop] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  // null means "use the default row", which depends on the results.
+  const [selection, setSelection] = useState<number | null>(null);
   const [analyticsConsent, setAnalyticsConsent] = useState(false);
   const [shortcut, setShortcut] = useState(() => message('shortcutLoading', 'Loading…'));
   useEffect(() => {
@@ -64,6 +65,10 @@ const TabSwitcher: React.FC = () => {
 
   const searcher = useMemo(() => createTabSearcher(tabs.open, tabs.history), [tabs]);
   const searchResults = useMemo(() => searcher.search(searchQuery), [searcher, searchQuery]);
+  // With no query the current tab is listed first, so start on the previous tab:
+  // opening JumpAround and pressing Enter jumps back, like Alt+Tab.
+  const defaultIndex = !searchQuery.trim() && searchResults[0]?.item.active && searchResults.length > 1 ? 1 : 0;
+  const selectedIndex = selection ?? defaultIndex;
   const startIndex = Math.min(
     Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - OVERSCAN),
     Math.max(0, searchResults.length - 1),
@@ -145,10 +150,10 @@ const TabSwitcher: React.FC = () => {
         }
       } else if (e.key === 'ArrowDown' || (e.key === 'Tab' && !e.shiftKey)) {
         e.preventDefault();
-        setSelectedIndex(prev => (prev + 1) % Math.max(searchResults.length, 1));
+        setSelection((selectedIndex + 1) % Math.max(searchResults.length, 1));
       } else if (e.key === 'ArrowUp' || (e.key === 'Tab' && e.shiftKey)) {
         e.preventDefault();
-        setSelectedIndex(prev => (prev - 1 + searchResults.length) % Math.max(searchResults.length, 1));
+        setSelection((selectedIndex - 1 + searchResults.length) % Math.max(searchResults.length, 1));
       } else if (e.key === 'Escape') {
         e.preventDefault();
         closePopup();
@@ -173,7 +178,7 @@ const TabSwitcher: React.FC = () => {
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
-              setSelectedIndex(0);
+              setSelection(null);
               setScrollTop(0);
               if (listRef.current) listRef.current.scrollTop = 0;
             }}

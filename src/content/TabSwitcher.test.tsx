@@ -92,6 +92,29 @@ it('wraps keyboard selection to the last result and back to the first', () => {
   act(() => { input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); });
   expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({ type: 'SWITCH_TAB', tabId: 1 }, expect.any(Function));
 });
+it('starts on the previous tab when the current tab is listed first, and on the best match when searching', () => {
+  const withActive = tabs.map((tab, i) => ({ ...tab, active: i === 0 }));
+  vi.mocked(chrome.runtime.sendMessage).mockImplementation(((_message: unknown, callback: (r: unknown) => void) =>
+    callback({ tabs: withActive, historyTabs: [] })) as never);
+  act(() => root.render(<TabSwitcher />));
+  const input = container.querySelector('input')!;
+  act(() => { input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); });
+  expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({ type: 'SWITCH_TAB', tabId: 2 }, expect.any(Function));
+  vi.mocked(chrome.runtime.sendMessage).mockClear();
+  type('Example tab 0');
+  act(() => { input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); });
+  expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({ type: 'SWITCH_TAB', tabId: 1 }, expect.any(Function));
+});
+it('moves from the default row with the arrow keys', () => {
+  const withActive = tabs.map((tab, i) => ({ ...tab, active: i === 0 }));
+  vi.mocked(chrome.runtime.sendMessage).mockImplementation(((_message: unknown, callback: (r: unknown) => void) =>
+    callback({ tabs: withActive, historyTabs: [] })) as never);
+  act(() => root.render(<TabSwitcher />));
+  const input = container.querySelector('input')!;
+  act(() => { input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true })); });
+  act(() => { input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); });
+  expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({ type: 'SWITCH_TAB', tabId: 1 }, expect.any(Function));
+});
 it('opens a web search when there are no matching results', () => {
   act(() => root.render(<TabSwitcher />));
   type('zzzzzz');
