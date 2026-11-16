@@ -4,6 +4,7 @@
   "searchPlaceholder": { "message": "搜尋分頁..." },
   "noResults": { "message": "找不到分頁" },
   "noMatchingTabs": { "message": "沒有符合的分頁" },
+  "noDuplicateTabs": { "message": "沒有重複的分頁。" },
   "pressEnterToSearch": { "message": "按 Enter 在新分頁中搜尋網路" },
   "historyTab": { "message": "歷史" },
   "themeLight": { "message": "淺色" },

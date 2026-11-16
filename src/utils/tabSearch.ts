@@ -308,3 +308,27 @@ export function createSearchUrl(query: string): string {
   }
   return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
 }
+
+const DUPLICATE_FILTER = /^@dup(?:\s+|$)/i;
+
+/** For "@dup" queries, returns the text after the filter; otherwise null. */
+export function parseDuplicateFilter(query: string): string | null {
+  const trimmed = query.trimStart();
+  const match = DUPLICATE_FILTER.exec(trimmed);
+  return match ? trimmed.slice(match[0].length) : null;
+}
+
+/**
+ * Open tabs whose URL (ignoring #fragments) is open more than once. Copies stay
+ * next to each other, and groups keep the input's most-recent-first order.
+ */
+export function findDuplicateTabs(tabs: TabInfo[]): TabInfo[] {
+  const groups = new Map<string, TabInfo[]>();
+  for (const tab of tabs) {
+    const key = tab.url.split('#')[0];
+    const group = groups.get(key);
+    if (group) group.push(tab);
+    else groups.set(key, [tab]);
+  }
+  return [...groups.values()].filter(group => group.length > 1).flat();
+}

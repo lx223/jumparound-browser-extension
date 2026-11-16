@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect } from 'react';
 import { Search, Sun, Moon, Monitor, Settings, History } from 'lucide-react';
 import type { TabInfo, Message } from '../types';
-import { createTabSearcher, createSearchUrl, isUrl } from '../utils/tabSearch';
+import { createTabSearcher, createSearchUrl, findDuplicateTabs, isUrl, parseDuplicateFilter } from '../utils/tabSearch';
 import HighlightedText from '../components/HighlightedText';
 import { useTheme, type ThemeMode } from './ThemeContext';
 
@@ -59,6 +59,7 @@ const TabSwitcher: React.FC = () => {
   const searchPlaceholder = chrome.i18n?.getMessage('searchPlaceholder') || 'Search tabs...';
   const noResults = chrome.i18n?.getMessage('noResults') || 'No tabs found';
   const noMatchingTabs = chrome.i18n?.getMessage('noMatchingTabs') || 'No matching tabs.';
+  const noDuplicateTabs = chrome.i18n?.getMessage('noDuplicateTabs') || 'No duplicate tabs.';
   const pressEnterToSearch = chrome.i18n?.getMessage('pressEnterToSearch') || 'Press Enter to search the web in a new tab';
   const historyTabLabel = chrome.i18n?.getMessage('historyTab') || 'History';
 
@@ -76,7 +77,7 @@ const TabSwitcher: React.FC = () => {
   // The initial list holds only recent history; ask for older matches as the user types.
   useEffect(() => {
     const query = searchQuery.trim();
-    if (!query) return;
+    if (!query || parseDuplicateFilter(query) !== null) return;
     let cancelled = false;
     const timer = window.setTimeout(() => {
       chrome.runtime.sendMessage({ type: 'SEARCH_HISTORY', query } as Message, (response) => {
@@ -93,7 +94,12 @@ const TabSwitcher: React.FC = () => {
   const history = useMemo(() => mergeHistory(tabs.history, searchQuery.trim() ? searchedHistory : []),
     [tabs.history, searchedHistory, searchQuery]);
   const searcher = useMemo(() => createTabSearcher(tabs.open, history), [tabs.open, history]);
-  const searchResults = useMemo(() => searcher.search(searchQuery), [searcher, searchQuery]);
+  // "@dup" lists only open tabs that are open more than once, then searches within them.
+  const duplicateQuery = parseDuplicateFilter(searchQuery);
+  const searchResults = useMemo(() => duplicateQuery === null
+    ? searcher.search(searchQuery)
+    : createTabSearcher(findDuplicateTabs(tabs.open)).search(duplicateQuery),
+  [searcher, searchQuery, duplicateQuery, tabs.open]);
   // With no query the current tab is listed first, so start on the previous tab:
   // opening JumpAround and pressing Enter jumps back, like Alt+Tab.
   const defaultIndex = !searchQuery.trim() && searchResults[0]?.item.active && searchResults.length > 1 ? 1 : 0;
@@ -185,7 +191,7 @@ const TabSwitcher: React.FC = () => {
         const selected = searchResults[selectedIndex];
         if (selected) {
           selectResult(selectedIndex, 'keyboard');
-        } else if (searchQuery.trim()) {
+        } else if (searchQuery.trim() && parseDuplicateFilter(searchQuery) === null) {
           searchWeb(searchQuery);
         }
       } else if (e.key === 'ArrowDown' || (e.key === 'Tab' && !e.shiftKey)) {
@@ -288,7 +294,9 @@ const TabSwitcher: React.FC = () => {
       >
         {searchResults.length === 0 ? (
           <li className="p-8 text-center">
-            {searchQuery.trim() ? (
+            {duplicateQuery !== null ? (
+              <p className="text-text-secondary font-medium">{noDuplicateTabs}</p>
+            ) : searchQuery.trim() ? (
               <>
                 <p className="text-text-secondary font-medium">{noMatchingTabs}</p>
                 <p className="text-text-primary font-semibold mt-1">{pressEnterToSearch}</p>
