@@ -68,6 +68,12 @@ Native action commands do not report whether the popup opened via shortcut,
 toolbar, accessibility, or the extensions menu, so all are recorded as `action`.
 Safari compatibility needs manual verification before shipping a Safari release.
 
+The privacy policy and `store/chrome/submission.md` describe analytics by category, so
+a new event or property that fits those categories needs only an entry in the list
+above. Update the policy, the store notes and the Chrome Web Store privacy form when
+you collect a new kind of data (anything derived from search text, URLs, titles or
+history, for example), add a permission, or send data to a new service.
+
 Before publishing, update Chrome Web Store privacy disclosures. Smoke-test a
 configured production build: opt out (no requests), opt in and reopen using both
 methods, select first/later results with click and Enter, disconnect/reconnect the
