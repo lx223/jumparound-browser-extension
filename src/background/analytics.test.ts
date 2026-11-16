@@ -66,3 +66,26 @@ it('tags opening and selection events with the fixed product project', async () 
   expect(state.analyticsQueue.map((event: { properties: { project: string } }) => event.properties.project))
     .toEqual(['jumparound', 'jumparound']);
 });
+it('classifies the shortcut without exposing the keys', () => {
+  expect(analytics.classifyShortcut('Ctrl+K')).toBe('default');
+  expect(analytics.classifyShortcut('⌘K')).toBe('default');
+  expect(analytics.classifyShortcut('Ctrl+Shift+K')).toBe('custom');
+  expect(analytics.classifyShortcut('⌃K')).toBe('custom');
+  expect(analytics.classifyShortcut('')).toBe('unassigned');
+  expect(analytics.classifyShortcut(undefined)).toBe('unknown');
+});
+it('reports shortcut changes only for opted-in users and forgets them on withdrawal', async () => {
+  await analytics.recordShortcut('default');
+  expect(state.analyticsShortcut).toBeUndefined();
+  state.analyticsConsent = true;
+  await analytics.recordShortcut('default');
+  await analytics.recordShortcut('default');
+  expect(state.analyticsQueue).toBeUndefined();
+  await analytics.recordShortcut('custom');
+  await analytics.recordShortcut('unknown');
+  expect(state.analyticsQueue.map((e: { event: string; properties: object }) => [e.event, e.properties])).toEqual([
+    ['shortcut_changed', expect.objectContaining({ from: 'default', to: 'custom' })],
+  ]);
+  await analytics.setConsent(false);
+  expect(state.analyticsShortcut).toBeUndefined();
+});

@@ -1,4 +1,4 @@
-import { analyticsTask, capture, flush, selectionMetadata, setConsent } from './analytics';
+import { analyticsTask, capture, flush, getShortcutState, recordShortcut, selectionMetadata, setConsent } from './analytics';
 import type { Message } from '../types';
 import { getAllTabs, searchHistory, filterHistoryItems, switchToTab } from '../utils/tabManager';
 
@@ -33,8 +33,11 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
       await setConsent(message.enabled);
     } else if (message.type === 'ANALYTICS_OPEN') {
       // Native action shortcuts and toolbar clicks both open the popup directly.
-      if (typeof message.openId === 'string' && message.openId.length <= 50)
-        await capture('extension_opened', { source: 'action', open_id: message.openId });
+      if (typeof message.openId === 'string' && message.openId.length <= 50) {
+        const shortcut = await getShortcutState();
+        await capture('extension_opened', { source: 'action', open_id: message.openId, shortcut });
+        await recordShortcut(shortcut);
+      }
     } else {
       const metadata = selectionMetadata(message.metadata);
       if (metadata && typeof message.openId === 'string' && message.openId.length <= 50)
