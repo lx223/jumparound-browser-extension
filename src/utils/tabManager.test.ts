@@ -97,3 +97,21 @@ it('requests tabs and the current window concurrently', async () => {
   await expect(pending).resolves.toEqual([]);
   vi.unstubAllGlobals();
 });
+
+it('searches all of history for typed text, but only recent history otherwise', async () => {
+  const search = vi.fn().mockResolvedValue([]);
+  vi.stubGlobal('chrome', { history: { search } });
+  const { searchHistory } = await import('./tabManager');
+  await searchHistory('invoice');
+  expect(search).toHaveBeenLastCalledWith(expect.objectContaining({ text: 'invoice', startTime: 0 }));
+  await searchHistory();
+  expect(search.mock.lastCall![0].startTime).toBeGreaterThan(0);
+  vi.unstubAllGlobals();
+});
+
+it('caps history per domain only when asked to', async () => {
+  const { filterHistoryItems } = await import('./tabManager');
+  const items = Array.from({ length: 5 }, (_, i) => ({ id: `${i}`, url: `https://a.com/${i}`, title: `${i}` }));
+  expect(filterHistoryItems(items, [])).toHaveLength(3);
+  expect(filterHistoryItems(items, [], Infinity)).toHaveLength(5);
+});

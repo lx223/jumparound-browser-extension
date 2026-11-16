@@ -17,9 +17,19 @@ const themeOptions: { mode: ThemeMode; icon: React.ReactNode; label: string }[] 
 const ROW_HEIGHT = 56;
 const OVERSCAN = 4;
 const VIEWPORT_HEIGHT = 536;
+const HISTORY_SEARCH_DELAY = 150;
+
+/** Add history found by a typed search to the initial list, keeping row keys unique. */
+function mergeHistory(base: TabInfo[], extra: TabInfo[]): TabInfo[] {
+  if (!extra.length) return base;
+  const seen = new Set(base.map(tab => tab.url));
+  return [...base, ...extra.filter(tab => !seen.has(tab.url) && seen.add(tab.url))]
+    .map((tab, index) => ({ ...tab, id: -(index + 1) }));
+}
 
 const TabSwitcher: React.FC = () => {
   const [tabs, setTabs] = useState<{ open: TabInfo[]; history: TabInfo[] }>({ open: [], history: [] });
+  const [searchedHistory, setSearchedHistory] = useState<TabInfo[]>([]);
   const [scrollTop, setScrollTop] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -62,7 +72,26 @@ const TabSwitcher: React.FC = () => {
     searchInputRef.current?.focus();
   }, []);
 
-  const searcher = useMemo(() => createTabSearcher(tabs.open, tabs.history), [tabs]);
+  // The initial list holds only recent history; ask for older matches as the user types.
+  useEffect(() => {
+    const query = searchQuery.trim();
+    if (!query) return;
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      chrome.runtime.sendMessage({ type: 'SEARCH_HISTORY', query } as Message, (response) => {
+        if (chrome.runtime.lastError || cancelled) return;
+        setSearchedHistory(response?.historyTabs ?? []);
+      });
+    }, HISTORY_SEARCH_DELAY);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [searchQuery]);
+
+  const history = useMemo(() => mergeHistory(tabs.history, searchQuery.trim() ? searchedHistory : []),
+    [tabs.history, searchedHistory, searchQuery]);
+  const searcher = useMemo(() => createTabSearcher(tabs.open, history), [tabs.open, history]);
   const searchResults = useMemo(() => searcher.search(searchQuery), [searcher, searchQuery]);
   const startIndex = Math.min(
     Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - OVERSCAN),

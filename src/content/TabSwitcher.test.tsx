@@ -126,3 +126,22 @@ it('tracks Enter selections and emits only one opening under Strict Mode', async
     metadata: { position: 1, input_method: 'keyboard', has_query: false, result_count: 1000, result_type: 'tab' },
   }, expect.any(Function));
 });
+it('finds older history that matches the typed query', () => {
+  vi.useFakeTimers();
+  try {
+    const old = { id: -1, title: 'Quarterly planning doc', url: 'https://docs.example.org/plan', windowId: -1,
+      active: false, lastAccessed: 1, isHistoryTab: true };
+    vi.mocked(chrome.runtime.sendMessage).mockImplementation(((message: { type: string }, callback: (r: unknown) => void) =>
+      callback(message.type === 'SEARCH_HISTORY' ? { historyTabs: [old] } : { tabs, historyTabs: [] })) as never);
+    act(() => root.render(<TabSwitcher />));
+    type('quarterly');
+    expect(container.querySelector('ul')!.textContent).not.toContain('Quarterly planning doc');
+    act(() => { vi.advanceTimersByTime(200); });
+    expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({ type: 'SEARCH_HISTORY', query: 'quarterly' }, expect.any(Function));
+    expect(container.querySelector('ul')!.textContent).toContain('Quarterly planning doc');
+    type('');
+    expect(container.querySelector('ul')!.textContent).not.toContain('Quarterly planning doc');
+  } finally {
+    vi.useRealTimers();
+  }
+});
