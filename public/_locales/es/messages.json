@@ -4,6 +4,7 @@
   "searchPlaceholder": { "message": "Buscar pestañas..." },
   "noResults": { "message": "No se encontraron pestañas" },
   "noMatchingTabs": { "message": "No hay pestañas coincidentes." },
+  "noDuplicateTabs": { "message": "No hay pestañas duplicadas." },
   "pressEnterToSearch": { "message": "Presiona Enter para buscar en la web en una pestaña nueva" },
   "historyTab": { "message": "Historial" },
   "themeLight": { "message": "Claro" },

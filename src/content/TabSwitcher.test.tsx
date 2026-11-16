@@ -181,3 +181,28 @@ it('finds older history that matches the typed query', () => {
     vi.useRealTimers();
   }
 });
+it('lists only duplicate tabs for @dup, without web or history searches', () => {
+  vi.useFakeTimers();
+  try {
+    const dupTabs = [
+      { id: 1, title: 'Docs', url: 'https://docs.example.com/', windowId: 1, active: true, lastAccessed: 5 },
+      { id: 2, title: 'Mail', url: 'https://mail.example.com/', windowId: 1, active: false, lastAccessed: 4 },
+      { id: 3, title: 'Docs again', url: 'https://docs.example.com/', windowId: 2, active: false, lastAccessed: 3 },
+    ];
+    vi.mocked(chrome.runtime.sendMessage).mockImplementation(((_message: unknown, callback: (r: unknown) => void) =>
+      callback({ tabs: dupTabs, historyTabs: [] })) as never);
+    act(() => root.render(<TabSwitcher />));
+    type('@dup');
+    const list = container.querySelector('ul')!;
+    expect([...list.querySelectorAll('li[aria-posinset]')].map(row => row.textContent)).toEqual([
+      expect.stringContaining('Docs'), expect.stringContaining('Docs again')]);
+    type('@dup mail');
+    expect(list.textContent).toContain('No duplicate tabs.');
+    act(() => { container.querySelector('input')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); });
+    act(() => { vi.advanceTimersByTime(200); });
+    expect(chrome.tabs.create).not.toHaveBeenCalled();
+    expect(chrome.runtime.sendMessage).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'SEARCH_HISTORY' }), expect.any(Function));
+  } finally {
+    vi.useRealTimers();
+  }
+});
