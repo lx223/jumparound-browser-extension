@@ -4,7 +4,7 @@
   "searchPlaceholder": { "message": "Pesquisar abas..." },
   "noResults": { "message": "Nenhuma aba encontrada" },
   "noMatchingTabs": { "message": "Nenhuma aba corresponde à pesquisa." },
-  "pressEnterToSearch": { "message": "Pressione Enter para pesquisar no Google em uma nova aba" },
+  "pressEnterToSearch": { "message": "Pressione Enter para pesquisar na web em uma nova aba" },
   "historyTab": { "message": "Histórico" },
   "themeLight": { "message": "Claro" },
   "themeDark": { "message": "Escuro" },

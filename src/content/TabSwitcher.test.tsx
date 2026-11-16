@@ -99,6 +99,19 @@ it('opens a web search when there are no matching results', () => {
   act(() => { container.querySelector('input')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); });
   expect(chrome.tabs.create).toHaveBeenCalledWith({ url: 'https://www.google.com/search?q=zzzzzz' });
 });
+it('searches with the default search engine, but opens typed URLs directly', () => {
+  const query = vi.fn().mockResolvedValue(undefined);
+  vi.stubGlobal('chrome', { ...chrome, search: { query } });
+  act(() => root.render(<TabSwitcher />));
+  const input = container.querySelector('input')!;
+  type('zzzzzz');
+  act(() => { input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); });
+  expect(query).toHaveBeenCalledWith({ text: 'zzzzzz', disposition: 'NEW_TAB' });
+  expect(chrome.tabs.create).not.toHaveBeenCalled();
+  type('zzzz.example');
+  act(() => { input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); });
+  expect(chrome.tabs.create).toHaveBeenCalledWith({ url: 'https://zzzz.example' });
+});
 it('tracks absolute rank for a clicked result after scrolling, without browsing data', () => {
   act(() => root.render(<TabSwitcher />));
   const list = container.querySelector('ul')!;

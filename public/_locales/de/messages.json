@@ -4,7 +4,7 @@
   "searchPlaceholder": { "message": "Tabs durchsuchen..." },
   "noResults": { "message": "Keine Tabs gefunden" },
   "noMatchingTabs": { "message": "Keine passenden Tabs." },
-  "pressEnterToSearch": { "message": "Enter drücken, um in einem neuen Tab mit Google zu suchen" },
+  "pressEnterToSearch": { "message": "Enter drücken, um in einem neuen Tab im Web zu suchen" },
   "historyTab": { "message": "Verlauf" },
   "themeLight": { "message": "Hell" },
   "themeDark": { "message": "Dunkel" },

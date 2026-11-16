@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect } from 'react';
 import { Search, Sun, Moon, Monitor, Settings, History } from 'lucide-react';
 import type { TabInfo, Message } from '../types';
-import { createTabSearcher, createSearchUrl } from '../utils/tabSearch';
+import { createTabSearcher, createSearchUrl, isUrl } from '../utils/tabSearch';
 import HighlightedText from '../components/HighlightedText';
 import { useTheme, type ThemeMode } from './ThemeContext';
 
@@ -48,7 +48,7 @@ const TabSwitcher: React.FC = () => {
   const searchPlaceholder = chrome.i18n?.getMessage('searchPlaceholder') || 'Search tabs...';
   const noResults = chrome.i18n?.getMessage('noResults') || 'No tabs found';
   const noMatchingTabs = chrome.i18n?.getMessage('noMatchingTabs') || 'No matching tabs.';
-  const pressEnterToSearch = chrome.i18n?.getMessage('pressEnterToSearch') || 'Press Enter to search on Google in a new tab';
+  const pressEnterToSearch = chrome.i18n?.getMessage('pressEnterToSearch') || 'Press Enter to search the web in a new tab';
   const historyTabLabel = chrome.i18n?.getMessage('historyTab') || 'History';
 
   useEffect(() => {
@@ -133,6 +133,17 @@ const TabSwitcher: React.FC = () => {
     } }, () => { void chrome.runtime.lastError; window.clearTimeout(fallback); activate(); });
   }, [searchResults, searchQuery, openUrl, switchToTab]);
 
+  const searchWeb = useCallback((input: string) => {
+    const query = input.trim();
+    // chrome.search uses the user's default engine; other browsers may lack it.
+    if (isUrl(query) || !chrome.search?.query) {
+      openUrl(createSearchUrl(query));
+      return;
+    }
+    chrome.search.query({ text: query, disposition: 'NEW_TAB' })
+      .then(closePopup, () => openUrl(createSearchUrl(query)));
+  }, [openUrl, closePopup]);
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
@@ -141,7 +152,7 @@ const TabSwitcher: React.FC = () => {
         if (selected) {
           selectResult(selectedIndex, 'keyboard');
         } else if (searchQuery.trim()) {
-          openUrl(createSearchUrl(searchQuery));
+          searchWeb(searchQuery);
         }
       } else if (e.key === 'ArrowDown' || (e.key === 'Tab' && !e.shiftKey)) {
         e.preventDefault();
@@ -154,7 +165,7 @@ const TabSwitcher: React.FC = () => {
         closePopup();
       }
     },
-    [searchResults, selectedIndex, searchQuery, openUrl, selectResult, closePopup]
+    [searchResults, selectedIndex, searchQuery, searchWeb, selectResult, closePopup]
   );
 
   return (
