@@ -7,6 +7,9 @@ export interface TabInfo {
   active: boolean;
   lastAccessed: number;
   isHistoryTab?: boolean;
+  isClosedTab?: boolean;
+  /** chrome.sessions ID used to restore a recently closed tab. */
+  sessionId?: string;
 }
 
 export interface MatchHighlight {
@@ -20,12 +23,15 @@ export interface SearchResult {
   titleHighlight?: MatchHighlight;
   urlHighlight?: MatchHighlight;
   matchedField: 'url' | 'title';
-  searchTier: 'tabs-url' | 'tabs-title' | 'history-url' | 'history-title';
+  searchTier: 'tabs-url' | 'tabs-title' | 'closed-url' | 'closed-title' | 'history-url' | 'history-title';
 }
 
 export interface Message {
-  type: 'GET_TABS' | 'SWITCH_TAB';
+  type: 'GET_TABS' | 'SWITCH_TAB' | 'SEARCH_HISTORY' | 'RESTORE_TAB';
   tabId?: number;
+  query?: string;
   tabs?: TabInfo[];
   historyTabs?: TabInfo[];
+  closedTabs?: TabInfo[];
+  sessionId?: string;
 }

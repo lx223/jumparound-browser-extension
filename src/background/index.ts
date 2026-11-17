@@ -1,13 +1,31 @@
-import { analyticsTask, capture, flush, selectionMetadata, setConsent } from './analytics';
+import { analyticsTask, capture, flush, getShortcutState, recordShortcut, selectionMetadata, setConsent } from './analytics';
 import type { Message } from '../types';
-import { getAllTabs, searchHistory, filterHistoryItems, switchToTab } from '../utils/tabManager';
+import { getAllTabs, getRecentlyClosedTabs, searchHistory, filterHistoryItems, switchToTab } from '../utils/tabManager';
 
 chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) => {
   if (message.type === 'GET_TABS') {
-    Promise.all([getAllTabs(), searchHistory()]).then(([tabs, historyItems]) => {
+    Promise.all([getAllTabs(), searchHistory()]).then(async ([tabs, historyItems]) => {
       const historyTabs = filterHistoryItems(historyItems, tabs);
-      sendResponse({ tabs, historyTabs });
+      // Without chrome.sessions (or if reading it fails), still return tabs and history.
+      const closedTabs = await getRecentlyClosedTabs(tabs).catch(() => []);
+      sendResponse({ tabs, historyTabs, closedTabs });
     });
+    return true;
+  }
+
+  if (message.type === 'SEARCH_HISTORY' && typeof message.query === 'string' && message.query.trim()) {
+    // Typed searches are explicit, so don't cap results per domain.
+    Promise.all([getAllTabs(), searchHistory(message.query.trim())]).then(([tabs, historyItems]) => {
+      sendResponse({ historyTabs: filterHistoryItems(historyItems, tabs, Infinity) });
+    }).catch(() => sendResponse({ historyTabs: [] }));
+    return true;
+  }
+
+  if (message.type === 'RESTORE_TAB' && typeof message.sessionId === 'string') {
+    chrome.sessions.restore(message.sessionId).then(
+      () => sendResponse({ success: true }),
+      () => sendResponse({ success: false }),
+    );
     return true;
   }
 
@@ -21,40 +39,23 @@ chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) =
   return false;
 });
 
-type OpeningState = { shortcutOpen?: { id: string; time: number } };
-
-// A session-storage marker survives service worker restarts, but expires quickly.
-chrome.commands.onCommand.addListener((command) => {
-  if (command !== 'open-switcher') return;
-  void (async () => {
-    const marker = { id: crypto.randomUUID(), time: Date.now() };
-    await chrome.storage.session.set({ shortcutOpen: marker });
-    try { await chrome.action.openPopup(); }
-    catch {
-      const state = await chrome.storage.session.get<OpeningState>('shortcutOpen');
-      if (state.shortcutOpen?.id === marker.id) await chrome.storage.session.remove('shortcutOpen');
-    }
-  })().catch(() => {});
-});
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === 'analytics-retry') void analyticsTask(flush);
 });
 chrome.runtime.onMessage.addListener((message, sender, respond) => {
   if (sender.id !== chrome.runtime.id || !sender.url?.startsWith(chrome.runtime.getURL('src/content/index.html'))) return false;
   if (!['ANALYTICS_OPEN', 'ANALYTICS_SELECTION', 'ANALYTICS_CONSENT'].includes(message.type)) return false;
-  const openedAt = Date.now();
-  const openingState = message.type === 'ANALYTICS_OPEN' ? chrome.storage.session.get<OpeningState>('shortcutOpen') : undefined;
   void analyticsTask(async () => {
     if (message.type === 'ANALYTICS_CONSENT') {
       if (typeof message.enabled !== 'boolean') return;
       await setConsent(message.enabled);
     } else if (message.type === 'ANALYTICS_OPEN') {
-      const state = await openingState!;
-      const source = state.shortcutOpen && openedAt - state.shortcutOpen.time < 2000 ? 'shortcut' : 'action';
-      const current = await chrome.storage.session.get<OpeningState>('shortcutOpen');
-      if (current.shortcutOpen?.id === state.shortcutOpen?.id) await chrome.storage.session.remove('shortcutOpen');
-      if (typeof message.openId === 'string' && message.openId.length <= 50)
-        await capture('extension_opened', { source, open_id: message.openId });
+      // Native action shortcuts and toolbar clicks both open the popup directly.
+      if (typeof message.openId === 'string' && message.openId.length <= 50) {
+        const shortcut = await getShortcutState();
+        await capture('extension_opened', { source: 'action', open_id: message.openId, shortcut });
+        await recordShortcut(shortcut);
+      }
     } else {
       const metadata = selectionMetadata(message.metadata);
       if (metadata && typeof message.openId === 'string' && message.openId.length <= 50)

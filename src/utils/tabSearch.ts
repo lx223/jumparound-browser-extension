@@ -52,18 +52,29 @@ function indexFields(tab: TabInfo): SearchField[] {
   return fields;
 }
 
-/** Search every query word across title and URL; prefer open tabs to history. */
+// A tab closed this recently is listed first when nothing is typed, to undo a close.
+const RECENTLY_CLOSED_MS = 30_000;
+const SOURCE_RANK = { tabs: 0, closed: 1, history: 2 } as const;
+const sourceOf = (tab: TabInfo) => tab.isClosedTab ? 'closed' as const : tab.isHistoryTab ? 'history' as const : 'tabs' as const;
+
+/**
+ * Search every query word across title and URL. Open tabs come first, then
+ * recently closed tabs (passed in with history), then history.
+ */
 export function createTabSearcher(tabs: TabInfo[], historyTabs: TabInfo[] = []) {
   const allItems = [
     ...tabs.map(tab => ({ tab, tierPrefix: 'tabs' as const })),
-    ...historyTabs.map(tab => ({ tab, tierPrefix: 'history' as const })),
+    ...historyTabs.map(tab => ({ tab, tierPrefix: sourceOf(tab) })),
   ].map(item => ({ ...item, fields: indexFields(item.tab) }));
 
   return {
     search: (input: string): SearchResult[] => {
       const query = input.trim();
       if (!query) {
-        return allItems.map(({ tab, tierPrefix }) => ({
+        const now = Date.now();
+        const justClosed = ({ tab }: { tab: TabInfo }) => Boolean(tab.isClosedTab) && now - tab.lastAccessed <= RECENTLY_CLOSED_MS;
+        const bySource = [...allItems].sort((a, b) => SOURCE_RANK[a.tierPrefix] - SOURCE_RANK[b.tierPrefix]);
+        return [...bySource.filter(justClosed), ...bySource.filter(item => !justClosed(item))].map(({ tab, tierPrefix }) => ({
           item: tab,
           score: 0,
           matchedField: 'url' as const,
@@ -113,7 +124,7 @@ export function createTabSearcher(tabs: TabInfo[], historyTabs: TabInfo[] = []) 
       }
       // Match quality wins within each source; recency resolves equally good matches.
       return results.sort((a, b) =>
-        Number(Boolean(a.item.isHistoryTab)) - Number(Boolean(b.item.isHistoryTab)) ||
+        SOURCE_RANK[sourceOf(a.item)] - SOURCE_RANK[sourceOf(b.item)] ||
         b.score - a.score || b.item.lastAccessed - a.item.lastAccessed,
       );
     },
@@ -307,4 +318,28 @@ export function createSearchUrl(query: string): string {
     return query.startsWith('http') ? query : `https://${query}`;
   }
   return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+}
+
+const DUPLICATE_FILTER = /^@dup(?:\s+|$)/i;
+
+/** For "@dup" queries, returns the text after the filter; otherwise null. */
+export function parseDuplicateFilter(query: string): string | null {
+  const trimmed = query.trimStart();
+  const match = DUPLICATE_FILTER.exec(trimmed);
+  return match ? trimmed.slice(match[0].length) : null;
+}
+
+/**
+ * Open tabs whose URL (ignoring #fragments) is open more than once. Copies stay
+ * next to each other, and groups keep the input's most-recent-first order.
+ */
+export function findDuplicateTabs(tabs: TabInfo[]): TabInfo[] {
+  const groups = new Map<string, TabInfo[]>();
+  for (const tab of tabs) {
+    const key = tab.url.split('#')[0];
+    const group = groups.get(key);
+    if (group) group.push(tab);
+    else groups.set(key, [tab]);
+  }
+  return [...groups.values()].filter(group => group.length > 1).flat();
 }

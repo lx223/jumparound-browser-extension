@@ -20,7 +20,7 @@ beforeEach(async () => {
 });
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 it('never queues or sends events without consent', async () => {
-  await analytics.capture('extension_opened', { source: 'shortcut' });
+  await analytics.capture('extension_opened', { source: 'action' });
   await analytics.flush();
   expect(state.analyticsQueue).toBeUndefined();
   expect(fetch).not.toHaveBeenCalled();
@@ -61,8 +61,35 @@ it('bounds the offline queue and preserves UUIDs for retry', async () => {
 
 it('tags opening and selection events with the fixed product project', async () => {
   state.analyticsConsent = true;
-  await analytics.capture('extension_opened', { source: 'shortcut', project: 'other' });
+  await analytics.capture('extension_opened', { source: 'action', project: 'other' });
   await analytics.capture('result_selected', { position: 1 });
   expect(state.analyticsQueue.map((event: { properties: { project: string } }) => event.properties.project))
     .toEqual(['jumparound', 'jumparound']);
+});
+it('classifies the shortcut without exposing the keys', () => {
+  expect(analytics.classifyShortcut('Ctrl+K')).toBe('default');
+  expect(analytics.classifyShortcut('⌘K')).toBe('default');
+  expect(analytics.classifyShortcut('Ctrl+Shift+K')).toBe('custom');
+  expect(analytics.classifyShortcut('⌃K')).toBe('custom');
+  expect(analytics.classifyShortcut('')).toBe('unassigned');
+  expect(analytics.classifyShortcut(undefined)).toBe('unknown');
+});
+it('reports shortcut changes only for opted-in users and forgets them on withdrawal', async () => {
+  await analytics.recordShortcut('default');
+  expect(state.analyticsShortcut).toBeUndefined();
+  state.analyticsConsent = true;
+  await analytics.recordShortcut('default');
+  await analytics.recordShortcut('default');
+  expect(state.analyticsQueue).toBeUndefined();
+  await analytics.recordShortcut('custom');
+  await analytics.recordShortcut('unknown');
+  expect(state.analyticsQueue.map((e: { event: string; properties: object }) => [e.event, e.properties])).toEqual([
+    ['shortcut_changed', expect.objectContaining({ from: 'default', to: 'custom' })],
+  ]);
+  await analytics.setConsent(false);
+  expect(state.analyticsShortcut).toBeUndefined();
+});
+it('accepts recently closed tabs as a result type', () => {
+  const metadata = { position: 1, input_method: 'keyboard', has_query: false, result_count: 3, result_type: 'closed' };
+  expect(analytics.selectionMetadata(metadata)).toEqual(metadata);
 });

@@ -26,17 +26,22 @@ export async function getAllTabs(): Promise<TabInfo[]> {
   return currentTabs.sort((a, b) => b.lastAccessed - a.lastAccessed);
 }
 
-export function searchHistory(): Promise<chrome.history.HistoryItem[]> {
+/**
+ * Without text, returns recent visits for the initial list. With text, searches
+ * all of history (Chrome otherwise defaults to the last 24 hours).
+ */
+export function searchHistory(text = ''): Promise<chrome.history.HistoryItem[]> {
   return chrome.history.search({
-    text: '',
+    text,
     maxResults: HISTORY_MAX_RESULTS,
-    startTime: Date.now() - HISTORY_DAYS * 24 * 60 * 60 * 1000,
+    startTime: text ? 0 : Date.now() - HISTORY_DAYS * 24 * 60 * 60 * 1000,
   });
 }
 
 export function filterHistoryItems(
   historyItems: chrome.history.HistoryItem[],
   openTabs: TabInfo[],
+  maxPerDomain = HISTORY_MAX_PER_DOMAIN,
 ): TabInfo[] {
   const openUrls = new Set(openTabs.map(tab => tab.url));
 
@@ -48,7 +53,7 @@ export function filterHistoryItems(
       try {
         const domain = new URL(item.url).hostname;
         const count = domainCount.get(domain) ?? 0;
-        if (count >= HISTORY_MAX_PER_DOMAIN) return false;
+        if (count >= maxPerDomain) return false;
         domainCount.set(domain, count + 1);
         return true;
       } catch {
@@ -76,4 +81,30 @@ export async function switchToTab(tabId: number): Promise<void> {
 
 export function getI18nMessage(key: string): string {
   return chrome.i18n.getMessage(key);
+}
+
+const RECENTLY_CLOSED_MAX = 25;
+
+/** Recently closed tabs that are not open again, newest first. Closed windows are skipped. */
+export async function getRecentlyClosedTabs(openTabs: TabInfo[]): Promise<TabInfo[]> {
+  const sessions = await chrome.sessions.getRecentlyClosed({ maxResults: RECENTLY_CLOSED_MAX });
+  const seen = new Set(openTabs.map(tab => tab.url));
+  const closed: TabInfo[] = [];
+  for (const { tab, lastModified } of sessions) {
+    if (!tab?.url || !tab.sessionId || seen.has(tab.url)) continue;
+    seen.add(tab.url);
+    closed.push({
+      id: -(closed.length + 1),
+      title: tab.title || '',
+      url: tab.url,
+      favIconUrl: tab.favIconUrl,
+      windowId: -1,
+      active: false,
+      // Chrome reports seconds since the epoch; accept milliseconds too.
+      lastAccessed: lastModified < 1e12 ? lastModified * 1000 : lastModified,
+      isClosedTab: true,
+      sessionId: tab.sessionId,
+    });
+  }
+  return closed;
 }

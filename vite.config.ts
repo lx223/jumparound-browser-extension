@@ -26,7 +26,7 @@ export default defineConfig({
   ],
   build: {
     outDir: 'dist',
-    rollupOptions: {
+    rolldownOptions: {
       input: {
         'content-ui': resolve(import.meta.dirname, 'src/content/index.html'),
         background: resolve(import.meta.dirname, 'src/background/index.ts'),

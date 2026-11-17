@@ -42,10 +42,14 @@ never send events. If changing region/host, also update `host_permissions` in
 `public/manifest.json` and the privacy policy. No SDK or remote code is loaded.
 
 Events:
-- `extension_opened`: `source` (`shortcut` or `action`) and `open_id`.
+- `extension_opened`: `source` (`action`, including shortcut opens), `open_id`, and
+  `shortcut` (`default` for Ctrl+K / ⌘K, `custom`, `unassigned`, or `unknown`). The
+  keys of a custom shortcut are never sent.
+- `shortcut_changed`: `from` and `to`, using the same `shortcut` values. Sent on the
+  first opening after an opted-in user's shortcut differs from the last one seen.
 - `result_selected`: `position` (1-based absolute result rank), `input_method`
-  (`keyboard` or `pointer`), `has_query`, `result_count`, `result_type` (`tab` or
-  `history`), and `open_id`.
+  (`keyboard` or `pointer`), `has_query`, `result_count`, `result_type` (`tab`,
+  `closed` or `history`), and `open_id`.
 - Both include `project: "jumparound"`, timestamp, random installation ID, and extension version. No
   query text, URLs, titles, or history entries are transmitted. Person profile
   processing is disabled. The queue retains at most 100 events, retries with
@@ -54,19 +58,30 @@ Events:
 In PostHog, filter all JumpAround insights by `project = jumparound` to distinguish
 this extension from other products sharing the same PostHog project.
 
-Chart total `extension_opened` events broken down by `source`.
+Chart total `extension_opened` events for popup usage.
 For result preference, compare `result_selected` with `position = 1` against
 `position > 1`; filter `has_query = true` for actual searches. Break down by
 `input_method` to compare clicks with Enter selections. These describe opted-in
 users only. `open_id` can link opens to selections without using PostHog sessions.
 
-The shortcut now uses the named `open-switcher` command so its source can be
-measured, and requires Chrome 127+ for `action.openPopup()`. Existing users may
-need to reassign their shortcut at `chrome://extensions/shortcuts` after updating.
-The action source includes browser action activations via accessibility or the
-extensions menu, not only mouse clicks. Shortcut markers expire after two seconds;
-unusually delayed popup startup can be classified as an action open. Safari
-compatibility needs manual verification before shipping a Safari release.
+To see whether people move off the default shortcut, break down `extension_opened` by
+`shortcut` (counting unique installations), and chart `shortcut_changed` broken down by
+`from` and `to`. Users who changed the shortcut before opting in show up as `custom`
+on `extension_opened` but never send `shortcut_changed`.
+
+The shortcut uses the native `_execute_action` command. Chrome shows one entry,
+“Activate the extension”, at `chrome://extensions/shortcuts`. Existing users who
+assigned the old “Open JumpAround” command may need to reassign their shortcut
+there after updating; custom bindings cannot be migrated automatically.
+Native action commands do not report whether the popup opened via shortcut,
+toolbar, accessibility, or the extensions menu, so all are recorded as `action`.
+Safari compatibility needs manual verification before shipping a Safari release.
+
+The privacy policy and `store/chrome/submission.md` describe analytics by category, so
+a new event or property that fits those categories needs only an entry in the list
+above. Update the policy, the store notes and the Chrome Web Store privacy form when
+you collect a new kind of data (anything derived from search text, URLs, titles or
+history, for example), add a permission, or send data to a new service.
 
 Before publishing, update Chrome Web Store privacy disclosures. Smoke-test a
 configured production build: opt out (no requests), opt in and reopen using both

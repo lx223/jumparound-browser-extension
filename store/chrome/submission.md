@@ -24,7 +24,7 @@ Cmd+K → "local" → Enter (localhost). Cmd+K → "stack" → Enter (Stack Over
 
 PRIVACY
 
-Tab and history search runs locally. Optional usage analytics is off by default. If you enable it, JumpAround sends opening and selection metadata, random identifiers, timestamps and extension version to PostHog EU Cloud. Analytics never includes your search text, tab titles, URLs or history entries. The service receives your IP address with requests. You can disable analytics in the popup; this clears the local identifier and pending events but does not delete events already sent. Opening a Google search sends your query to Google. See the privacy policy for details.
+Tab and history search runs locally. Optional usage analytics is off by default. If you enable it, JumpAround sends opening and selection metadata, random identifiers, timestamps and extension version to PostHog EU Cloud. Analytics never includes your search text, tab titles, URLs or history entries. The service receives your IP address with requests. You can disable analytics in the popup; this clears the local identifier and pending events but does not delete events already sent. Opening a web search sends your query to your default search engine. See the privacy policy for details.
 
 ---
 
@@ -50,7 +50,7 @@ Cmd+K → "local" → Enter (localhost). Cmd+K → "stack" → Enter (Stack Over
 
 PRIVACIDAD
 
-La búsqueda de pestañas e historial se realiza localmente. Las estadísticas de uso son opcionales y están desactivadas por defecto. Si las activas, JumpAround envía a PostHog EU Cloud metadatos de apertura y selección, identificadores aleatorios, marcas de tiempo y la versión de la extensión. Nunca incluyen el texto de búsqueda, títulos de pestañas, URLs ni entradas del historial. El servicio recibe tu dirección IP con las solicitudes. Puedes desactivarlas en la ventana de la extensión; se borran el identificador local y los eventos pendientes, pero no los ya enviados. Abrir una búsqueda en Google envía tu consulta a Google. Consulta la política de privacidad.
+La búsqueda de pestañas e historial se realiza localmente. Las estadísticas de uso son opcionales y están desactivadas por defecto. Si las activas, JumpAround envía a PostHog EU Cloud metadatos de apertura y selección, identificadores aleatorios, marcas de tiempo y la versión de la extensión. Nunca incluyen el texto de búsqueda, títulos de pestañas, URLs ni entradas del historial. El servicio recibe tu dirección IP con las solicitudes. Puedes desactivarlas en la ventana de la extensión; se borran el identificador local y los eventos pendientes, pero no los ya enviados. Abrir una búsqueda web envía tu consulta a tu buscador predeterminado. Consulta la política de privacidad.
 
 ---
 
@@ -76,7 +76,7 @@ Cmd+K → "local" → Entrée (localhost). Cmd+K → "stack" → Entrée (Stack 
 
 CONFIDENTIALITÉ
 
-La recherche dans les onglets et l’historique s’effectue localement. Les statistiques d’utilisation sont facultatives et désactivées par défaut. Si vous les activez, JumpAround envoie à PostHog EU Cloud des métadonnées d’ouverture et de sélection, des identifiants aléatoires, des horodatages et la version de l’extension. Elles ne contiennent jamais vos recherches, titres d’onglets, URL ou entrées d’historique. Le service reçoit votre adresse IP avec les requêtes. Vous pouvez les désactiver dans la fenêtre de l’extension : l’identifiant local et les événements en attente sont supprimés, mais pas les événements déjà envoyés. Ouvrir une recherche Google transmet votre requête à Google. Consultez la politique de confidentialité.
+La recherche dans les onglets et l’historique s’effectue localement. Les statistiques d’utilisation sont facultatives et désactivées par défaut. Si vous les activez, JumpAround envoie à PostHog EU Cloud des métadonnées d’ouverture et de sélection, des identifiants aléatoires, des horodatages et la version de l’extension. Elles ne contiennent jamais vos recherches, titres d’onglets, URL ou entrées d’historique. Le service reçoit votre adresse IP avec les requêtes. Vous pouvez les désactiver dans la fenêtre de l’extension : l’identifiant local et les événements en attente sont supprimés, mais pas les événements déjà envoyés. Ouvrir une recherche Web transmet votre requête à votre moteur de recherche par défaut. Consultez la politique de confidentialité.
 
 ---
 
@@ -102,7 +102,7 @@ Cmd+K → "local" → Enter（localhost）。Cmd+K → "stack" → Enter（Stack
 
 隐私保护
 
-标签页和历史记录搜索在本地完成。使用情况分析默认关闭，可自行选择开启。开启后，JumpAround 会向 PostHog 欧盟云服务发送打开和选择操作的元数据、随机标识符、时间戳及扩展版本，绝不包含搜索文字、标签页标题、网址或历史记录条目。服务会随请求接收到你的 IP 地址。你可在弹出窗口中关闭分析，这会清除本地标识符和待发送事件，但不会删除已发送的事件。打开 Google 搜索会将查询发送给 Google。详情请参阅隐私政策。
+标签页和历史记录搜索在本地完成。使用情况分析默认关闭，可自行选择开启。开启后，JumpAround 会向 PostHog 欧盟云服务发送打开和选择操作的元数据、随机标识符、时间戳及扩展版本，绝不包含搜索文字、标签页标题、网址或历史记录条目。服务会随请求接收到你的 IP 地址。你可在弹出窗口中关闭分析，这会清除本地标识符和待发送事件，但不会删除已发送的事件。打开网页搜索会将查询发送给你的默认搜索引擎。详情请参阅隐私政策。
 
 ---
 
@@ -128,7 +128,7 @@ Cmd+K → "local" → Enter（localhost）。Cmd+K → "stack" → Enter（Stack
 
 私隱保護
 
-分頁同歷史記錄搜尋喺本機完成。使用情況分析預設關閉，你可以自行開啟。開啟後，JumpAround 會向 PostHog 歐盟雲端服務傳送開啟同選取操作嘅中繼資料、隨機識別碼、時間戳記同擴充功能版本，絕不包括搜尋文字、分頁標題、網址或歷史記錄項目。服務會隨請求收到你嘅 IP 位址。你可以喺彈出視窗關閉分析，清除本機識別碼同待傳送事件，但唔會刪除已傳送嘅事件。開啟 Google 搜尋會將查詢傳送畀 Google。詳情請參閱私隱政策。
+分頁同歷史記錄搜尋喺本機完成。使用情況分析預設關閉，你可以自行開啟。開啟後，JumpAround 會向 PostHog 歐盟雲端服務傳送開啟同選取操作嘅中繼資料、隨機識別碼、時間戳記同擴充功能版本，絕不包括搜尋文字、分頁標題、網址或歷史記錄項目。服務會隨請求收到你嘅 IP 位址。你可以喺彈出視窗關閉分析，清除本機識別碼同待傳送事件，但唔會刪除已傳送嘅事件。開啟網上搜尋會將查詢傳送畀你嘅預設搜尋引擎。詳情請參閱私隱政策。
 
 ---
 
@@ -154,7 +154,76 @@ Cmd+K → "local" → Enter（localhost）。Cmd+K → "stack" → Enter（Stack
 
 隱私保護
 
-分頁與歷史紀錄搜尋在本機完成。使用情況分析預設關閉，可自行選擇開啟。開啟後，JumpAround 會向 PostHog 歐盟雲端服務傳送開啟與選取操作的中繼資料、隨機識別碼、時間戳記及擴充功能版本，絕不包含搜尋文字、分頁標題、網址或歷史紀錄項目。服務會隨請求收到你的 IP 位址。你可在彈出視窗關閉分析，清除本機識別碼及待傳送事件，但不會刪除已傳送的事件。開啟 Google 搜尋會將查詢傳送給 Google。詳情請參閱隱私權政策。
+分頁與歷史紀錄搜尋在本機完成。使用情況分析預設關閉，可自行選擇開啟。開啟後，JumpAround 會向 PostHog 歐盟雲端服務傳送開啟與選取操作的中繼資料、隨機識別碼、時間戳記及擴充功能版本，絕不包含搜尋文字、分頁標題、網址或歷史紀錄項目。服務會隨請求收到你的 IP 位址。你可在彈出視窗關閉分析，清除本機識別碼及待傳送事件，但不會刪除已傳送的事件。開啟網路搜尋會將查詢傳送給你的預設搜尋引擎。詳情請參閱隱私權政策。
+
+---
+
+### Português (Brasil)
+
+---
+
+Encontre qualquer aba instantaneamente com Cmd+K. Como o Quick Open do VS Code, mas no navegador.
+
+Dezenas de abas em várias janelas? Pressione Cmd+K (Ctrl+K no Windows/Linux), digite algumas letras e pressione Enter para ir à aba desejada.
+
+RECURSOS
+
+• Pesquisa aproximada — encontre abas por partes do título ou endereço.
+• Histórico recente — encontre páginas visitadas que já não estão abertas.
+• Ordenação inteligente — as abas usadas mais recentemente aparecem primeiro.
+• Todas as janelas — pesquise suas abas abertas em um só lugar.
+• Navegação pelo teclado — use as setas para selecionar, Enter para abrir e Escape para fechar.
+• Temas claro, escuro e automático.
+
+PRIVACIDADE
+
+A pesquisa de abas e histórico é feita localmente. As estatísticas de uso são opcionais e vêm desativadas. Se você as ativar, o JumpAround enviará metadados de abertura e seleção, identificadores aleatórios, horários e a versão da extensão ao PostHog EU Cloud. Esses eventos nunca incluem o texto da pesquisa, títulos de abas, endereços ou itens do histórico. O serviço recebe seu endereço IP nas solicitações. Você pode desativar as estatísticas na janela da extensão; isso apaga o identificador local e os eventos pendentes, mas não os já enviados. Abrir uma pesquisa na web envia sua consulta ao seu mecanismo de pesquisa padrão. Consulte a política de privacidade para mais detalhes.
+
+---
+
+### Deutsch
+
+---
+
+Mit Cmd+K sofort den richtigen Tab finden. Wie Quick Open in VS Code, direkt im Browser.
+
+Dutzende Tabs in mehreren Fenstern? Cmd+K drücken (Ctrl+K unter Windows/Linux), ein paar Buchstaben eingeben und mit Enter zum gewünschten Tab wechseln.
+
+FUNKTIONEN
+
+• Unscharfe Suche — Tabs anhand von Teilen des Titels oder der Webadresse finden.
+• Kürzlich besuchte Seiten — auch Seiten finden, die nicht mehr geöffnet sind.
+• Intelligente Sortierung — zuletzt verwendete Tabs erscheinen zuerst.
+• Alle Fenster — geöffnete Tabs an einer Stelle durchsuchen.
+• Tastaturbedienung — mit den Pfeiltasten auswählen, mit Enter öffnen und mit Escape schließen.
+• Helles, dunkles oder automatisches Design.
+
+DATENSCHUTZ
+
+Tabs und Verlauf werden lokal durchsucht. Optionale Nutzungsstatistiken sind standardmäßig deaktiviert. Wenn Sie diese aktivieren, sendet JumpAround Metadaten zum Öffnen und zur Ergebnisauswahl, zufällige Kennungen, Zeitstempel und die Erweiterungsversion an PostHog EU Cloud. Suchtext, Tab-Titel, Webadressen und Verlaufseinträge sind nie in diesen Ereignissen enthalten. Der Dienst erhält bei Anfragen Ihre IP-Adresse. Sie können die Statistiken im Erweiterungsfenster deaktivieren. Dabei werden die lokale Kennung und ausstehende Ereignisse gelöscht, jedoch keine bereits gesendeten Ereignisse. Wenn Sie eine Websuche öffnen, wird Ihre Suchanfrage an Ihre Standardsuchmaschine übermittelt. Einzelheiten finden Sie in der Datenschutzerklärung.
+
+---
+
+### 日本語
+
+---
+
+Cmd+K で目的のタブをすぐに見つける。VS Code の Quick Open のような操作をブラウザでも。
+
+複数のウィンドウにタブがたくさん開いていませんか？ Cmd+K（Windows/Linux では Ctrl+K）を押し、数文字入力して Enter を押すと、目的のタブに切り替えられます。
+
+主な機能
+
+• あいまい検索 — タイトルや URL の一部からタブを検索できます。
+• 最近の閲覧履歴 — すでに閉じたページも検索結果に表示します。
+• 最近使った順に表示 — よく使うタブにすばやく移動できます。
+• すべてのウィンドウを検索 — 開いているタブをまとめて探せます。
+• キーボードで操作 — 矢印キーで選択、Enter で開く、Escape で閉じます。
+• ライト・ダーク・自動テーマに対応。
+
+プライバシー
+
+タブと履歴の検索は端末内で行います。任意の利用統計は初期状態では無効です。有効にすると、開き方や検索結果の選択に関するメタデータ、ランダムな識別子、日時、拡張機能のバージョンを PostHog EU Cloud に送信します。検索語句、タブのタイトル、URL、履歴の項目は統計に含まれません。送信先のサービスはリクエスト時に IP アドレスを受け取ります。利用統計は拡張機能のポップアップで無効にできます。無効にすると端末内の識別子と未送信のイベントを削除しますが、送信済みのイベントは削除されません。ウェブ検索を開くと検索語句が既定の検索エンジンに送信されます。詳しくはプライバシーポリシーをご覧ください。
 
 ---
 
@@ -174,7 +243,7 @@ tabs
 Required to read title, url and favIconUrl from all open tabs returned by chrome.tabs.query({}). JumpAround displays these fields in its popup and searches tab titles and URLs across every browser window. This is the extension’s core tab-search feature, not a permission needed merely to call tabs.update or tabs.create. The only host permission is https://eu.i.posthog.com/*, which does not grant access to other tabs’ metadata. activeTab would expose only the invoked tab and cannot support searching all open tabs. Tab metadata is processed locally and is never sent to analytics.
 
 history
-Required to retrieve recent browsing history so users can quickly navigate back to recently visited pages that are no longer open in any tab, displayed alongside open tabs in the search results.
+Required to retrieve recent browsing history so users can quickly navigate back to recently visited pages that are no longer open in any tab, displayed alongside open tabs in the search results. When the user types a query, chrome.history.search is also called with that text so older matching pages can be found. History is searched locally and never transmitted.
 
 storage
 Stores the user’s optional analytics consent, a random installation identifier, and a bounded queue of up to 100 pending usage events in chrome.storage.local. Analytics is off by default. Disabling analytics deletes the identifier and pending events. Search text, tab titles, URLs and browsing history are never stored in the analytics queue.
@@ -182,8 +251,14 @@ Stores the user’s optional analytics consent, a random installation identifier
 alarms
 Schedules retries for pending usage analytics events after network failures so delivery can continue when the extension service worker restarts. Events are queued only after the user opts in to analytics. Retry alarms are cleared when the queue is delivered or the user disables analytics. Alarms are not used to collect browsing history or track visited websites.
 
+search
+When no tab or history result matches, pressing Enter passes the typed text to chrome.search.query so it opens in a new tab with the user's own default search engine, instead of a hardcoded engine. The extension does not read or change search settings.
+
+sessions
+Required to list recently closed tabs with chrome.sessions.getRecentlyClosed so they appear in the popup's search results, and to reopen the chosen one with chrome.sessions.restore, which returns it to its window with its back/forward history. Closed-tab titles and URLs are processed locally and never transmitted.
+
 Host permission: https://eu.i.posthog.com/*
-Access is limited to https://eu.i.posthog.com/* to send optional usage analytics to PostHog EU Cloud over HTTPS. Analytics is off by default and requires consent in the popup. Events describe opening method and result-selection metadata, with random identifiers and extension version. Search text, tab titles, URLs and browsing history are never transmitted. No remote scripts or executable code are downloaded.
+Access is limited to https://eu.i.posthog.com/* to send optional usage analytics to PostHog EU Cloud over HTTPS. Analytics is off by default and requires consent in the popup. Events describe how the extension is used and set up, such as how the popup is opened and which result position is chosen, with random identifiers and extension version. Search text, tab titles, URLs and browsing history are never transmitted. No remote scripts or executable code are downloaded.
 
 ## Remote Code
 
@@ -195,8 +270,8 @@ The dashboard asks about data handled by the extension, including data processed
 
 - Personally identifiable information: the optional analytics installation identifier is a random persistent identifier; no names or email addresses are collected.
 - Location: the analytics service receives the request IP address when opted-in events are delivered. The extension does not request GPS location.
-- Web history: tab and browsing-history URLs, titles and access times are processed locally for search and navigation; they are never included in analytics.
-- User activity: optional analytics records opening method and result-selection metadata, including result position, keyboard or pointer input, whether a query was present, result count and result type. It does not send the query text.
+- Web history: open-tab, recently-closed-tab and browsing-history URLs, titles and access times are processed locally for search and navigation; they are never included in analytics.
+- User activity: optional analytics records how the extension is used and set up, such as how the popup is opened and which result position is chosen. It never sends the query text, tab titles, URLs or history. The README lists each event and property.
 - Website content: tab titles and favicons are used locally to display search results; page bodies are not scraped or sent to analytics.
 
 Leave health information, financial and payment information, authentication information, and personal communications unselected.
@@ -223,7 +298,9 @@ Implementation: `src/content/TabSwitcher.tsx` sends GET_TABS when the popup open
 | Permission | Active use | Why narrower access is insufficient |
 | --- | --- | --- |
 | tabs | Reads title, URL and favicon for all open tabs, including inactive tabs in other windows. | activeTab covers only the invoked tab. Broad website host access would grant more capabilities than tabs. |
-| history | chrome.history.search retrieves recent history for local history search results. | Tab metadata does not include closed pages from browsing history. |
+| history | chrome.history.search retrieves recent history, plus matches for the typed query, for local history search results. | Tab metadata does not include closed pages from browsing history. |
 | storage | chrome.storage.local saves analytics consent, installation identifier and bounded event queue; chrome.storage.session holds a short-lived shortcut marker across service-worker restarts. | Service workers cannot use window.localStorage; in-memory state would be lost on restart. |
 | alarms | chrome.alarms.create and onAlarm retry queued opted-in analytics; clear removes retries on delivery or opt-out. | A worker timer does not survive service-worker suspension. |
+| search | chrome.search.query opens the typed query with the user's default search engine when nothing matches. | Opening a hardcoded engine URL would ignore the user's chosen search engine. |
+| sessions | chrome.sessions.getRecentlyClosed lists recently closed tabs for local search; chrome.sessions.restore reopens the chosen one. | History cannot restore a closed tab to its window with its back/forward history. |
 | https://eu.i.posthog.com/* | HTTPS POST to the PostHog /batch/ endpoint for opted-in usage events. | Access is limited to the configured ingestion host, with no broad website host patterns. |

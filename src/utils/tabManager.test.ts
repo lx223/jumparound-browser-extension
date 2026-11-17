@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { getAllTabs } from './tabManager';
+import { getAllTabs, getRecentlyClosedTabs } from './tabManager';
 
 describe('getAllTabs', () => {
   const currentWindowId = 1;
@@ -95,5 +95,43 @@ it('requests tabs and the current window concurrently', async () => {
   expect(chrome.windows.getCurrent).toHaveBeenCalledOnce();
   resolveTabs([]);
   await expect(pending).resolves.toEqual([]);
+  vi.unstubAllGlobals();
+});
+
+it('searches all of history for typed text, but only recent history otherwise', async () => {
+  const search = vi.fn().mockResolvedValue([]);
+  vi.stubGlobal('chrome', { history: { search } });
+  const { searchHistory } = await import('./tabManager');
+  await searchHistory('invoice');
+  expect(search).toHaveBeenLastCalledWith(expect.objectContaining({ text: 'invoice', startTime: 0 }));
+  await searchHistory();
+  expect(search.mock.lastCall![0].startTime).toBeGreaterThan(0);
+  vi.unstubAllGlobals();
+});
+
+it('caps history per domain only when asked to', async () => {
+  const { filterHistoryItems } = await import('./tabManager');
+  const items = Array.from({ length: 5 }, (_, i) => ({ id: `${i}`, url: `https://a.com/${i}`, title: `${i}` }));
+  expect(filterHistoryItems(items, [])).toHaveLength(3);
+  expect(filterHistoryItems(items, [], Infinity)).toHaveLength(5);
+});
+
+it('lists recently closed tabs that are not open again, newest first', async () => {
+  const closedTab = (sessionId: string | undefined, url: string) => ({ sessionId, url, title: url.toUpperCase(), favIconUrl: undefined });
+  vi.stubGlobal('chrome', { sessions: { getRecentlyClosed: vi.fn().mockResolvedValue([
+    { lastModified: 1_700_000_000, tab: closedTab('a', 'https://a.example/') },
+    { lastModified: 1_699_999_990, window: { tabs: [] } },
+    { lastModified: 1_699_999_980, tab: closedTab('b', 'https://open.example/') },
+    { lastModified: 1_699_999_970, tab: closedTab('c', 'https://a.example/') },
+    { lastModified: 1_699_999_960, tab: closedTab(undefined, 'https://no-session.example/') },
+    { lastModified: 1_699_999_950_123, tab: closedTab('d', 'https://ms.example/') },
+  ]) } });
+  const open = [{ id: 1, title: 'Open', url: 'https://open.example/', windowId: 1, active: true, lastAccessed: 1 }];
+  expect(await getRecentlyClosedTabs(open)).toEqual([
+    { id: -1, title: 'HTTPS://A.EXAMPLE/', url: 'https://a.example/', favIconUrl: undefined, windowId: -1, active: false,
+      lastAccessed: 1_700_000_000_000, isClosedTab: true, sessionId: 'a' },
+    { id: -2, title: 'HTTPS://MS.EXAMPLE/', url: 'https://ms.example/', favIconUrl: undefined, windowId: -1, active: false,
+      lastAccessed: 1_699_999_950_123, isClosedTab: true, sessionId: 'd' },
+  ]);
   vi.unstubAllGlobals();
 });

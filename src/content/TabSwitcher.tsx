@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect } from 'react';
-import { Search, Sun, Moon, Monitor, Settings, History } from 'lucide-react';
+import { Search, Sun, Moon, Monitor, Settings, History, RotateCcw } from 'lucide-react';
 import type { TabInfo, Message } from '../types';
-import { createTabSearcher, createSearchUrl } from '../utils/tabSearch';
+import { createTabSearcher, createSearchUrl, findDuplicateTabs, isUrl, parseDuplicateFilter } from '../utils/tabSearch';
 import HighlightedText from '../components/HighlightedText';
 import { useTheme, type ThemeMode } from './ThemeContext';
 
@@ -17,19 +17,30 @@ const themeOptions: { mode: ThemeMode; icon: React.ReactNode; label: string }[] 
 const ROW_HEIGHT = 56;
 const OVERSCAN = 4;
 const VIEWPORT_HEIGHT = 536;
+const HISTORY_SEARCH_DELAY = 150;
+
+/** Add history found by a typed search to the initial list, keeping row keys unique. */
+function mergeHistory(base: TabInfo[], extra: TabInfo[]): TabInfo[] {
+  if (!extra.length) return base;
+  const seen = new Set(base.map(tab => tab.url));
+  return [...base, ...extra.filter(tab => !seen.has(tab.url) && seen.add(tab.url))]
+    .map((tab, index) => ({ ...tab, id: -(index + 1) }));
+}
 
 const TabSwitcher: React.FC = () => {
-  const [tabs, setTabs] = useState<{ open: TabInfo[]; history: TabInfo[] }>({ open: [], history: [] });
+  const [tabs, setTabs] = useState<{ open: TabInfo[]; closed: TabInfo[]; history: TabInfo[] }>({ open: [], closed: [], history: [] });
+  const [searchedHistory, setSearchedHistory] = useState<TabInfo[]>([]);
   const [scrollTop, setScrollTop] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  // null means "use the default row", which depends on the results.
+  const [selection, setSelection] = useState<number | null>(null);
   const [analyticsConsent, setAnalyticsConsent] = useState(false);
   const [shortcut, setShortcut] = useState(() => message('shortcutLoading', 'Loading…'));
   useEffect(() => {
     chrome.commands.getAll(commands => {
       setShortcut(chrome.runtime.lastError
         ? message('shortcutUnavailable', 'Unavailable')
-        : commands.find(command => command.name === 'open-switcher')?.shortcut || message('shortcutNotAssigned', 'Not assigned'));
+        : commands.find(command => command.name === '_execute_action')?.shortcut || message('shortcutNotAssigned', 'Not assigned'));
     });
   }, []);
   const openId = useRef(crypto.randomUUID());
@@ -48,13 +59,16 @@ const TabSwitcher: React.FC = () => {
   const searchPlaceholder = chrome.i18n?.getMessage('searchPlaceholder') || 'Search tabs...';
   const noResults = chrome.i18n?.getMessage('noResults') || 'No tabs found';
   const noMatchingTabs = chrome.i18n?.getMessage('noMatchingTabs') || 'No matching tabs.';
-  const pressEnterToSearch = chrome.i18n?.getMessage('pressEnterToSearch') || 'Press Enter to search on Google in a new tab';
+  const noDuplicateTabs = chrome.i18n?.getMessage('noDuplicateTabs') || 'No duplicate tabs.';
+  const pressEnterToSearch = chrome.i18n?.getMessage('pressEnterToSearch') || 'Press Enter to search the web in a new tab';
   const historyTabLabel = chrome.i18n?.getMessage('historyTab') || 'History';
+  const closedTabLabel = chrome.i18n?.getMessage('closedTab') || 'Closed';
 
   useEffect(() => {
     chrome.runtime.sendMessage({ type: 'GET_TABS' } as Message, (response) => {
       setTabs({
         open: response?.tabs ?? [],
+        closed: response?.closedTabs ?? [],
         history: response?.historyTabs ?? [],
       });
     });
@@ -62,8 +76,40 @@ const TabSwitcher: React.FC = () => {
     searchInputRef.current?.focus();
   }, []);
 
-  const searcher = useMemo(() => createTabSearcher(tabs.open, tabs.history), [tabs]);
-  const searchResults = useMemo(() => searcher.search(searchQuery), [searcher, searchQuery]);
+  // The initial list holds only recent history; ask for older matches as the user types.
+  useEffect(() => {
+    const query = searchQuery.trim();
+    if (!query || parseDuplicateFilter(query) !== null) return;
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      chrome.runtime.sendMessage({ type: 'SEARCH_HISTORY', query } as Message, (response) => {
+        if (chrome.runtime.lastError || cancelled) return;
+        setSearchedHistory(response?.historyTabs ?? []);
+      });
+    }, HISTORY_SEARCH_DELAY);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [searchQuery]);
+
+  // Recently closed tabs travel with history; the searcher ranks them between open tabs and history.
+  const history = useMemo(() => {
+    const closedUrls = new Set(tabs.closed.map(tab => tab.url));
+    return [...tabs.closed, ...mergeHistory(tabs.history, searchQuery.trim() ? searchedHistory : [])
+      .filter(tab => !closedUrls.has(tab.url))];
+  }, [tabs.closed, tabs.history, searchedHistory, searchQuery]);
+  const searcher = useMemo(() => createTabSearcher(tabs.open, history), [tabs.open, history]);
+  // "@dup" lists only open tabs that are open more than once, then searches within them.
+  const duplicateQuery = parseDuplicateFilter(searchQuery);
+  const searchResults = useMemo(() => duplicateQuery === null
+    ? searcher.search(searchQuery)
+    : createTabSearcher(findDuplicateTabs(tabs.open)).search(duplicateQuery),
+  [searcher, searchQuery, duplicateQuery, tabs.open]);
+  // With no query the current tab is listed first, so start on the previous tab:
+  // opening JumpAround and pressing Enter jumps back, like Alt+Tab.
+  const defaultIndex = !searchQuery.trim() && searchResults[0]?.item.active && searchResults.length > 1 ? 1 : 0;
+  const selectedIndex = selection ?? defaultIndex;
   const startIndex = Math.min(
     Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - OVERSCAN),
     Math.max(0, searchResults.length - 1),
@@ -115,6 +161,14 @@ const TabSwitcher: React.FC = () => {
     [closePopup]
   );
 
+  // Restoring puts the tab back in its window with its back/forward history.
+  const restoreTab = useCallback((tab: TabInfo) => {
+    chrome.runtime.sendMessage({ type: 'RESTORE_TAB', sessionId: tab.sessionId } as Message, (response) => {
+      if (chrome.runtime.lastError || !response?.success) openUrl(tab.url);
+      else closePopup();
+    });
+  }, [openUrl, closePopup]);
+
   const selectResult = useCallback((index: number, inputMethod: 'keyboard' | 'pointer') => {
     const selected = searchResults[index];
     if (!selected) return;
@@ -122,16 +176,28 @@ const TabSwitcher: React.FC = () => {
     const activate = () => {
       if (activated) return;
       activated = true;
-      if (selected.item.isHistoryTab) openUrl(selected.item.url);
+      if (selected.item.isClosedTab) restoreTab(selected.item);
+      else if (selected.item.isHistoryTab) openUrl(selected.item.url);
       else switchToTab(selected.item.id);
     };
     const fallback = window.setTimeout(activate, 150);
     // Wait only for local queue persistence, never network delivery.
     chrome.runtime.sendMessage({ type: 'ANALYTICS_SELECTION', openId: openId.current, metadata: {
       position: index + 1, input_method: inputMethod, has_query: Boolean(searchQuery.trim()),
-      result_count: searchResults.length, result_type: selected.item.isHistoryTab ? 'history' : 'tab',
+      result_count: searchResults.length, result_type: selected.item.isClosedTab ? 'closed' : selected.item.isHistoryTab ? 'history' : 'tab',
     } }, () => { void chrome.runtime.lastError; window.clearTimeout(fallback); activate(); });
-  }, [searchResults, searchQuery, openUrl, switchToTab]);
+  }, [searchResults, searchQuery, openUrl, restoreTab, switchToTab]);
+
+  const searchWeb = useCallback((input: string) => {
+    const query = input.trim();
+    // chrome.search uses the user's default engine; other browsers may lack it.
+    if (isUrl(query) || !chrome.search?.query) {
+      openUrl(createSearchUrl(query));
+      return;
+    }
+    chrome.search.query({ text: query, disposition: 'NEW_TAB' })
+      .then(closePopup, () => openUrl(createSearchUrl(query)));
+  }, [openUrl, closePopup]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -140,21 +206,21 @@ const TabSwitcher: React.FC = () => {
         const selected = searchResults[selectedIndex];
         if (selected) {
           selectResult(selectedIndex, 'keyboard');
-        } else if (searchQuery.trim()) {
-          openUrl(createSearchUrl(searchQuery));
+        } else if (searchQuery.trim() && parseDuplicateFilter(searchQuery) === null) {
+          searchWeb(searchQuery);
         }
       } else if (e.key === 'ArrowDown' || (e.key === 'Tab' && !e.shiftKey)) {
         e.preventDefault();
-        setSelectedIndex(prev => (prev + 1) % Math.max(searchResults.length, 1));
+        setSelection((selectedIndex + 1) % Math.max(searchResults.length, 1));
       } else if (e.key === 'ArrowUp' || (e.key === 'Tab' && e.shiftKey)) {
         e.preventDefault();
-        setSelectedIndex(prev => (prev - 1 + searchResults.length) % Math.max(searchResults.length, 1));
+        setSelection((selectedIndex - 1 + searchResults.length) % Math.max(searchResults.length, 1));
       } else if (e.key === 'Escape') {
         e.preventDefault();
         closePopup();
       }
     },
-    [searchResults, selectedIndex, searchQuery, openUrl, selectResult, closePopup]
+    [searchResults, selectedIndex, searchQuery, searchWeb, selectResult, closePopup]
   );
 
   return (
@@ -173,7 +239,7 @@ const TabSwitcher: React.FC = () => {
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
-              setSelectedIndex(0);
+              setSelection(null);
               setScrollTop(0);
               if (listRef.current) listRef.current.scrollTop = 0;
             }}
@@ -243,7 +309,9 @@ const TabSwitcher: React.FC = () => {
       >
         {searchResults.length === 0 ? (
           <li className="p-8 text-center">
-            {searchQuery.trim() ? (
+            {duplicateQuery !== null ? (
+              <p className="text-text-secondary font-medium">{noDuplicateTabs}</p>
+            ) : searchQuery.trim() ? (
               <>
                 <p className="text-text-secondary font-medium">{noMatchingTabs}</p>
                 <p className="text-text-primary font-semibold mt-1">{pressEnterToSearch}</p>
@@ -260,7 +328,7 @@ const TabSwitcher: React.FC = () => {
             const tab = result.item;
             const isSelected = index === selectedIndex;
             return (
-              <li key={`${tab.isHistoryTab ? 'h' : 't'}-${tab.id}`} aria-posinset={index + 1} aria-setsize={searchResults.length}
+              <li key={`${tab.isClosedTab ? 'c' : tab.isHistoryTab ? 'h' : 't'}-${tab.id}`} aria-posinset={index + 1} aria-setsize={searchResults.length}
                 style={{ height: ROW_HEIGHT }} className="px-2 py-0.5">
                 <button
                   type="button"
@@ -306,6 +374,14 @@ const TabSwitcher: React.FC = () => {
                           dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700/50">
                           <History size={10} />
                           {historyTabLabel}
+                        </span>
+                      )}
+                      {tab.isClosedTab && (
+                        <span className="shrink-0 flex items-center gap-0.5 text-[0.65rem] font-semibold px-1.5 py-px rounded
+                          bg-amber-100 text-amber-800 border border-amber-200 leading-none
+                          dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700/50">
+                          <RotateCcw size={10} />
+                          {closedTabLabel}
                         </span>
                       )}
                     </div>
