@@ -3,15 +3,14 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { resolve } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
-import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 /** Injects package.json version into dist/manifest.json after build. */
 function injectManifestVersion() {
   return {
     name: 'inject-manifest-version',
     closeBundle() {
-      const pkg = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf-8'));
-      const manifestPath = resolve(__dirname, 'dist/manifest.json');
+      const pkg = JSON.parse(readFileSync(resolve(import.meta.dirname, 'package.json'), 'utf-8'));
+      const manifestPath = resolve(import.meta.dirname, 'dist/manifest.json');
       const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
       manifest.version = pkg.version;
       writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
@@ -23,21 +22,14 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    viteStaticCopy({
-      targets: [
-        { src: 'public/manifest.json', dest: '.' },
-        { src: 'public/_locales', dest: '.' },
-        { src: 'public/icons', dest: '.' },
-      ],
-    }),
     injectManifestVersion(),
   ],
   build: {
     outDir: 'dist',
     rollupOptions: {
       input: {
-        'content-ui': resolve(__dirname, 'src/content/index.html'),
-        background: resolve(__dirname, 'src/background/index.ts'),
+        'content-ui': resolve(import.meta.dirname, 'src/content/index.html'),
+        background: resolve(import.meta.dirname, 'src/background/index.ts'),
       },
       output: {
         entryFileNames: (chunkInfo) => {
