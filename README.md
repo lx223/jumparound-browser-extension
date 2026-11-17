@@ -33,7 +33,7 @@ MIT - See [LICENSE](./LICENSE) file for details
 
 ## Optional product analytics
 
-Analytics is off by default and requires the user to opt in using the popup checkbox.
+Analytics is off by default and requires the user to opt in on the extension’s settings page (popup → Settings).
 Production builds read `VITE_POSTHOG_PROJECT_TOKEN` (the public project ingestion
 token, never a personal API key) and `VITE_POSTHOG_HOST` (defaults to
 `https://eu.i.posthog.com`). Set these in `.env.local` or the build environment,

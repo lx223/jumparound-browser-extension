@@ -18,5 +18,23 @@
   "configureShortcutsTitle": { "message": "設定鍵盤快捷鍵" },
   "configureShortcut": { "message": "設定快捷鍵" },
   "analyticsConsent": { "message": "分享選用的使用情況分析資料（含隨機識別碼；不含搜尋文字或瀏覽網址）" },
-  "openSwitcherCommand": { "message": "開啟 JumpAround" }
+  "openSwitcherCommand": { "message": "開啟 JumpAround" },
+  "openSettings": {
+    "message": "設定"
+  },
+  "openSettingsTitle": {
+    "message": "開啟設定（包括使用情況分析）"
+  },
+  "optionsTitle": {
+    "message": "JumpAround 設定"
+  },
+  "analyticsHeading": {
+    "message": "使用情況分析"
+  },
+  "analyticsDetails": {
+    "message": "預設為關閉。關閉後會刪除本機識別碼和待傳送的事件。已傳送的事件不會被刪除。"
+  },
+  "analyticsSaveFailed": {
+    "message": "無法儲存此設定，請再試一次。"
+  }
 }

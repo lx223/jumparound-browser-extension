@@ -18,5 +18,23 @@
   "configureShortcutsTitle": { "message": "Configurer les raccourcis clavier" },
   "configureShortcut": { "message": "Configurer le raccourci" },
   "analyticsConsent": { "message": "Partager des statistiques d’utilisation facultatives (avec des identifiants aléatoires ; sans texte de recherche ni URL de navigation)" },
-  "openSwitcherCommand": { "message": "Ouvrir JumpAround" }
+  "openSwitcherCommand": { "message": "Ouvrir JumpAround" },
+  "openSettings": {
+    "message": "Paramètres"
+  },
+  "openSettingsTitle": {
+    "message": "Ouvrir les paramètres, y compris les statistiques d’utilisation"
+  },
+  "optionsTitle": {
+    "message": "Paramètres de JumpAround"
+  },
+  "analyticsHeading": {
+    "message": "Statistiques d’utilisation"
+  },
+  "analyticsDetails": {
+    "message": "Désactivé par défaut. La désactivation supprime l’identifiant local et les événements en attente. Les événements déjà envoyés ne sont pas supprimés."
+  },
+  "analyticsSaveFailed": {
+    "message": "Impossible d’enregistrer ce paramètre. Veuillez réessayer."
+  }
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect } from 'react';
-import { Search, Sun, Moon, Monitor, Settings, History, RotateCcw } from 'lucide-react';
+import { Search, Sun, Moon, Monitor, Settings, History, RotateCcw, Keyboard } from 'lucide-react';
 import type { TabInfo, Message } from '../types';
 import { createTabSearcher, createSearchUrl, findDuplicateTabs, isUrl, parseDuplicateFilter } from '../utils/tabSearch';
 import HighlightedText from '../components/HighlightedText';
@@ -34,7 +34,6 @@ const TabSwitcher: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   // null means "use the default row", which depends on the results.
   const [selection, setSelection] = useState<number | null>(null);
-  const [analyticsConsent, setAnalyticsConsent] = useState(false);
   const [shortcut, setShortcut] = useState(() => message('shortcutLoading', 'Loading…'));
   useEffect(() => {
     chrome.commands.getAll(commands => {
@@ -50,7 +49,6 @@ const TabSwitcher: React.FC = () => {
       opened.current = true;
       chrome.runtime.sendMessage({ type: 'ANALYTICS_OPEN', openId: openId.current }, () => void chrome.runtime.lastError);
     }
-    void chrome.storage?.local.get('analyticsConsent').then(state => setAnalyticsConsent(state.analyticsConsent === true));
   }, []);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
@@ -279,6 +277,7 @@ const TabSwitcher: React.FC = () => {
             {shortcut.replace(/([⌘⌃⌥⇧])\s*\+?\s*/g, '$1+').split('+').map(key => key.trim()).join(' + ')}
           </kbd>
         </span>
+        <div className="flex items-center gap-1">
         <button
           onClick={() => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' })}
           title={message('configureShortcutsTitle', 'Configure keyboard shortcuts')}
@@ -286,20 +285,22 @@ const TabSwitcher: React.FC = () => {
             text-text-secondary underline underline-offset-2 hover:text-text-primary hover:bg-surface-hover
             transition-all duration-150 cursor-pointer shrink-0"
         >
-          <Settings size={14} />
+          <Keyboard size={14} />
           {message('configureShortcut', 'Configure shortcut')}
         </button>
+        <button
+          onClick={() => void chrome.runtime.openOptionsPage()}
+          title={message('openSettingsTitle', 'Open settings, including usage analytics')}
+          className="flex items-center gap-1.5 rounded px-2 py-1
+            text-text-secondary underline underline-offset-2 hover:text-text-primary hover:bg-surface-hover
+            transition-all duration-150 cursor-pointer shrink-0"
+        >
+          <Settings size={14} />
+          {message('openSettings', 'Settings')}
+        </button>
+        </div>
       </div>
 
-      <label className="flex items-center gap-2 px-4 pb-2 text-xs text-text-secondary">
-        <input type="checkbox" checked={analyticsConsent} onChange={e => {
-          const enabled = e.target.checked;
-          chrome.runtime.sendMessage({ type: 'ANALYTICS_CONSENT', enabled }, response => {
-            if (!chrome.runtime.lastError && response?.success) setAnalyticsConsent(enabled);
-          });
-        }} />
-        {message('analyticsConsent', 'Share optional usage analytics (includes random identifiers; no search text or browsing URLs)')}
-      </label>
       {/* Tab list */}
       <ul
         ref={listRef}

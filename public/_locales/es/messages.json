@@ -18,5 +18,23 @@
   "configureShortcutsTitle": { "message": "Configurar atajos de teclado" },
   "configureShortcut": { "message": "Configurar atajo" },
   "analyticsConsent": { "message": "Compartir estadísticas de uso opcionales (incluyen identificadores aleatorios; sin texto de búsqueda ni direcciones web visitadas)" },
-  "openSwitcherCommand": { "message": "Abrir JumpAround" }
+  "openSwitcherCommand": { "message": "Abrir JumpAround" },
+  "openSettings": {
+    "message": "Ajustes"
+  },
+  "openSettingsTitle": {
+    "message": "Abrir los ajustes, incluidas las estadísticas de uso"
+  },
+  "optionsTitle": {
+    "message": "Ajustes de JumpAround"
+  },
+  "analyticsHeading": {
+    "message": "Estadísticas de uso"
+  },
+  "analyticsDetails": {
+    "message": "Desactivado de forma predeterminada. Al desactivarlo se eliminan el identificador local y los eventos pendientes. Los eventos ya enviados no se eliminan."
+  },
+  "analyticsSaveFailed": {
+    "message": "No se pudo guardar este ajuste. Inténtalo de nuevo."
+  }
 }

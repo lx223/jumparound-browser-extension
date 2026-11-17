@@ -1,5 +1,7 @@
 import { expect, it } from 'vitest';
 import component from './TabSwitcher.tsx?raw';
+import options from '../options/Options.tsx?raw';
+import optionsEntry from '../options/index.tsx?raw';
 import manifest from '../../public/manifest.json?raw';
 
 const catalogs = import.meta.glob<{ default: Record<string, { message: string }> }>('../../public/_locales/*/messages.json', { eager: true });
@@ -7,7 +9,7 @@ const catalogs = import.meta.glob<{ default: Record<string, { message: string }>
 it('provides every UI and manifest message in every supported locale', () => {
   const english = catalogs['../../public/_locales/en/messages.json'].default;
   const referenced = [
-    ...Array.from(component.matchAll(/(?:message|getMessage)\('([^']+)'/g), match => match[1]),
+    ...[component, options, optionsEntry].flatMap(source => Array.from(source.matchAll(/(?:message|getMessage)\('([^']+)'/g), match => match[1])),
     ...Array.from(manifest.matchAll(/__MSG_(\w+)__/g), match => match[1]),
     'themeLight', 'themeDark', 'themeAuto',
   ];
