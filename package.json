@@ -10,6 +10,7 @@
     "build:safari": "npm run build && npm run convert:safari",
     "convert:safari": "xcrun safari-web-extension-converter dist --app-name JumpAround --bundle-identifier jumparound.lanxiao.dev",
     "generate-icons": "node scripts/generate-icons.js",
+    "store-screenshots": "npm run build && node scripts/store-screenshots.js",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage"
