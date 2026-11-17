@@ -3,7 +3,6 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { resolve } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
-import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 /** Injects package.json version into dist/manifest.json after build. */
 function injectManifestVersion() {
@@ -23,13 +22,6 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    viteStaticCopy({
-      targets: [
-        { src: 'public/manifest.json', dest: '.', rename: { stripBase: 1 } },
-        { src: 'public/_locales', dest: '.', rename: { stripBase: 1 } },
-        { src: 'public/icons', dest: '.', rename: { stripBase: 1 } },
-      ],
-    }),
     injectManifestVersion(),
   ],
   build: {
