@@ -12,7 +12,7 @@ const tabs = Array.from({ length: 1000 }, (_, i) => ({
 beforeEach(() => {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
   vi.stubGlobal('chrome', {
-    runtime: { sendMessage: vi.fn((_message, callback) => callback({ tabs, historyTabs: [] })) },
+    runtime: { sendMessage: vi.fn((_message, callback) => callback({ tabs, historyTabs: [] })), openOptionsPage: vi.fn(async () => {}) },
     i18n: { getMessage: () => '' },
     tabs: { create: vi.fn() },
     commands: { getAll: vi.fn(callback => callback([{ name: '_execute_action', shortcut: 'Ctrl+Shift+K' }])) },
@@ -40,6 +40,13 @@ it('shows the assigned shortcut and opens shortcut configuration', () => {
   expect(configure.textContent).toContain('Configure shortcut');
   act(() => configure.click());
   expect(chrome.tabs.create).toHaveBeenCalledWith({ url: 'chrome://extensions/shortcuts' });
+});
+it('opens the settings page instead of showing analytics consent in the popup', () => {
+  act(() => root.render(<TabSwitcher />));
+  expect(container.querySelector('input[type="checkbox"]')).toBeNull();
+  const settings = container.querySelector<HTMLButtonElement>('button[title="Open settings, including usage analytics"]')!;
+  act(() => settings.click());
+  expect(chrome.runtime.openOptionsPage).toHaveBeenCalled();
 });
 it('shows when the opening shortcut is not assigned', () => {
   vi.mocked(chrome.commands.getAll).mockImplementation(callback => callback([{ name: '_execute_action', shortcut: '' }]));

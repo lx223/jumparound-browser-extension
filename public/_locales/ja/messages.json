@@ -18,5 +18,23 @@
   "configureShortcutsTitle": { "message": "キーボードショートカットを設定" },
   "configureShortcut": { "message": "ショートカットを設定" },
   "analyticsConsent": { "message": "任意の利用統計を共有する（ランダムな識別子を含みます。検索語句や閲覧先の URL は含みません）" },
-  "openSwitcherCommand": { "message": "JumpAround を開く" }
+  "openSwitcherCommand": { "message": "JumpAround を開く" },
+  "openSettings": {
+    "message": "設定"
+  },
+  "openSettingsTitle": {
+    "message": "使用状況の分析を含む設定を開く"
+  },
+  "optionsTitle": {
+    "message": "JumpAround の設定"
+  },
+  "analyticsHeading": {
+    "message": "使用状況の分析"
+  },
+  "analyticsDetails": {
+    "message": "デフォルトではオフです。オフにすると、ローカルの識別子と未送信のイベントが削除されます。送信済みのイベントは削除されません。"
+  },
+  "analyticsSaveFailed": {
+    "message": "この設定を保存できませんでした。もう一度お試しください。"
+  }
 }

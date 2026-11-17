@@ -24,7 +24,7 @@ Cmd+K → "local" → Enter (localhost). Cmd+K → "stack" → Enter (Stack Over
 
 PRIVACY
 
-Tab and history search runs locally. Optional usage analytics is off by default. If you enable it, JumpAround sends opening and selection metadata, random identifiers, timestamps and extension version to PostHog EU Cloud. Analytics never includes your search text, tab titles, URLs or history entries. The service receives your IP address with requests. You can disable analytics in the popup; this clears the local identifier and pending events but does not delete events already sent. Opening a web search sends your query to your default search engine. See the privacy policy for details.
+Tab and history search runs locally. Optional usage analytics is off by default. If you enable it, JumpAround sends opening and selection metadata, random identifiers, timestamps and extension version to PostHog EU Cloud. Analytics never includes your search text, tab titles, URLs or history entries. The service receives your IP address with requests. You can disable analytics on the extension’s settings page; this clears the local identifier and pending events but does not delete events already sent. Opening a web search sends your query to your default search engine. See the privacy policy for details.
 
 ---
 
@@ -258,7 +258,7 @@ sessions
 Required to list recently closed tabs with chrome.sessions.getRecentlyClosed so they appear in the popup's search results, and to reopen the chosen one with chrome.sessions.restore, which returns it to its window with its back/forward history. Closed-tab titles and URLs are processed locally and never transmitted.
 
 Host permission: https://eu.i.posthog.com/*
-Access is limited to https://eu.i.posthog.com/* to send optional usage analytics to PostHog EU Cloud over HTTPS. Analytics is off by default and requires consent in the popup. Events describe how the extension is used and set up, such as how the popup is opened and which result position is chosen, with random identifiers and extension version. Search text, tab titles, URLs and browsing history are never transmitted. No remote scripts or executable code are downloaded.
+Access is limited to https://eu.i.posthog.com/* to send optional usage analytics to PostHog EU Cloud over HTTPS. Analytics is off by default and requires consent on the extension’s settings page. Events describe how the extension is used and set up, such as how the popup is opened and which result position is chosen, with random identifiers and extension version. Search text, tab titles, URLs and browsing history are never transmitted. No remote scripts or executable code are downloaded.
 
 ## Remote Code
 

@@ -18,5 +18,23 @@
   "configureShortcutsTitle": { "message": "配置键盘快捷键" },
   "configureShortcut": { "message": "设置快捷键" },
   "analyticsConsent": { "message": "分享可选的使用情况分析数据（含随机标识符；不含搜索文字或浏览网址）" },
-  "openSwitcherCommand": { "message": "打开 JumpAround" }
+  "openSwitcherCommand": { "message": "打开 JumpAround" },
+  "openSettings": {
+    "message": "设置"
+  },
+  "openSettingsTitle": {
+    "message": "打开设置（包括使用情况分析）"
+  },
+  "optionsTitle": {
+    "message": "JumpAround 设置"
+  },
+  "analyticsHeading": {
+    "message": "使用情况分析"
+  },
+  "analyticsDetails": {
+    "message": "默认关闭。关闭后会删除本地标识符和待发送的事件。已发送的事件不会被删除。"
+  },
+  "analyticsSaveFailed": {
+    "message": "无法保存此设置，请重试。"
+  }
 }

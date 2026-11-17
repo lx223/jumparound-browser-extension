@@ -29,6 +29,7 @@ export default defineConfig({
     rolldownOptions: {
       input: {
         'content-ui': resolve(import.meta.dirname, 'src/content/index.html'),
+        options: resolve(import.meta.dirname, 'src/options/index.html'),
         background: resolve(import.meta.dirname, 'src/background/index.ts'),
       },
       output: {

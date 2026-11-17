@@ -18,5 +18,23 @@
   "configureShortcutsTitle": { "message": "Configure keyboard shortcuts" },
   "configureShortcut": { "message": "Configure shortcut" },
   "analyticsConsent": { "message": "Share optional usage analytics (includes random identifiers; no search text or browsing URLs)" },
-  "openSwitcherCommand": { "message": "Open JumpAround" }
+  "openSwitcherCommand": { "message": "Open JumpAround" },
+  "openSettings": {
+    "message": "Settings"
+  },
+  "openSettingsTitle": {
+    "message": "Open settings, including usage analytics"
+  },
+  "optionsTitle": {
+    "message": "JumpAround settings"
+  },
+  "analyticsHeading": {
+    "message": "Usage analytics"
+  },
+  "analyticsDetails": {
+    "message": "Off by default. Turning it off deletes the local identifier and pending events. Events already sent are not deleted."
+  },
+  "analyticsSaveFailed": {
+    "message": "Could not save this setting. Please try again."
+  }
 }

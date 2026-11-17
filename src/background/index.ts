@@ -43,8 +43,11 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === 'analytics-retry') void analyticsTask(flush);
 });
 chrome.runtime.onMessage.addListener((message, sender, respond) => {
-  if (sender.id !== chrome.runtime.id || !sender.url?.startsWith(chrome.runtime.getURL('src/content/index.html'))) return false;
-  if (!['ANALYTICS_OPEN', 'ANALYTICS_SELECTION', 'ANALYTICS_CONSENT'].includes(message.type)) return false;
+  if (sender.id !== chrome.runtime.id) return false;
+  // Consent changes only come from the options page; usage events only from the popup.
+  const page = message.type === 'ANALYTICS_CONSENT' ? 'src/options/index.html'
+    : ['ANALYTICS_OPEN', 'ANALYTICS_SELECTION'].includes(message.type) ? 'src/content/index.html' : undefined;
+  if (!page || !sender.url?.startsWith(chrome.runtime.getURL(page))) return false;
   void analyticsTask(async () => {
     if (message.type === 'ANALYTICS_CONSENT') {
       if (typeof message.enabled !== 'boolean') return;

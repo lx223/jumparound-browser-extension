@@ -18,5 +18,23 @@
   "configureShortcutsTitle": { "message": "Configurar atalhos de teclado" },
   "configureShortcut": { "message": "Configurar atalho" },
   "analyticsConsent": { "message": "Compartilhar estatísticas de uso opcionais (incluem identificadores aleatórios; sem texto de pesquisa nem endereços visitados)" },
-  "openSwitcherCommand": { "message": "Abrir JumpAround" }
+  "openSwitcherCommand": { "message": "Abrir JumpAround" },
+  "openSettings": {
+    "message": "Configurações"
+  },
+  "openSettingsTitle": {
+    "message": "Abrir as configurações, incluindo as estatísticas de uso"
+  },
+  "optionsTitle": {
+    "message": "Configurações do JumpAround"
+  },
+  "analyticsHeading": {
+    "message": "Estatísticas de uso"
+  },
+  "analyticsDetails": {
+    "message": "Desativado por padrão. Ao desativar, o identificador local e os eventos pendentes são excluídos. Eventos já enviados não são excluídos."
+  },
+  "analyticsSaveFailed": {
+    "message": "Não foi possível salvar esta configuração. Tente novamente."
+  }
 }

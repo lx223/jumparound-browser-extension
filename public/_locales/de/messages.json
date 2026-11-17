@@ -18,5 +18,23 @@
   "configureShortcutsTitle": { "message": "Tastenkürzel konfigurieren" },
   "configureShortcut": { "message": "Tastenkürzel festlegen" },
   "analyticsConsent": { "message": "Optionale Nutzungsstatistiken teilen (mit zufälligen Kennungen; ohne Suchtext oder besuchte Webadressen)" },
-  "openSwitcherCommand": { "message": "JumpAround öffnen" }
+  "openSwitcherCommand": { "message": "JumpAround öffnen" },
+  "openSettings": {
+    "message": "Einstellungen"
+  },
+  "openSettingsTitle": {
+    "message": "Einstellungen öffnen, einschließlich Nutzungsstatistiken"
+  },
+  "optionsTitle": {
+    "message": "JumpAround-Einstellungen"
+  },
+  "analyticsHeading": {
+    "message": "Nutzungsstatistiken"
+  },
+  "analyticsDetails": {
+    "message": "Standardmäßig deaktiviert. Beim Deaktivieren werden die lokale Kennung und ausstehende Ereignisse gelöscht. Bereits gesendete Ereignisse werden nicht gelöscht."
+  },
+  "analyticsSaveFailed": {
+    "message": "Diese Einstellung konnte nicht gespeichert werden. Bitte versuche es erneut."
+  }
 }
